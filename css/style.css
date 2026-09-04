@@ -844,6 +844,27 @@ pre
 	line-height: 1.7;
 }
 
+.footer-gh
+{
+	display: inline-flex;
+	align-items: center;
+	margin-top: 10px;
+	color: var(--muted);
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.footer-gh:hover
+{
+	color: var(--text);
+}
+
+.footer-gh svg
+{
+	display: block;
+	fill: currentColor;
+}
+
 /* ---------- small screens ---------- */
 
 @media (max-width: 560px)
