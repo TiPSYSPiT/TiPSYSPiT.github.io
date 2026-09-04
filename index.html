@@ -10,6 +10,7 @@
 	<script src="js/tabs.js" defer></script>
 	<script src="js/checkcfg.js" defer></script>
 	<script src="js/killfeed.js" defer></script>
+	<script src="js/rcon.js" defer></script>
 </head>
 
 <body>
@@ -20,9 +21,11 @@
 
 		<div class="tabs" role="tablist" aria-label="Tools">
 			<button class="tab is-active" type="button" role="tab" id="tab-checker" aria-controls="panel-checker"
-				aria-selected="true">CoD4 Config Checker</button>
+				aria-selected="true">config checker</button>
 			<button class="tab" type="button" role="tab" id="tab-killfeed" aria-controls="panel-killfeed"
-				aria-selected="false" tabindex="-1">Killfeed colors</button>
+				aria-selected="false" tabindex="-1">killfeed colors</button>
+			<button class="tab" type="button" role="tab" id="tab-rcon" aria-controls="panel-rcon"
+				aria-selected="false" tabindex="-1">rcon commands</button>
 		</div>
 
 		<section class="panel" id="panel-checker" role="tabpanel" aria-labelledby="tab-checker" tabindex="0">
@@ -91,6 +94,15 @@
 				</div>
 				<pre class="kf-output" id="kf-output-bind"></pre>
 			</div>
+		</section>
+
+		<section class="panel" id="panel-rcon" role="tabpanel" aria-labelledby="tab-rcon" tabindex="0" hidden>
+			<p class="lede">Promod rcon reference. Copy a command, then paste it into the in-game console.
+				Placeholders in square brackets are yours to fill in.</p>
+
+			<p class="hint" id="rc-hint" role="status"></p>
+
+			<div id="rc-list"></div>
 		</section>
 	</main>
 
