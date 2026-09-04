@@ -5,48 +5,93 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="color-scheme" content="light dark">
-	<title>CoD4 Config Checker</title>
+	<title>CoD4 Tools</title>
 	<link href="css/style.css" rel="stylesheet">
+	<script src="js/tabs.js" defer></script>
 	<script src="js/checkcfg.js" defer></script>
+	<script src="js/killfeed.js" defer></script>
 </head>
 
 <body>
 	<main class="wrap">
 		<header class="header">
-			<h1>CoD4 Config Checker</h1>
-			<p class="lede">Paste or load a config to scan it for disallowed DVARs and binds. Nothing is
-				uploaded &mdash; the scan runs in your browser.</p>
+			<h1>CoD4 Tools</h1>
 		</header>
 
-		<form class="card" action="#">
-			<label class="visually-hidden" for="cfg">Config</label>
-			<div class="editor">
-				<div class="gutter-box" aria-hidden="true">
-					<div class="gutter" id="gutter">1</div>
-				</div>
-				<div class="input-wrap">
-					<div class="highlights" aria-hidden="true">
-						<div class="highlights-inner" id="highlights"></div>
+		<div class="tabs" role="tablist" aria-label="Tools">
+			<button class="tab is-active" type="button" role="tab" id="tab-checker" aria-controls="panel-checker"
+				aria-selected="true">CoD4 Config Checker</button>
+			<button class="tab" type="button" role="tab" id="tab-killfeed" aria-controls="panel-killfeed"
+				aria-selected="false" tabindex="-1">Killfeed colors</button>
+		</div>
+
+		<section class="panel" id="panel-checker" role="tabpanel" aria-labelledby="tab-checker" tabindex="0">
+			<p class="lede">Paste or load a config to scan it for disallowed DVARs and binds. Nothing is
+				uploaded &mdash; the scan runs in your browser.</p>
+
+			<form class="card" action="#">
+				<label class="visually-hidden" for="cfg">Config</label>
+				<div class="editor">
+					<div class="gutter-box" aria-hidden="true">
+						<div class="gutter" id="gutter">1</div>
 					</div>
-					<textarea id="cfg" name="cfg" rows="16" wrap="off" spellcheck="false" autocomplete="off"
-						placeholder="bind MOUSE1 &quot;+attack&quot;&#10;seta cg_fov 80&#10;..."></textarea>
+					<div class="input-wrap">
+						<div class="highlights" aria-hidden="true">
+							<div class="highlights-inner" id="highlights"></div>
+						</div>
+						<textarea id="cfg" name="cfg" rows="16" wrap="off" spellcheck="false" autocomplete="off"
+							placeholder="bind MOUSE1 &quot;+attack&quot;&#10;seta cg_fov 80&#10;..."></textarea>
+					</div>
+				</div>
+
+				<div class="actions">
+					<div class="tools">
+						<input class="visually-hidden" type="file" id="file" accept=".cfg">
+						<button class="btn" type="button" id="upload">Load .cfg</button>
+						<button class="btn" type="button" id="copy" hidden>Copy</button>
+						<button class="btn" type="button" id="download" hidden>Download</button>
+					</div>
+					<button class="btn btn-primary" type="submit">Scan</button>
+				</div>
+			</form>
+
+			<p class="hint" id="hint" role="status"></p>
+
+			<ul id="violations" hidden></ul>
+		</section>
+
+		<section class="panel" id="panel-killfeed" role="tabpanel" aria-labelledby="tab-killfeed" tabindex="0" hidden>
+			<p class="lede">Pick a colour per DVAR, or paste the values from your config to see which colour
+				they are. CoD4 writes red, green, blue and alpha as numbers from 0 to 1.</p>
+
+			<div class="card">
+				<div class="kf-bind">
+					<span class="kf-bind-label">bind</span>
+					<input class="kf-key" type="text" id="kf-key" value="W" placeholder="W" spellcheck="false"
+						autocomplete="off" aria-label="Bind key">
+					<input class="kf-action" type="text" id="kf-action" value="+forward" placeholder="+forward"
+						spellcheck="false" autocomplete="off" aria-label="Bind action">
+				</div>
+
+				<div class="kf-rows" id="kf-rows"></div>
+
+				<div class="actions">
+					<div class="tools">
+						<button class="btn" type="button" id="kf-reset">Reset</button>
+					</div>
 				</div>
 			</div>
 
-			<div class="actions">
-				<div class="tools">
-					<input class="visually-hidden" type="file" id="file" accept=".cfg">
-					<button class="btn" type="button" id="upload">Load .cfg</button>
-					<button class="btn" type="button" id="copy" hidden>Copy</button>
-					<button class="btn" type="button" id="download" hidden>Download</button>
+			<p class="hint" id="kf-hint" role="status"></p>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Bind line</span>
+					<button class="btn btn-sm" type="button" id="kf-copy-bind">Copy</button>
 				</div>
-				<button class="btn btn-primary" type="submit">Scan</button>
+				<pre class="kf-output" id="kf-output-bind"></pre>
 			</div>
-		</form>
-
-		<p class="hint" id="hint" role="status"></p>
-
-		<ul id="violations" hidden></ul>
+		</section>
 	</main>
 
 	<footer class="footer">

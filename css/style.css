@@ -125,7 +125,7 @@ a:hover
 
 .header
 {
-	margin-bottom: 24px;
+	margin-bottom: 18px;
 }
 
 .header h1
@@ -138,9 +138,229 @@ a:hover
 
 .lede
 {
-	margin: 4px 0 0;
+	margin: 0 0 20px;
 	color: var(--muted);
 	font-size: 14px;
+}
+
+/* ---------- tabs ---------- */
+
+.tabs
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: 20px;
+	border-bottom: 1px solid var(--border);
+}
+
+.tab
+{
+	position: relative;
+	bottom: -1px;
+	padding: 9px 14px;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	background: none;
+	color: var(--muted);
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+	cursor: pointer;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab:hover
+{
+	color: var(--text);
+}
+
+.tab.is-active
+{
+	color: var(--text);
+	border-bottom-color: var(--accent);
+}
+
+.panel:focus
+{
+	outline: 0;
+}
+
+/* ---------- killfeed colours ---------- */
+
+.kf-rows
+{
+	display: flex;
+	flex-direction: column;
+}
+
+.kf-bind
+{
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--border);
+	background-color: var(--field);
+}
+
+.kf-bind-label
+{
+	flex: 0 0 auto;
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 13px;
+}
+
+.kf-row
+{
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--border);
+}
+
+.kf-color
+{
+	flex: 0 0 auto;
+	width: 40px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background: none;
+	cursor: pointer;
+}
+
+.kf-color::-webkit-color-swatch-wrapper
+{
+	padding: 2px;
+}
+
+.kf-color::-webkit-color-swatch
+{
+	border: 0;
+	border-radius: 3px;
+}
+
+.kf-dvar,
+.kf-value,
+.kf-hex,
+.kf-key,
+.kf-action
+{
+	height: 30px;
+	padding: 0 8px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	color: inherit;
+	font-family: var(--mono);
+	font-size: 13px;
+}
+
+.kf-dvar
+{
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.kf-value
+{
+	flex: 0 0 auto;
+	width: 170px;
+}
+
+.kf-key
+{
+	flex: 0 0 auto;
+	width: 84px;
+	text-align: center;
+}
+
+.kf-action
+{
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.kf-hex
+{
+	flex: 0 0 auto;
+	width: 100px;
+	text-transform: lowercase;
+}
+
+.kf-dvar[readonly]
+{
+	border-color: transparent;
+	background-color: transparent;
+	color: var(--text);
+	font-weight: 600;
+	cursor: default;
+}
+
+.kf-value.is-invalid,
+.kf-hex.is-invalid
+{
+	border-color: var(--red);
+	color: var(--red);
+}
+
+.kf-out
+{
+	margin-top: 12px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background-color: var(--surface);
+	overflow: hidden;
+}
+
+.kf-out-head
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 7px 8px 7px 16px;
+	border-bottom: 1px solid var(--border);
+	background-color: var(--field);
+}
+
+.kf-out-title
+{
+	color: var(--muted);
+	font-size: 13px;
+	font-weight: 500;
+}
+
+.btn-sm
+{
+	padding: 4px 12px;
+	font-size: 13px;
+}
+
+.kf-output
+{
+	display: block;
+	margin: 0;
+	padding: 14px 16px;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	color: var(--text);
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.7;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.kf-output.is-empty
+{
+	color: var(--muted);
 }
 
 /* ---------- form ---------- */
@@ -509,6 +729,30 @@ pre
 	.gutter
 	{
 		padding-left: 10px;
+	}
+
+	.kf-row
+	{
+		flex-wrap: wrap;
+	}
+
+	/* Give the value its own line so the DVAR name keeps a usable width. */
+	/* min-width: 0 lets the inputs shrink below their intrinsic size, so the
+	   two of them share one line instead of stacking. */
+	.kf-value
+	{
+		order: 2;
+		flex: 1 1 55%;
+		width: auto;
+		min-width: 0;
+	}
+
+	.kf-hex
+	{
+		order: 3;
+		flex: 1 1 30%;
+		width: auto;
+		min-width: 0;
 	}
 }
 
