@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<title>CoD4 Config Checker</title>
+	<link href="css/style.css" rel="stylesheet">
+	<script src="js/checkcfg.js" defer></script>
+</head>
+
+<body>
+	<main class="wrap">
+		<header class="header">
+			<h1>CoD4 Config Checker</h1>
+			<p class="lede">Paste or load a config to scan it for disallowed DVARs and binds. Nothing is
+				uploaded &mdash; the scan runs in your browser.</p>
+		</header>
+
+		<form class="card" action="#">
+			<label class="visually-hidden" for="cfg">Config</label>
+			<div class="editor">
+				<div class="gutter-box" aria-hidden="true">
+					<div class="gutter" id="gutter">1</div>
+				</div>
+				<div class="input-wrap">
+					<div class="highlights" aria-hidden="true">
+						<div class="highlights-inner" id="highlights"></div>
+					</div>
+					<textarea id="cfg" name="cfg" rows="16" wrap="off" spellcheck="false" autocomplete="off"
+						placeholder="bind MOUSE1 &quot;+attack&quot;&#10;seta cg_fov 80&#10;..."></textarea>
+				</div>
+			</div>
+
+			<div class="actions">
+				<div class="tools">
+					<input class="visually-hidden" type="file" id="file" accept=".cfg">
+					<button class="btn" type="button" id="upload">Load .cfg</button>
+					<button class="btn" type="button" id="copy" hidden>Copy</button>
+					<button class="btn" type="button" id="download" hidden>Download</button>
+				</div>
+				<button class="btn btn-primary" type="submit">Scan</button>
+			</div>
+		</form>
+
+		<p class="hint" id="hint" role="status"></p>
+
+		<ul id="violations" hidden></ul>
+	</main>
+
+	<footer class="footer">
+		<p>&#169; 2013, A dude on Tek-9.org</p>
+		<p>&#169; 2013&ndash;2021, <a href="https://github.com/jNizM" rel="noopener">jNizM</a></p>
+		<p>&#169; 2021&ndash;2026, <a href="https://github.com/tipsy-cod" rel="noopener">TiPSY</a></p>
+	</footer>
+</body>
+
+</html>

@@ -1,0 +1,521 @@
+/*
+ * CoD4 Config Checker
+ * Minimal two-tone theme. Severity colours are used as accents only,
+ * so long config lines stay readable inside a result row.
+ */
+
+:root
+{
+	--bg: #fbfbfa;
+	--surface: #ffffff;
+	--field: #fafaf9;
+	--text: #1c1c1a;
+	--muted: #6f6f6a;
+	--border: #e4e4e1;
+	--border-strong: #cfcfca;
+
+	--accent: #1c1c1a;
+	--accent-text: #ffffff;
+	--focus: #7c7c74;
+
+	--red: #c4322c;
+	--red-tint: rgba(196, 50, 44, 0.07);
+	--orange: #a86a06;
+	--orange-tint: rgba(168, 106, 6, 0.08);
+	--green: #3f7d2c;
+	--green-tint: rgba(63, 125, 44, 0.08);
+
+	/* Row tints for the highlight layer behind the textarea. */
+	--red-line: rgba(196, 50, 44, 0.11);
+	--orange-line: rgba(168, 106, 6, 0.13);
+
+	--radius: 10px;
+	--radius-sm: 6px;
+
+	--sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark)
+{
+	:root
+	{
+		--bg: #131313;
+		--surface: #1a1a1a;
+		--field: #151515;
+		--text: #ececea;
+		--muted: #97978f;
+		--border: #2c2c2c;
+		--border-strong: #3d3d3d;
+
+		--accent: #ececea;
+		--accent-text: #131313;
+		--focus: #8d8d85;
+
+		--red: #f2807c;
+		--red-tint: rgba(242, 128, 124, 0.10);
+		--orange: #e0ac4a;
+		--orange-tint: rgba(224, 172, 74, 0.10);
+		--green: #86c96a;
+		--green-tint: rgba(134, 201, 106, 0.10);
+
+		--red-line: rgba(242, 128, 124, 0.16);
+		--orange-line: rgba(224, 172, 74, 0.16);
+	}
+}
+
+*,
+*::before,
+*::after
+{
+	box-sizing: border-box;
+}
+
+body
+{
+	margin: 0;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--bg);
+	color: var(--text);
+	font-family: var(--sans);
+	font-size: 15px;
+	line-height: 1.55;
+	-webkit-font-smoothing: antialiased;
+}
+
+a
+{
+	color: inherit;
+	text-underline-offset: 2px;
+	text-decoration-color: var(--border-strong);
+}
+
+a:hover
+{
+	text-decoration-color: currentColor;
+}
+
+:focus-visible
+{
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+}
+
+.visually-hidden
+{
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* ---------- layout ---------- */
+
+.wrap
+{
+	width: 100%;
+	max-width: 920px;
+	margin: 0 auto;
+	padding: 56px 20px 40px;
+}
+
+.header
+{
+	margin-bottom: 24px;
+}
+
+.header h1
+{
+	margin: 0;
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+.lede
+{
+	margin: 4px 0 0;
+	color: var(--muted);
+	font-size: 14px;
+}
+
+/* ---------- form ---------- */
+
+.card
+{
+	background-color: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow: hidden;
+}
+
+.editor
+{
+	display: flex;
+	align-items: stretch;
+	background-color: var(--field);
+	border-bottom: 1px solid var(--border);
+}
+
+/* The numbers are absolutely positioned so their height never drives the
+   flex line -- otherwise a long config would stretch the editor instead of
+   letting the textarea scroll. */
+.gutter-box
+{
+	position: relative;
+	flex: 0 0 auto;
+	width: calc(2ch + 24px);
+	border-right: 1px solid var(--border);
+	overflow: hidden;
+}
+
+.gutter
+{
+	position: absolute;
+	top: 16px;
+	right: 10px;
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.7;
+	text-align: right;
+	white-space: pre;
+	opacity: 0.7;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.input-wrap
+{
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+}
+
+/* A textarea cannot colour individual lines, so flagged rows are painted on a
+   layer underneath it. Its text is transparent and only exists to give the
+   rows the width of the longest config line. Every metric here must stay in
+   sync with the textarea below or the rows drift out of alignment. */
+.highlights
+{
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 0;
+	padding-top: 16px;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.highlights-inner
+{
+	display: inline-block;
+	min-width: 100%;
+	color: transparent;
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.7;
+	tab-size: 4;
+	white-space: pre;
+}
+
+.highlights-inner div
+{
+	padding: 0 16px;
+}
+
+.highlights-inner .hl-red
+{
+	background-color: var(--red-line);
+}
+
+.highlights-inner .hl-orange
+{
+	background-color: var(--orange-line);
+}
+
+textarea
+{
+	position: relative;
+	z-index: 1;
+	flex: 1 1 auto;
+	display: block;
+	width: 100%;
+	min-width: 0;
+	min-height: 260px;
+	margin: 0;
+	padding: 16px;
+	border: 0;
+	background-color: transparent;
+	color: inherit;
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.7;
+	tab-size: 4;
+	white-space: pre;
+	overflow: auto;
+	resize: vertical;
+}
+
+textarea::placeholder
+{
+	color: var(--muted);
+	opacity: 0.65;
+}
+
+textarea:focus-visible
+{
+	outline: 0;
+}
+
+.editor:focus-within
+{
+	background-color: var(--surface);
+}
+
+.actions
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 12px;
+}
+
+.tools
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.hint
+{
+	margin: 10px 2px 0;
+	color: var(--muted);
+	font-size: 13px;
+	min-height: 1.55em;
+}
+
+.hint.is-error
+{
+	color: var(--red);
+}
+
+.btn
+{
+	padding: 8px 16px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background-color: transparent;
+	color: var(--text);
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+	cursor: pointer;
+	transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:hover
+{
+	background-color: var(--field);
+}
+
+.btn[hidden]
+{
+	display: none;
+}
+
+.btn-primary
+{
+	border-color: transparent;
+	background-color: var(--accent);
+	color: var(--accent-text);
+	font-weight: 550;
+	padding-inline: 22px;
+}
+
+.btn-primary:hover
+{
+	background-color: var(--accent);
+	opacity: 0.85;
+}
+
+.btn-primary:active
+{
+	opacity: 0.7;
+}
+
+/* ---------- results ---------- */
+
+#violations
+{
+	margin: 20px 0 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+#violations[hidden]
+{
+	display: none;
+}
+
+#violations li
+{
+	padding: 12px 14px;
+	border: 1px solid var(--border);
+	border-left: 3px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	font-size: 14px;
+}
+
+#violations li.red
+{
+	border-left-color: var(--red);
+	background-color: var(--red-tint);
+}
+
+#violations li.orange
+{
+	border-left-color: var(--orange);
+	background-color: var(--orange-tint);
+}
+
+#violations li.green
+{
+	border-left-color: var(--green);
+	background-color: var(--green-tint);
+}
+
+#violations em
+{
+	font-family: var(--mono);
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 600;
+}
+
+li.red em
+{
+	color: var(--red);
+}
+
+li.orange em
+{
+	color: var(--orange);
+}
+
+pre
+{
+	display: block;
+	margin: 8px 0 0;
+	padding: 8px 10px;
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	border: 1px solid var(--border);
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 12.5px;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.line-actions
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 16px;
+	margin-top: 8px;
+}
+
+.line-action
+{
+	color: var(--muted);
+	font-size: 13px;
+	text-decoration: underline;
+	text-decoration-color: var(--border-strong);
+}
+
+.line-action:hover
+{
+	color: var(--text);
+}
+
+/* ---------- footer ---------- */
+
+.footer
+{
+	margin-top: auto;
+	padding: 24px 20px 28px;
+	max-width: 920px;
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	border-top: 1px solid var(--border);
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.footer p
+{
+	margin: 0;
+	line-height: 1.7;
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 560px)
+{
+	.wrap
+	{
+		padding-top: 32px;
+	}
+
+	.actions
+	{
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.tools
+	{
+		width: 100%;
+	}
+
+	.tools .btn
+	{
+		flex: 1 1 auto;
+	}
+
+	.btn-primary
+	{
+		width: 100%;
+	}
+
+	.gutter
+	{
+		padding-left: 10px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce)
+{
+	*
+	{
+		transition: none !important;
+	}
+}
