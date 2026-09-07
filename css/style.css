@@ -1005,17 +1005,10 @@ pre
 	font-size: 12px;
 }
 
-.footer p
-{
-	margin: 0;
-	line-height: 1.7;
-}
-
 .footer-gh
 {
 	display: inline-flex;
 	align-items: center;
-	margin-top: 10px;
 	color: var(--muted);
 	text-decoration: none;
 	transition: color 0.15s ease;
