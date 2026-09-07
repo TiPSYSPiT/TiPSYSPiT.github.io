@@ -394,6 +394,50 @@ a:hover
 	color: var(--muted);
 }
 
+/* Killfeed preview. The backdrop imitates an out of focus map -- muted olive
+   greys -- rather than a flat dark panel, because that is what the names sit
+   over in game and it is the honest test of whether a colour stays readable.
+   It stays the same in both themes for the same reason. */
+.kf-feed
+{
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 3px;
+	padding: 14px 16px;
+	background-color: #55564a;
+	background-image:
+		radial-gradient(115% 85% at 22% 28%, rgba(151, 148, 126, 0.55) 0%, rgba(151, 148, 126, 0) 58%),
+		radial-gradient(85% 70% at 68% 58%, rgba(88, 88, 74, 0.55) 0%, rgba(88, 88, 74, 0) 62%),
+		radial-gradient(70% 60% at 92% 18%, rgba(120, 116, 96, 0.35) 0%, rgba(120, 116, 96, 0) 70%),
+		radial-gradient(140% 130% at 45% 45%, rgba(20, 20, 14, 0) 42%, rgba(20, 20, 14, 0.5) 100%);
+}
+
+.kf-line
+{
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+	white-space: nowrap;
+}
+
+.kf-nick
+{
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.kf-weapon
+{
+	flex: 0 0 auto;
+	width: 34px;
+	height: 12px;
+	fill: #e6e6e6;
+	filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
+}
+
 /* ---------- rcon reference ---------- */
 
 .rc-group

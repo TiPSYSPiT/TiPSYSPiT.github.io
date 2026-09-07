@@ -20,12 +20,22 @@
 		{ dvar: "g_TeamColor_Axis", label: "Axis", rgba: [1, 0.541, 0.361, 1] }
 	];
 
+	// Sample rows for the preview. Each kill is scored by one team against the
+	// other, so both colours show up in both positions.
+	var PREVIEW_ROWS = [
+		{ attacker: "alpha", victim: "bravo", team: 0 },
+		{ attacker: "charlie", victim: "delta", team: 1 },
+		{ attacker: "echo", victim: "foxtrot", team: 0 },
+		{ attacker: "golf", victim: "hotel", team: 1 }
+	];
+
 	var HINT_RESET_MS = 3000;
 
 	var rowsBox = null;
 	var keyField = null;
 	var actionField = null;
 	var bindBox = null;
+	var feedBox = null;
 	var hint = null;
 	var defaultHint = "";
 	var hintTimer = null;
@@ -286,6 +296,102 @@
 		var bind = buildBindLine(collectEntries());
 		fill(bindBox, bind === null ? "" : bind,
 			"Enter a bind key and action to generate this line.");
+		renderPreview();
+	}
+
+	/* ---------- killfeed preview ---------- */
+
+	function cssColor(rgba)
+	{
+		return "rgba(" + Math.round(rgba[0] * 255) + ", " + Math.round(rgba[1] * 255) +
+			", " + Math.round(rgba[2] * 255) + ", " + rgba[3] + ")";
+	}
+
+	// A rifle silhouette standing in for the weapon icon, which is a game asset.
+	function makeWeapon()
+	{
+		var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		svg.setAttribute("class", "kf-weapon");
+		svg.setAttribute("viewBox", "0 0 48 16");
+		svg.setAttribute("aria-hidden", "true");
+		svg.setAttribute("focusable", "false");
+
+		var shapes = [
+			["rect", { x: 1, y: 6, width: 30, height: 2.5 }],
+			["rect", { x: 12, y: 4.5, width: 13, height: 5.5 }],
+			["polygon", { points: "17,10 22,10 21,15 16,15" }],
+			["polygon", { points: "25,4.5 34,4.5 38,11 33,11 25,10" }]
+		];
+
+		for (var i = 0; i < shapes.length; i++)
+		{
+			var node = document.createElementNS("http://www.w3.org/2000/svg", shapes[i][0]);
+			for (var key in shapes[i][1])
+			{
+				if (shapes[i][1].hasOwnProperty(key))
+				{
+					node.setAttribute(key, shapes[i][1][key]);
+				}
+			}
+			svg.appendChild(node);
+		}
+
+		return svg;
+	}
+
+	function buildPreview()
+	{
+		if (feedBox === null)
+		{
+			return;
+		}
+
+		feedBox.innerHTML = "";
+
+		for (var i = 0; i < PREVIEW_ROWS.length; i++)
+		{
+			var line = document.createElement("div");
+			line.className = "kf-line";
+
+			var attacker = document.createElement("span");
+			attacker.className = "kf-nick";
+			attacker.textContent = PREVIEW_ROWS[i].attacker;
+
+			var victim = document.createElement("span");
+			victim.className = "kf-nick";
+			victim.textContent = PREVIEW_ROWS[i].victim;
+
+			line.appendChild(attacker);
+			line.appendChild(makeWeapon());
+			line.appendChild(victim);
+			feedBox.appendChild(line);
+		}
+	}
+
+	// Attacker and victim are on opposite teams, so each line shows both colours.
+	function renderPreview()
+	{
+		if (feedBox === null || rowsBox === null)
+		{
+			return;
+		}
+
+		var rows = rowsBox.querySelectorAll(".kf-row");
+		if (rows.length < 2)
+		{
+			return;
+		}
+
+		var colours = [cssColor(readRgba(rows[0])), cssColor(readRgba(rows[1]))];
+		var lines = feedBox.querySelectorAll(".kf-line");
+
+		for (var i = 0; i < lines.length && i < PREVIEW_ROWS.length; i++)
+		{
+			var team = PREVIEW_ROWS[i].team;
+			var nicks = lines[i].querySelectorAll(".kf-nick");
+			nicks[0].style.color = colours[team];
+			nicks[1].style.color = colours[team === 0 ? 1 : 0];
+		}
 	}
 
 	function onRowInput(event)
@@ -400,6 +506,7 @@
 		keyField = document.getElementById("kf-key");
 		actionField = document.getElementById("kf-action");
 		bindBox = document.getElementById("kf-output-bind");
+		feedBox = document.getElementById("kf-feed");
 		hint = document.getElementById("kf-hint");
 
 		if (rowsBox === null || bindBox === null)
@@ -413,6 +520,7 @@
 		}
 
 		renderRows(DEFAULT_ROWS);
+		buildPreview();
 		renderOutput();
 
 		rowsBox.addEventListener("input", onRowInput);
