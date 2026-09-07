@@ -11,6 +11,7 @@
 	<script src="js/checkcfg.js" defer></script>
 	<script src="js/killfeed.js" defer></script>
 	<script src="js/rcon.js" defer></script>
+	<script src="js/dvars.js" defer></script>
 </head>
 
 <body>
@@ -34,6 +35,8 @@
 				aria-selected="false" tabindex="-1">killfeed colors</button>
 			<button class="tab" type="button" role="tab" id="tab-rcon" aria-controls="panel-rcon"
 				aria-selected="false" tabindex="-1">rcon commands</button>
+			<button class="tab" type="button" role="tab" id="tab-dvars" aria-controls="panel-dvars"
+				aria-selected="false" tabindex="-1">dvars</button>
 		</div>
 
 		<section class="panel" id="panel-checker" role="tabpanel" aria-labelledby="tab-checker" tabindex="0">
@@ -118,6 +121,22 @@
 			<p class="hint" id="rc-hint" role="status"></p>
 
 			<div id="rc-list"></div>
+		</section>
+
+		<section class="panel" id="panel-dvars" role="tabpanel" aria-labelledby="tab-dvars" tabindex="0" hidden>
+			<p class="lede">Every CoD4 dvar with its in-game description, sorted by name.
+				Filter by name or description.</p>
+
+			<div class="dv-bar">
+				<label class="visually-hidden" for="dv-search">Filter dvars</label>
+				<input class="dv-search" type="search" id="dv-search" placeholder="Filter dvars&hellip;"
+					spellcheck="false" autocomplete="off">
+				<span class="dv-count" id="dv-count" aria-live="polite"></span>
+			</div>
+
+			<p class="dv-empty" id="dv-empty" hidden></p>
+
+			<div class="dv-list" id="dv-list"></div>
 		</section>
 	</main>
 

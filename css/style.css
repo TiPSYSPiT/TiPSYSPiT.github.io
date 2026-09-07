@@ -586,6 +586,98 @@ a:hover
 	font-size: 12.5px;
 }
 
+/* ---------- dvar reference ---------- */
+
+.dv-bar
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.dv-search
+{
+	flex: 1 1 260px;
+	min-width: 0;
+	height: 36px;
+	padding: 0 12px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	color: inherit;
+	font-family: inherit;
+	font-size: 14px;
+}
+
+.dv-search::placeholder
+{
+	color: var(--muted);
+}
+
+.dv-count
+{
+	flex: 0 0 auto;
+	color: var(--muted);
+	font-size: 13px;
+}
+
+.dv-empty
+{
+	margin: 0 0 12px;
+	color: var(--muted);
+	font-size: 14px;
+}
+
+.dv-list
+{
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background-color: var(--surface);
+	overflow: hidden;
+}
+
+.dv-row
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 16px;
+	padding: 9px 16px;
+	border-bottom: 1px solid var(--border);
+}
+
+.dv-row:last-child
+{
+	border-bottom: 0;
+}
+
+.dv-row[hidden]
+{
+	display: none;
+}
+
+.dv-name
+{
+	flex: 0 0 auto;
+	width: 260px;
+	font-family: var(--mono);
+	font-size: 13px;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.dv-desc
+{
+	flex: 1 1 260px;
+	min-width: 0;
+	margin: 0;
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
 /* ---------- form ---------- */
 
 .card
@@ -997,6 +1089,12 @@ pre
 		flex: 1 1 30%;
 		width: auto;
 		min-width: 0;
+	}
+
+	.dv-name
+	{
+		width: auto;
+		flex: 1 1 100%;
 	}
 }
 
