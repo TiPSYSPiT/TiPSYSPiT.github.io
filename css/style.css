@@ -71,6 +71,23 @@
 	box-sizing: border-box;
 }
 
+/* Reserve the scrollbar track at all times, so switching to a tab that is long
+   enough to scroll does not shift the page sideways. The @supports block is the
+   modern version: space reserved without a permanently visible scrollbar. */
+html
+{
+	overflow-y: scroll;
+}
+
+@supports (scrollbar-gutter: stable)
+{
+	html
+	{
+		overflow-y: auto;
+		scrollbar-gutter: stable;
+	}
+}
+
 body
 {
 	margin: 0;
@@ -125,7 +142,21 @@ a:hover
 
 .header
 {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	margin-bottom: 18px;
+}
+
+/* Vector redraw of cod4.png, so it needs no filter or blend trick: the paths
+   use currentColor and the background is genuinely empty. */
+.brand
+{
+	flex: 0 0 auto;
+	display: block;
+	width: 34px;
+	height: 34px;
+	color: var(--text);
 }
 
 .header h1
