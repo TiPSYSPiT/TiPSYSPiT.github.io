@@ -10,7 +10,9 @@
  * Dvar_Register* calls, the domain structs some of them keep their bounds in,
  * the bounds a few pack into a single 64 bit literal, and the const char *
  * arrays the enums point at. Where a name is defined twice the multiplayer
- * version wins. 1163 of the 1196 were found.
+ * version wins, because this is a multiplayer tool: cg_fov for instance is
+ * 1 to 160 in the singleplayer build but 65 to 120 in multiplayer. 1163 of
+ * the 1196 were found.
  *
  * FLT_MAX and INT_MAX are reported as no limit rather than as a number, bool
  * keeps only its default because true or false already states the domain, and
@@ -73,7 +75,7 @@ aim_turnrate_pitch_ads|The turn rate up and down for aim assist when aiming down
 aim_turnrate_yaw|The horizontal turn rate for aim assist when firing from the hip|float|260|0|1080|
 aim_turnrate_yaw_ads|The horizontal turn rate for aim assist when aiming down the sight|float|90|0|1080|
 ammoCounterHide|Hide the Ammo Counter|bool|false|||
-authPort|Auth server port|int|20800|0||
+authPort|Auth server port|int|20800|0|65535|
 authServerName|Authentication server name for listing public inet games|string|cod4master.activision.com|||
 bg_aimSpreadMoveSpeedThreshold|When player is moving faster than this speed, the aim spread will increase|float|11|0|300|
 bg_bobAmplitudeDucked|The multiplier to apply to the player's speed to get the bob amplitude while ducking|vec2|0.0075 0.0075|0|1|
@@ -139,7 +141,7 @@ cg_airstrikeKillCamNearBlurEnd|Airstrike kill camera distance above the airplane
 cg_airstrikeKillCamNearBlurStart|Airstrike kill camera distance above the airplane.|float|0|0||
 cg_blood|Show Blood|bool|true|||
 cg_brass|Weapons eject brass|bool|true|||
-cg_centertime|The time for a center printed message to fade|float|3|0||
+cg_centertime|The time for a center printed message to fade|float|5|0||
 cg_chatHeight|The font height of a chat message|int|8|0|8|
 cg_chatTime|The amount of time that a chat message is visible|int|12000|0|60000|
 cg_connectionIconSize|Size of the connection icon|float|0|0|100|
@@ -148,7 +150,7 @@ cg_crosshairAlpha|The alpha value of the crosshair|float|1|0|1|
 cg_crosshairAlphaMin|The minimum alpha value of the crosshair when it fades in|float|0.5|0|1|
 cg_crosshairDynamic|Crosshair is Dynamic|bool|false|||
 cg_crosshairEnemyColor|The crosshair color when over an enemy|bool|true|||
-cg_cursorHints|Draw cursor hints where: 0: no hints 1: sin size pulse 2: one way size pulse 3: alpha pulse 4: static image|int|3|0|4|
+cg_cursorHints|Draw cursor hints where: 0: no hints 1: sin size pulse 2: one way size pulse 3: alpha pulse 4: static image|int|4|0|4|
 cg_debug_overlay_viewport|Remove the sniper overlay so you can check that the scissor window is correct.|bool|false|||
 cg_debugevents|Output event debug information|bool|false|||
 cg_debugInfoCornerOffset|Offset from top-right corner, for cg_drawFPS, etc|vec2|5 -5|-200|640|
@@ -182,13 +184,13 @@ cg_enemyNameFadeOut|Time in milliseconds to fade out enemy names|int|250|0||
 cg_errordecay|Decay for predicted error|float|100|0||
 cg_firstPersonTracerChance|The probability that a bullet is a tracer round for your bullets|float|0.5|0|1|
 cg_footsteps|Play footstep sounds|bool|true|||
-cg_fov|The field of view angle in degrees|float|65|1|160|
+cg_fov|The field of view angle in degrees|float|65|65|120|
 cg_fovMin|The minimum possible field of view|float|10|1|160|
 cg_fovScale|Scale applied to the field of view|float|1|0.2|2|
 cg_friendlyNameFadeIn|Time in milliseconds to fade in friendly names|int|0|0||
 cg_friendlyNameFadeOut|Time in milliseconds to fade out friendly names|int|1500|0||
 cg_gameBoldMessageWidth|The maximum character width of the bold game messages|int|390|130|1664|
-cg_gameMessageWidth|The maximum character width of the game messages|int|500|130|1664|
+cg_gameMessageWidth|The maximum character width of the game messages|int|455|130|1664|
 cg_gun_move_f|Weapon movement forward due to player movement|float|0|||
 cg_gun_move_minspeed|The minimum weapon movement rate|float|0|||
 cg_gun_move_r|Weapon movement right due to player movement|float|0|||
@@ -210,20 +212,20 @@ cg_heliKillCamNearBlur|Sets the radius of the gaussian blur used by depth of fie
 cg_heliKillCamNearBlurEnd|Helicopter kill camera distance above the helicopter.|float|100|0|10000|
 cg_heliKillCamNearBlurStart|Helicopter kill camera distance above the helicopter.|float|0|0||
 cg_heliKillCamZDist|Helicopter kill camera distance above the helicopter.|float|50|0||
-cg_hintFadeTime|Time in milliseconds for the cursor hint to fade|int|100|0|7|
+cg_hintFadeTime|Time in milliseconds for the cursor hint to fade|int|100|0||
 cg_hudChatIntermissionPosition|Position of the HUD chat box during intermission|vec2|5 110|0|640|
 cg_hudChatPosition|Position of the HUD chat box|vec2|5 204|0|640|
 cg_hudDamageIconHeight|The height of the damage icon|float|64|0|512|
 cg_hudDamageIconInScope|Draw damage icons when aiming down the sight of a scoped weapon|bool|false|||
 cg_hudDamageIconOffset|The offset from the center of the damage icon|float|128|0|512|
-cg_hudDamageIconTime|The amount of time for the damage icon to stay on screen after damage is taken|int|2000|0|7|
+cg_hudDamageIconTime|The amount of time for the damage icon to stay on screen after damage is taken|int|2000|0||
 cg_hudDamageIconWidth|The width of the damage icon|float|128|0|512|
 cg_hudGrenadeIconEnabledFlash|Show the grenade indicator for flash grenades|bool|false|||
 cg_hudGrenadeIconHeight|The height of the grenade indicator icon|float|25|0|512|
-cg_hudGrenadeIconInScope|Show the grenade indicator when aiming down the sight of a scoped weapon|bool|true|||
+cg_hudGrenadeIconInScope|Show the grenade indicator when aiming down the sight of a scoped weapon|bool|false|||
 cg_hudGrenadeIconMaxHeight|The minimum height difference between a player and a grenade for the grenade to be shown on the grenade indicator|float|104|0|1000|
 cg_hudGrenadeIconMaxRangeFlash|The minimum distance that a flashbang has to be from a player in order to be shown on the grenade indicator|float|500|0|2000|
-cg_hudGrenadeIconMaxRangeFrag|The minimum distance that a grenade has to be from a player in order to be shown on the grenade indicator|float|256|0|1000|
+cg_hudGrenadeIconMaxRangeFrag|The minimum distance that a grenade has to be from a player in order to be shown on the grenade indicator|float|250|0|1000|
 cg_hudGrenadeIconOffset|The offset from the center of the screen for a grenade icon|float|50|0|512|
 cg_hudGrenadeIconWidth|The width of the grenade indicator icon|float|25|0|512|
 cg_hudGrenadePointerHeight|The height of the grenade indicator pointer|float|12|0|512|
@@ -243,8 +245,8 @@ cg_hudSayPosition|Position of the HUD say box|vec2|5 180|0|640|
 cg_hudStanceFlash|The background color of the flash when the stance changes|color|1 1 1 1|0|1|
 cg_hudStanceHintPrints|Draw helpful text to say how to change stances|bool|false|||
 cg_hudVotePosition|Position of the HUD vote box|vec2|5 220|0|640|
-cg_invalidCmdHintBlinkInterval|Blink rate of an invalid command hint|int|600|1|7|
-cg_invalidCmdHintDuration|Duration of an invalid command hint|int|1800|0|7|
+cg_invalidCmdHintBlinkInterval|Blink rate of an invalid command hint|int|600|1||
+cg_invalidCmdHintDuration|Duration of an invalid command hint|int|1800|0||
 cg_laserEndOffset|How far from the point of collision the end of the beam is.|float|0.5|||
 cg_laserFlarePct|Percentage laser widens over distance from viewer.|float|0.2|0||
 cg_laserForceOn|Force laser sights on in all possible places (for debug purposes).|bool|false|||
@@ -296,8 +298,8 @@ cg_sprintMeterEmptyColor|The color of the sprint meter when the sprint meter is 
 cg_sprintMeterFullColor|The color of the sprint meter when the sprint meter is full|vec4|0.8 0.8 0.8 0.8|0|1|
 cg_subtitleMinTime|The minimum time that the subtitles are displayed on screen in seconds|float|3|0||
 cg_subtitles|Show subtitles|bool|true|||
-cg_subtitleWidthStandard|The width of the subtitles in non wide-screen|int|306|130|1664|
-cg_subtitleWidthWidescreen|The width of the subtitles in wide-screen|int|468|130|1664|
+cg_subtitleWidthStandard|The width of the subtitles in non wide-screen|int|520|130|1664|
+cg_subtitleWidthWidescreen|The width of the subtitles in wide-screen|int|520|130|1664|
 cg_teamChatsOnly|Allow chatting only on the same team|bool|false|||
 cg_thirdPerson|Use third person view|bool|false|||
 cg_thirdPersonAngle|The angle of the camera from the player in third person view|float|0|-180|360|
@@ -315,7 +317,7 @@ cg_viewZSmoothingMax|Threshhold for the maximum smoothing distance we'll do|floa
 cg_viewZSmoothingMin|Threshhold for the minimum smoothing distance it must move to smooth|float|1|0||
 cg_viewZSmoothingTime|Amount of time to spread the smoothing over|float|0.1|0||
 cg_voiceIconSize|Size of the 'voice' icon|float|0|0|100|
-cg_weaponCycleDelay|The delay after cycling to a new weapon to prevent holding down the cycle weapon button from cycling too fast|int|0|0|7|
+cg_weaponCycleDelay|The delay after cycling to a new weapon to prevent holding down the cycle weapon button from cycling too fast|int|0|0||
 cg_weaponHintsCoD1Style|Draw weapon hints in CoD1 style: with the weapon name, and with the icon below|bool|true|||
 cg_weaponleftbone|Left hand weapon bone name|string|tag_weapon_left|||
 cg_weaponrightbone|Right handed weapon bone name|string|tag_weapon_right|||
@@ -324,7 +326,7 @@ cl_allowDownload|Allow client downloads from the server|bool|true|||
 cl_analog_attack_threshold|The threshold before firing|float|0.8|0.0001|1|
 cl_anglespeedkey|Multiplier for max angle speed for game pad and keyboard|float|1.5|0||
 cl_anonymous|Allow anonymous log in|||||
-cl_avidemo|AVI demo frames per second|int|0|0|7|
+cl_avidemo|AVI demo frames per second|int|0|0||
 cl_bypassMouseInput|Bypass UI mouse input and send directly to the game|bool|false|||
 cl_connectionAttempts|Maximum number of connection attempts before aborting|int|10|0||
 cl_connectTimeout|Timeout time in seconds while connecting to a server|float|200|0|3600|
@@ -503,7 +505,7 @@ g_entinfo|Display entity information|enum|0|0|1|off,all ents
 g_fogColorReadOnly|Fog color that was set in the most recent call to "setexpfog"|color|1 0 0 1|0|1|
 g_fogHalfDistReadOnly|Fog start distance that was set in the most recent call to "setexpfog"|float|0.1|0||
 g_fogStartDistReadOnly|Fog start distance that was set in the most recent call to "setexpfog"|float|0|0||
-g_friendlyfireDist|Maximum range for disabling fire at a friendly|float|175|0|15000|
+g_friendlyfireDist|Maximum range for disabling fire at a friendly|float|256|0|15000|
 g_friendlyNameDist|Maximum range for seeing a friendly's name|float|15000|0|15000|
 g_gametype|Setting state to CA_LOADING in CL_DownloadsComplete|string|war|||
 g_gravity|Game gravity in inches per second per second|float|800|1||
@@ -528,7 +530,7 @@ g_ScoresColor_Free|Free Team color on scoreboard|color|0.76 0.78 0.1 1|0|1|
 g_ScoresColor_MyTeam|Player team color on scoreboard|color|0.25 0.72 0.25 1|0|1|
 g_ScoresColor_Spectator|Spectator team color on scoreboard|color|0.25 0.25 0.25 1|0|1|
 g_smoothClients|Enable extrapolation between client states|bool|true|||
-g_speed|Player speed|int|190||7|
+g_speed|Player speed|int|190|||
 g_synchronousClients|Client is synchronized to the server - allows smooth demos|bool|false|||
 g_TeamColor_Allies|Allies team color|color|0.6 0.64 0.69 1|0|1|
 g_TeamColor_Axis|Axis team color|color|0.65 0.57 0.41 1|0|1|
@@ -546,18 +548,18 @@ g_useholdspawndelay|Time in milliseconds that the player is unable to 'use' afte
 g_useholdtime|Time to hold the 'use' button to activate use|int|0|0||
 g_voiceChatTalkingDuration|Time after the last talk packet was received that the player is considered by the server to still be talking in milliseconds|int|500|0|10000|
 g_voteAbstainWeight|How much an abstained vote counts as a 'no' vote|float|0.5|0|1|
-gamedate|May 1 2018|string|Sep  7 2007|||
-gamename|Call of Duty 4|string|main|||
+gamedate|May 1 2018|string||||
+gamename|Call of Duty 4|string|KisakCoD4|||
 heli_barrelMaxVelocity||float|1250|-360||
 heli_barrelRotation|How much to rotate the turret barrel when a helicopter fires|float|70|-360|360|
 heli_barrelSlowdown||float|360|-360||
 hiDef|True if the game video is running in high-def.|bool|true|||
 hud_deathQuoteFadeTime|The time for the death quote to fade|int|1000|0|100000|
 hud_enable|Enable hud elements|bool|true|||
-hud_fade_ammodisplay|The time for the ammo display to fade in seconds|float|8|0|30|
-hud_fade_compass|The time for the compass to fade in seconds|float|8|0|30|
+hud_fade_ammodisplay|The time for the ammo display to fade in seconds|float|0|0|30|
+hud_fade_compass|The time for the compass to fade in seconds|float|0|0|30|
 hud_fade_healthbar|The time for the health bar to fade in seconds|float|2|0|30|
-hud_fade_offhand|The time for the offhand weapons to fade in seconds|float|8|0|30|
+hud_fade_offhand|The time for the offhand weapons to fade in seconds|float|0|0|30|
 hud_fade_sprint|The time for the sprint meter to fade in seconds|float|1.7|0|30|
 hud_fade_stance|The time for the stance to fade in seconds|float|1.7|0|30|
 hud_fadeout_speed|The speed that the HUD will fade at|float|0.1|0|1|
@@ -574,7 +576,7 @@ hud_healthOverlay_phaseThree_pulseDuration|Time in milliseconds to fade the alph
 hud_healthOverlay_phaseThree_toAlphaMultiplier|Alpha multiplier for the third health overlay phase (percentage of the pulse peak)|float|0.6|0|1|
 hud_healthOverlay_phaseTwo_pulseDuration|Time in milliseconds to fade the alpha to hud_healthOverlay_phaseTwo_toAlphaMultiplier|int|320|0|1000|
 hud_healthOverlay_phaseTwo_toAlphaMultiplier|Alpha multiplier for the second health overlay phase (percentage of the pulse peak)|float|0.7|0|1|
-hud_healthOverlay_pulseStart|The percentage of full health at which the low-health warning overlay begins flashing|float|0.35|0|1|
+hud_healthOverlay_pulseStart|The percentage of full health at which the low-health warning overlay begins flashing|float|0.55|0|1|
 hud_healthOverlay_regenPauseTime|The time in milliseconds before the health regeneration kicks in|int|8000|0|10000|
 hudElemPausedBrightness|Brightness of the hudelems when the game is paused.|float|0.4|0|1|
 in_mouse|Initialize the mouse drivers|bool|true|||
@@ -612,8 +614,8 @@ mantle_check_range|The minimum distance from a player to a mantle surface to all
 mantle_debug|Show debug information for mantling|bool|false|||
 mantle_enable|Enable player mantling|bool|true|||
 mantle_view_yawcap|The angle at which to restrict a sideways turn while mantling|float|60|0|180|
-mapname|The current map name|string|""|||
-masterPort|Master server port|int|20810|0||
+mapname|The current map name|string||||
+masterPort|Master server port|int|20810|0|65535|
 masterServerName|Master server name for listing public inet games|string|cod4master.activision.com|||
 melee_debug|Turn on debug lines for melee traces|bool|false|||
 missileDebugAttractors|Draw the attractors and repulsors. Attractors are green, and repulsors are yellow.|bool|false|||
@@ -656,7 +658,7 @@ net_socksPort|Network socket port|int|1080|0|65535|
 net_socksServer|Network socket server|string|""|||
 net_socksUsername|Network socket username|string|""|||
 nextdemo|The next demo to play|string|""|||
-nextmap|Next map to play|string|""|||
+nextmap|Next map to play|string||||
 nightVisionDisableEffects||bool|false|||
 nightVisionFadeInOutTime|How long the fade to/from black lasts when putting on or removing night vision goggles.|float|0.1|0|10000|
 nightVisionPowerOnTime|How long the black-to-nightvision fade lasts when turning on the goggles.|float|0.3|0|10000|
@@ -758,8 +760,8 @@ player_sprintTime|The base length of time a player can sprint|float|4|0|12.8|
 player_strafeAnimCosAngle|Cosine of the angle which player starts using strafe animations|float|0.5|0|1|
 player_strafeSpeedScale|The scale applied to the player speed when strafing|float|0.8|0|20|
 player_sustainAmmo|Firing weapon will not decrease clip ammo.|bool|false|||
-player_throwbackInnerRadius|The radius to a live grenade player must be within initially to do a throwback|float|72|0||
-player_throwbackOuterRadius|The radius player is allow to throwback a grenade once the player has been in the inner radius|float|192|0||
+player_throwbackInnerRadius|The radius to a live grenade player must be within initially to do a throwback|float|90|0||
+player_throwbackOuterRadius|The radius player is allow to throwback a grenade once the player has been in the inner radius|float|160|0||
 player_turnAnims|Use animations to turn a player's model in multiplayer|bool|false|||
 player_view_pitch_down|Maximum angle that the player can look down|float|85|0|90|
 player_view_pitch_up|Maximum angle that the player can look up|float|85|0|90|
@@ -1063,7 +1065,7 @@ sv_iwdNames|Names of IWD files used by the server|string||||
 sv_iwds|IWD server checksums|string||||
 sv_keywords|Server keywords|string||||
 sv_kickBanTime|Time in seconds for a player to be banned from the server after being kicked|float|300|0|3600|
-sv_mapname|The current map name|string|""|||
+sv_mapname|The current map name|string||||
 sv_mapRotation|List of maps for the server to play|string||||
 sv_mapRotationCurrent|Current map in the map rotation|string||||
 sv_maxclients|The maximum number of clients that can connect to a server|int|32|||
@@ -1138,19 +1140,19 @@ ui_language||||||
 ui_languagechanged|External Dvar|||||
 ui_lastServerRefresh_%i||||||
 ui_maxclients|The maximum number of clients that can connect to a server|||||
-ui_multiplayer|True if the game is multiplayer|bool|false|||
+ui_multiplayer|True if the game is multiplayer|bool|true|||
 ui_Name||||||
 ui_netGametype|Game type|int|0|||
 ui_netGametypeName|Displayed game type name|string||||
 ui_netSource|The network source where: 0:Local 1:Internet 2:Favourites|int|1|0|2|
 ui_playerProfileAlreadyChosen|true if player profile has been selected.|int|0|0|1|
-ui_playerProfileCount|Number of player profiles|int|0||7|
-ui_playerProfileNameNew|New player profile name|string|""|||
-ui_playerProfileSelected|Selected player profile name|string|""|||
+ui_playerProfileCount|Number of player profiles|int|0|||
+ui_playerProfileNameNew|New player profile name|string||||
+ui_playerProfileSelected|Selected player profile name|string||||
 ui_serverStatusTimeOut|Time in milliseconds before a server status request times out|int|7000|0||
 ui_showEndOfGame|Currently showing the end of game menu.|bool|false|||
 ui_showList|Show onscreen list of currently visible menus|bool|false|||
-ui_showMenuOnly|If set, only menus using this name will draw.|string|""|||
+ui_showMenuOnly|If set, only menus using this name will draw.|string||||
 ui_smallFont|Small font scale|float|0.25|0|1|
 ui_uav_allies|Whether the UI should show UAV to allies|bool|false|||
 ui_uav_axis|Whether the UI should show UAV to axis|bool|false|||
@@ -1172,7 +1174,7 @@ vehHelicopterJitterJerkyness|Specifies how jerky the tilt jitter should be|float
 vehHelicopterLookaheadTime|How far ahead (in seconds) the player helicopter looks ahead, to avoid hard collisions. (Like driving down the highway, you should keep 2 seconds distance between you and the vehicle in front of you)|float|1|0.01||
 vehHelicopterMaxAccel|Maximum horizontal acceleration of the player helicopter (in MPH per second)|float|45|0.01||
 vehHelicopterMaxAccelVertical|Maximum vertical acceleration of the player helicopter (in MPH per second)|float|30|0.01||
-vehHelicopterMaxPitch|Maximum pitch of the player helicopter|float|10|0.01||
+vehHelicopterMaxPitch|Maximum pitch of the player helicopter|float|35|0.01||
 vehHelicopterMaxRoll|Maximum roll of the player helicopter|float|35|0.01||
 vehHelicopterMaxSpeed|Maximum horizontal speed of the player helicopter (in MPH)|float|150|0.01||
 vehHelicopterMaxSpeedVertical|Maximum vertical speed of the player helicopter (in MPH)|float|65|0.01||
