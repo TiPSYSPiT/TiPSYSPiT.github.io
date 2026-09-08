@@ -668,14 +668,40 @@ a:hover
 	overflow-wrap: anywhere;
 }
 
-.dv-desc
+.dv-body
 {
 	flex: 1 1 260px;
 	min-width: 0;
+}
+
+.dv-desc
+{
 	margin: 0;
 	color: var(--muted);
 	font-size: 13px;
 	line-height: 1.5;
+}
+
+.dv-meta
+{
+	margin: 2px 0 0;
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 12px;
+	line-height: 1.5;
+	opacity: 0.85;
+}
+
+.dv-meta b
+{
+	color: var(--text);
+	font-weight: 600;
+}
+
+.dv-type
+{
+	color: var(--text);
+	opacity: 0.75;
 }
 
 /* ---------- form ---------- */
