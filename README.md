@@ -14,7 +14,7 @@ Paste a config or load a `.cfg` file, and it flags the lines that leagues and
 match servers usually disallow.
 
 - Forbidden DVAR names are marked red, forbidden contents in binds and values
-  orange.
+  orange. The name list covers 318 known cheat and cheat-menu names.
 - Flagged lines are highlighted right in the text, with line numbers beside it.
 - Every finding has **Jump to this line** and **Remove this line**.
 - **Load .cfg** opens a local file, **Copy** puts the config on the clipboard,

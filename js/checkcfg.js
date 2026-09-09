@@ -6,15 +6,45 @@
 {
 	"use strict";
 
-	// Exact DVAR names that are not allowed.
+	// Exact DVAR names that are not allowed. Cheat menus declare these as
+	// aliases with set, so a plain name is enough to catch them.
 	var DISALLOWED_DVARS = [
-		"aim.autoaim", "aimbot", "chams", "con_maxfps", "hax_aimbot", "hax_autoshoot",
-		"hax_distesp", "hax_killsounds", "hax_killspam", "hax_nameesp", "hax_radar",
-		"hax_stats", "hax_wallhack", "Mom_aimbot", "Mom_autoshoot", "Mom_distesp",
-		"Mom_killspam", "Mom_nameesp", "Mom_radar", "Mom_stats", "Mom_wallhack",
-		"nameesp", "norecoil", "recoil", "wallhack", "wh", "_aimbot", "_autoshoot",
-		"_crosshair", "_crosshairhealth", "_infoenemy", "_killsounds", "_killspam",
-		"_nameesp", "_radar", "_simpletrace", "_stats", "_wallhack"
+		"con_maxfps", "j_lodBiasRigid", "j_lodBiasSkinned", "j_lodScaleRigid", "j_lodScaleSkinned",
+		"j_polygonOffsetBias", "aim.autoaim", "aimbot", "chams", "hax_aimbot", "hax_autoshoot",
+		"hax_distesp", "hax_killsounds", "hax_killspam", "hax_nameesp", "hax_radar", "hax_stats",
+		"hax_wallhack", "Mom_aimbot", "Mom_autoshoot", "Mom_distesp", "Mom_killspam", "Mom_nameesp",
+		"Mom_radar", "Mom_stats", "Mom_wallhack", "nameesp", "norecoil", "recoil", "wallhack", "wh",
+		"_aimbot", "_autoshoot", "_crosshair", "_crosshairhealth", "_infoenemy", "_killsounds",
+		"_killspam", "_nameesp", "_radar", "_simpletrace", "_stats", "_wallhack", "3rdp0", "3rdp1",
+		"aaaa", "aaim", "aaim1", "aaoff", "aaon", "aburst", "aburst1", "aburst2", "aburst3",
+		"aburst4", "aburst5", "aburst6", "aburst7", "aburst8", "aburst9", "afire", "afov", "afov1",
+		"aim", "aimkey", "aimvec", "aim_predict", "aim_speed", "aim_point", "aim_fire", "aim_burst",
+		"aim_key", "aim_fov", "akburst", "akburst2", "alias", "anrecoil", "autoaim", "autofire",
+		"av2chest", "av2head", "av2neck", "av3chest", "av3head", "av3neck", "avchest", "avex0",
+		"avex1", "avexc", "avexh", "avhead", "avneck", "bbbb", "bothelp", "bot_radar", "bot_wallhack",
+		"box", "box1", "box2", "box3", "bull", "bull1", "bun", "bun1", "bunny", "c0", "c0f", "c1",
+		"c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c19", "c2", "c20", "c3", "c4",
+		"c5", "c6", "c7", "c8", "c9", "cccc", "cheats", "com_cameraMode", "com_dropsim", "con",
+		"con1", "cu_aimbot", "cu_norecoil", "cu_wallhack", "cu_nameesp", "cu_distanceesp",
+		"cu_autoshoot", "dance0", "dance1", "dance2", "dddd", "dev1", "deva", "devb", "eeee", "esp",
+		"esp_all", "esp_names", "esp_off", "esp_weapons", "fb", "fb1", "fb2", "fb3", "ff", "ff+",
+		"ffff", "fire", "fog", "fog1", "fov", "fov_135", "fov_15", "fov_180", "fov_25", "fov_35",
+		"fov_360", "fov_45", "fov_5", "fov_90", "fov_off", "fov160", "fov80", "fw", "fw1", "gggg",
+		"glow", "gre", "gre1", "guid", "gun", "gun1", "help", "hhhh", "ignorewalls", "iiii", "jjjj",
+		"key", "key1", "key2", "key3", "m0", "m1", "m10", "m11", "m12", "m13", "m14", "m15", "m16",
+		"m17", "m18", "m19", "m2", "m20", "m3", "m4", "m4burst", "m4burst2", "m5", "m6", "m60burst",
+		"m60burst2", "m7", "m8", "m9", "melee", "mode", "mom_KillSounds", "names", "nofx", "ogc_aim",
+		"ogc_bot", "ogc_fov", "ogc_glow", "ogc_mode", "ogc_names", "ogc_trans", "ogc_wall",
+		"ogc_weapons", "pesp", "pINgpredict", "pistolburst", "pistolburst2", "por", "por1", "predict",
+		"predict_33", "predict_40", "predict_45", "predict_50", "predict_55", "predict_60",
+		"predict_65", "predict_off", "quiet", "radar", "radarconf", "recoil1", "rfog", "rscope",
+		"safe", "script1", "sesp0", "sesp1", "shoot", "sky", "sky1", "smok0", "smok1", "spIN",
+		"spIN1", "spIN2", "stopspIN", "team", "team0", "team1", "teamcheck", "thirdp", "thirdpcfg",
+		"thrd", "thrd1", "thrd2", "thrd3", "thrd4", "thrd5", "tp", "tp1", "tp2", "tp3", "tq", "tq1",
+		"tq2", "tq3", "tree", "tree1", "trigger", "vec", "vec_crouch", "vec_prone", "vec_stand",
+		"vec1", "w_bot", "w_chams", "w_cross", "w_fog", "w_pbss", "w_recoil", "w_scope", "w_wallhack",
+		"w_walls", "wall", "wallsm", "weapons", "wf", "wf1", "wf2", "wf3", "wh1", "wh2", "wh3",
+		"winamp", "wwall", "wwall1", "_aimkey", "_aim_key"
 	];
 
 	// Substrings that are not allowed inside a bind action or a DVAR value.
