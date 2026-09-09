@@ -135,7 +135,7 @@ a:hover
 .wrap
 {
 	width: 100%;
-	max-width: 920px;
+	max-width: 1180px;
 	margin: 0 auto;
 	padding: 56px 20px 40px;
 }
@@ -438,6 +438,194 @@ a:hover
 	filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
 }
 
+/* ---------- scoreboard generator ---------- */
+
+.sb-grid
+{
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.sb-group
+{
+	padding: 14px 16px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background-color: var(--surface);
+}
+
+.sb-group .rc-title
+{
+	margin-bottom: 10px;
+}
+
+.sb-field
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 10px;
+	padding: 4px 0;
+}
+
+.sb-label
+{
+	flex: 1 1 60px;
+	min-width: 0;
+	color: var(--muted);
+	font-family: var(--sans);
+	font-size: 12px;
+}
+
+.sb-value
+{
+	/* the longest value is a 26 character team name */
+	flex: 0 0 auto;
+	width: calc(27ch + 18px);
+	min-width: 0;
+	height: 28px;
+	padding: 0 8px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	color: inherit;
+	font-family: var(--mono);
+	font-size: 12px;
+}
+
+.sb-colorwrap
+{
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.sb-colorwrap .kf-color
+{
+	flex: 0 0 32px;
+	width: 32px;
+	height: 28px;
+}
+
+.sb-slot
+{
+	/* ch resolves against this rule's own font, so it has to match .sb-value */
+	font-family: var(--mono);
+	font-size: 12px;
+	flex: 0 0 calc(27ch + 18px);
+}
+
+.sb-check
+{
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	accent-color: var(--accent);
+}
+
+/* what every ping range turns into, for the values currently set */
+.sb-ladder
+{
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid var(--border);
+}
+
+.sb-step
+{
+	display: flex;
+	align-items: flex-end;
+	gap: 10px;
+	padding: 3px 0;
+}
+
+.sb-step-ping,
+.sb-step-value
+{
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 11px;
+	line-height: 16px;
+}
+
+.sb-step-ping
+{
+	flex: 0 0 92px;
+}
+
+.sb-step-value
+{
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sb-step-bars
+{
+	display: flex;
+	flex: 0 0 auto;
+	align-items: flex-end;
+	gap: 1px;
+	height: 16px;
+}
+
+.sb-step-bar
+{
+	width: 4px;
+	background: var(--border);
+}
+
+/* The board is drawn in the game's own virtual space (aspect ratio x 480) and
+   scaled to fit, so the numbers in the code are the numbers the game uses. The
+   backdrop is a Promod screenshot, so the board sits on it the way it does
+   in-game. */
+.sb-preview
+{
+	position: relative;
+	overflow: hidden;
+	background-color: #6d6a58;
+	background-image: url("../img/preview-bg.png");
+	background-position: center;
+	background-size: cover;
+}
+
+.sb-screen
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 640px;
+	height: 480px;
+	transform-origin: top left;
+}
+
+/* stands in for the g_TeamIcon_* material */
+.sb-icon
+{
+	position: absolute;
+	fill: rgba(255, 255, 255, 0.85);
+}
+
+.sb-rect
+{
+	position: absolute;
+}
+
+.sb-text
+{
+	position: absolute;
+	white-space: nowrap;
+	overflow: hidden;
+	font-family: var(--sans);
+	/* UI_DrawText style 3 is a hard one pixel drop shadow, not a soft glow */
+	text-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.7);
+}
+
 /* ---------- rcon reference ---------- */
 
 .rc-group
@@ -661,11 +849,24 @@ a:hover
 .dv-name
 {
 	flex: 0 0 auto;
-	width: 260px;
+	/* the longest name is 46 characters, hud_healthOverlay_phaseThree_toAlphaMultiplier */
+	width: 47ch;
 	font-family: var(--mono);
 	font-size: 13px;
 	font-weight: 600;
-	overflow-wrap: anywhere;
+	white-space: nowrap;
+}
+
+/* A phone has no room for the full column, so let the name wrap again there. */
+@media (max-width: 720px)
+{
+	.dv-name
+	{
+		width: auto;
+		max-width: 100%;
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
 }
 
 .dv-body

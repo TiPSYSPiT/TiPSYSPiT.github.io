@@ -20,6 +20,18 @@ match servers usually disallow.
 - **Load .cfg** opens a local file, **Copy** puts the config on the clipboard,
   **Download** saves it as `config_mp.cfg`.
 
+### rcon commands
+
+A Promod rcon reference with a copy button on every command: login and server
+commands, promod modes with their syntax and examples, game modes, match control,
+and all 21 maps.
+
+### dvars
+
+All 1196 CoD4 DVARs, sorted by name and searchable by name or description.
+Each one shows its description, type, default value, allowed range and, where
+it has named settings, what each number means.
+
 ### killfeed colors
 
 Pick your two team colours and get the config line for them.
@@ -38,16 +50,17 @@ Pick your two team colours and get the config line for them.
 
   Key and action can be changed.
 
-### rcon commands
+### scoreboard generator
 
-A Promod rcon reference with a copy button on every command: login and server
-commands, promod modes with their syntax and examples, game modes, match control,
-and all 21 maps.
+Build your scoreboard and see it before you go in-game.
 
-### dvars
-
-All 1196 CoD4 DVARs with their in-game descriptions, sorted by name and
-searchable by name or description.
+- Team names, row colours, sizes and the ping display, all in one place.
+- The preview updates as you type and follows the game's own layout rules.
+- A ping ladder shows what every ping range turns into: how many bars and which
+  colour, for the values you have set.
+- The output comes in three blocks with a copy button each: the `bind TAB` line
+  for the values the mod resets on every team change, the `seta` lines for the
+  board and the ping graph, and the `seta` lines for the team names and colours.
 
 ## Files
 
@@ -55,6 +68,7 @@ searchable by name or description.
 index.html      the page
 css/style.css   styling, light and dark
 js/             one file per tab, plus the tab switching
+img/            the backdrop for the scoreboard preview
 ```
 
 ## Credits

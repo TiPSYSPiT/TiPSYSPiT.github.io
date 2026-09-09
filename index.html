@@ -12,6 +12,7 @@
 	<script src="js/killfeed.js" defer></script>
 	<script src="js/rcon.js" defer></script>
 	<script src="js/dvars.js" defer></script>
+	<script src="js/scoreboard.js" defer></script>
 </head>
 
 <body>
@@ -31,12 +32,14 @@
 		<div class="tabs" role="tablist" aria-label="Tools">
 			<button class="tab is-active" type="button" role="tab" id="tab-checker" aria-controls="panel-checker"
 				aria-selected="true">config checker</button>
-			<button class="tab" type="button" role="tab" id="tab-killfeed" aria-controls="panel-killfeed"
-				aria-selected="false" tabindex="-1">killfeed colors</button>
 			<button class="tab" type="button" role="tab" id="tab-rcon" aria-controls="panel-rcon"
 				aria-selected="false" tabindex="-1">rcon commands</button>
 			<button class="tab" type="button" role="tab" id="tab-dvars" aria-controls="panel-dvars"
 				aria-selected="false" tabindex="-1">dvars</button>
+			<button class="tab" type="button" role="tab" id="tab-killfeed" aria-controls="panel-killfeed"
+				aria-selected="false" tabindex="-1">killfeed colors</button>
+			<button class="tab" type="button" role="tab" id="tab-sb" aria-controls="panel-sb"
+				aria-selected="false" tabindex="-1">scoreboard generator</button>
 		</div>
 
 		<section class="panel" id="panel-checker" role="tabpanel" aria-labelledby="tab-checker" tabindex="0">
@@ -72,6 +75,31 @@
 			<p class="hint" id="hint" role="status"></p>
 
 			<ul id="violations" hidden></ul>
+		</section>
+
+		<section class="panel" id="panel-rcon" role="tabpanel" aria-labelledby="tab-rcon" tabindex="0" hidden>
+			<p class="lede">Promod rcon reference. Copy a command, then paste it into the in-game console.
+				Placeholders in square brackets are yours to fill in.</p>
+
+			<p class="hint" id="rc-hint" role="status"></p>
+
+			<div id="rc-list"></div>
+		</section>
+
+		<section class="panel" id="panel-dvars" role="tabpanel" aria-labelledby="tab-dvars" tabindex="0" hidden>
+			<p class="lede">Every CoD4 dvar with its in-game description, sorted by name.
+				Filter by name or description.</p>
+
+			<div class="dv-bar">
+				<label class="visually-hidden" for="dv-search">Filter dvars</label>
+				<input class="dv-search" type="search" id="dv-search" placeholder="Filter dvars&hellip;"
+					spellcheck="false" autocomplete="off">
+				<span class="dv-count" id="dv-count" aria-live="polite"></span>
+			</div>
+
+			<p class="dv-empty" id="dv-empty" hidden></p>
+
+			<div class="dv-list" id="dv-list"></div>
 		</section>
 
 		<section class="panel" id="panel-killfeed" role="tabpanel" aria-labelledby="tab-killfeed" tabindex="0" hidden>
@@ -114,29 +142,47 @@
 			</div>
 		</section>
 
-		<section class="panel" id="panel-rcon" role="tabpanel" aria-labelledby="tab-rcon" tabindex="0" hidden>
-			<p class="lede">Promod rcon reference. Copy a command, then paste it into the in-game console.
-				Placeholders in square brackets are yours to fill in.</p>
+		<section class="panel" id="panel-sb" role="tabpanel" aria-labelledby="tab-sb" tabindex="0" hidden>
+			<p class="lede">Set up the scoreboard, watch it change, and copy the config lines.
+				The preview follows the layout rules from the game source.</p>
 
-			<p class="hint" id="rc-hint" role="status"></p>
+			<div class="sb-grid" id="sb-controls"></div>
 
-			<div id="rc-list"></div>
-		</section>
-
-		<section class="panel" id="panel-dvars" role="tabpanel" aria-labelledby="tab-dvars" tabindex="0" hidden>
-			<p class="lede">Every CoD4 dvar with its in-game description, sorted by name.
-				Filter by name or description.</p>
-
-			<div class="dv-bar">
-				<label class="visually-hidden" for="dv-search">Filter dvars</label>
-				<input class="dv-search" type="search" id="dv-search" placeholder="Filter dvars&hellip;"
-					spellcheck="false" autocomplete="off">
-				<span class="dv-count" id="dv-count" aria-live="polite"></span>
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Preview</span>
+					<button class="btn btn-sm" type="button" id="sb-reset">Reset</button>
+				</div>
+				<div class="sb-preview" id="sb-preview">
+					<div class="sb-screen" id="sb-screen"></div>
+				</div>
 			</div>
 
-			<p class="dv-empty" id="dv-empty" hidden></p>
+			<p class="hint" id="sb-hint" role="status"></p>
 
-			<div class="dv-list" id="dv-list"></div>
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">bind TAB</span>
+					<button class="btn btn-sm" type="button" id="sb-copy-bind">Copy</button>
+				</div>
+				<pre class="kf-output" id="sb-out-bind"></pre>
+			</div>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">scoreboard and ping</span>
+					<button class="btn btn-sm" type="button" id="sb-copy-board">Copy</button>
+				</div>
+				<pre class="kf-output" id="sb-out-board"></pre>
+			</div>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">teams and colours</span>
+					<button class="btn btn-sm" type="button" id="sb-copy-teams">Copy</button>
+				</div>
+				<pre class="kf-output" id="sb-out-teams"></pre>
+			</div>
 		</section>
 	</main>
 
