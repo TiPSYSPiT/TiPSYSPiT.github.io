@@ -580,6 +580,100 @@ a:hover
 	background: var(--border);
 }
 
+/* ---------- colour presets ---------- */
+
+.sb-presets
+{
+	margin-bottom: 12px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background-color: var(--surface);
+}
+
+.sb-presets-head
+{
+	padding: 11px 16px;
+	color: var(--text);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.sb-presets-head:focus-visible
+{
+	outline: 2px solid var(--focus);
+	outline-offset: -2px;
+}
+
+.sb-preset-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 0 12px 12px;
+}
+
+.sb-preset
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 20px;
+	width: 100%;
+	padding: 9px 12px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	color: inherit;
+	font-family: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.sb-preset:hover
+{
+	border-color: var(--border-strong);
+}
+
+.sb-preset.is-active
+{
+	border-color: var(--accent);
+}
+
+.sb-preset-name
+{
+	/* set from the longest name in buildPresets, so it never wraps */
+	flex: 0 0 var(--sb-name-width, 150px);
+	white-space: nowrap;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+/* The label has a fixed width, so the five colours line up in columns from
+   one preset row to the next. */
+.sb-part
+{
+	display: flex;
+	align-items: center;
+	gap: 7px;
+}
+
+.sb-swatch
+{
+	flex: 0 0 auto;
+	width: 18px;
+	height: 18px;
+	border: 1px solid var(--border-strong);
+	border-radius: 4px;
+}
+
+.sb-part-label
+{
+	flex: 0 0 78px;
+	color: var(--muted);
+	font-size: 11px;
+}
+
 /* The board is drawn in the game's own virtual space (aspect ratio x 480) and
    scaled to fit, so the numbers in the code are the numbers the game uses. The
    backdrop is a Promod screenshot, so the board sits on it the way it does

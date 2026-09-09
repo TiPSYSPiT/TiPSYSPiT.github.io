@@ -65,6 +65,52 @@
 
 	var MY_TEAM = "allies";   // the team the preview puts you on
 
+	// Ready-made colour sets. Each one writes the dvars listed in PRESET_PARTS.
+	var PRESETS = [
+		{ name: "My Original Color",
+			allies: "0.847 0.992 0.576 1", alliesTitle: "0.847 0.992 0.576 1",
+			axis: "0.561 0.655 0.843 1", axisTitle: "0.561 0.655 0.843 1",
+			mine: "0.3 0.3 0.3 1" },
+		{ name: "Green and black",
+			allies: "0.502 1 0 1", alliesTitle: "0.502 1 0 1",
+			axis: "0 0 0 0", axisTitle: "0 0 0 0",
+			mine: "0 0 0 1" },
+		{ name: "Blue and green",
+			allies: "0.383 0.793 1 1", alliesTitle: "0.383 0.793 1 1",
+			axis: "0.602 1 0 1", axisTitle: "0.602 1 0 1",
+			mine: "0 0 0 1" },
+		{ name: "Pink and grey",
+			allies: "1 0 0.703 1", alliesTitle: "1 0 0.703 1",
+			axis: "0.473 0.473 0.473 1", axisTitle: "0.473 0.473 0.473 1",
+			mine: "0 0 0 1" },
+		{ name: "Green and grey",
+			allies: "0.496 0.781 0.332 1", alliesTitle: "0.496 0.781 0.332 1",
+			axis: "0.711 0.711 0.711 1", axisTitle: "0.711 0.711 0.711 1",
+			mine: "0 0 0 0" },
+		{ name: "Blue and black",
+			allies: "0 0.55 1 1", alliesTitle: "0 0.55 1 1",
+			axis: "0 0 0 1", axisTitle: "0 0 0 1",
+			mine: "0.255 0.255 0.255 1" },
+		{ name: "LA Lakers",
+			allies: "0.438 0.113 1 1", alliesTitle: "0.89 1 0.184 1",
+			axis: "0.438 0.113 1 1", axisTitle: "0.89 1 0.184 1",
+			mine: "0.89 1 0.184 1" },
+		{ name: "RedOrange and DarkDenim",
+			allies: "1 0.371 0.145 1", alliesTitle: "0.672 1 0.102 1",
+			axis: "0.211 0.277 0.402 1", axisTitle: "0.199 0.211 0.313 1",
+			mine: "0 0 0 0" }
+	];
+
+	// The title colours are g_TeamColor_*, which is what ^8 and ^9 resolve to in
+	// the team names, so they are set apart from the row colours.
+	var PRESET_PARTS = [
+		{ key: "allies", label: "Allies row", dvars: ["g_ScoresColor_Allies"] },
+		{ key: "axis", label: "Axis row", dvars: ["g_ScoresColor_Axis"] },
+		{ key: "mine", label: "MyColor", dvars: ["cg_scoreboardMyColor"] },
+		{ key: "alliesTitle", label: "Allies title", dvars: ["g_TeamColor_Allies"] },
+		{ key: "axisTitle", label: "Axis title", dvars: ["g_TeamColor_Axis"] }
+	];
+
 	// Stand-ins for the g_TeamIcon_* materials, which live in the game files.
 	// Fixed markup, so it is safe to hand these to innerHTML.
 	var TEAM_ICONS = {
@@ -119,7 +165,7 @@
 	var state = {};
 	var controlsBox = null, screenBox = null, previewBox = null, hint = null;
 	var outBind = null, outBoard = null, outTeams = null;
-	var ladderBox = null, previewWatcher = null;
+	var ladderBox = null, presetsBox = null, previewWatcher = null;
 	var defaultHint = "", hintTimer = null;
 
 	/* ---------- helpers ---------- */
@@ -246,11 +292,16 @@
 		return fontStack;
 	}
 
-	function textWidth(text, size)
+	function measureWith(font, text)
 	{
 		if (measure === null) { measure = document.createElement("canvas").getContext("2d"); }
-		measure.font = size + "px " + previewFont();
+		measure.font = font;
 		return measure.measureText(text).width;
+	}
+
+	function textWidth(text, size)
+	{
+		return measureWith(size + "px " + previewFont(), text);
 	}
 
 	function spanWidth(spans, size)
@@ -612,6 +663,112 @@
 		renderPreview();
 		renderPingLadder();
 		renderOutput();
+		markActivePreset();
+	}
+
+	/* ---------- colour presets ---------- */
+
+	// The three dvars a preset touches all ignore the alpha you give them: rows
+	// are drawn at a fixed half, and the two text colours take the fade alpha.
+	// So the swatches show the colour opaque, and the exact value sits beside it.
+	function presetSwatch(part, value)
+	{
+		var cell = el("div", "sb-part");
+		cell.title = part.label + " " + value;   // the exact numbers, on hover
+		var dot = el("span", "sb-swatch");
+		dot.style.background = css(parseRgba(value), 1);
+		cell.appendChild(dot);
+		cell.appendChild(el("span", "sb-part-label", part.label));
+		return cell;
+	}
+
+	function presetMatchesState(preset)
+	{
+		for (var i = 0; i < PRESET_PARTS.length; i++)
+		{
+			var wanted = parseRgba(preset[PRESET_PARTS[i].key]).join(" ");
+			for (var d = 0; d < PRESET_PARTS[i].dvars.length; d++)
+			{
+				if (parseRgba(state[PRESET_PARTS[i].dvars[d]]).join(" ") !== wanted) { return false; }
+			}
+		}
+		return true;
+	}
+
+	function markActivePreset()
+	{
+		if (presetsBox === null) { return; }
+		var rows = presetsBox.querySelectorAll(".sb-preset");
+		for (var i = 0; i < rows.length; i++)
+		{
+			var on = presetMatchesState(PRESETS[i]);
+			rows[i].classList.toggle("is-active", on);
+			rows[i].setAttribute("aria-pressed", on ? "true" : "false");
+		}
+	}
+
+	function applyPreset(preset)
+	{
+		for (var i = 0; i < PRESET_PARTS.length; i++)
+		{
+			var value = preset[PRESET_PARTS[i].key];
+			for (var d = 0; d < PRESET_PARTS[i].dvars.length; d++)
+			{
+				state[PRESET_PARTS[i].dvars[d]] = value;
+			}
+		}
+		buildControls();   // the colour fields have to show the new values
+		update();
+		setHint(preset.name + " applied.");
+	}
+
+	function buildPresets()
+	{
+		if (presetsBox === null) { return; }
+		presetsBox.innerHTML = "";
+
+		for (var i = 0; i < PRESETS.length; i++)
+		{
+			var preset = PRESETS[i];
+			var row = el("button", "sb-preset");
+			row.type = "button";
+			row.setAttribute("aria-pressed", "false");
+			row.appendChild(el("span", "sb-preset-name", preset.name));
+
+			for (var p = 0; p < PRESET_PARTS.length; p++)
+			{
+				row.appendChild(presetSwatch(PRESET_PARTS[p], preset[PRESET_PARTS[p].key]));
+			}
+
+			row.addEventListener("click", (function (chosen)
+			{
+				return function () { applyPreset(chosen); };
+			}(preset)));
+
+			presetsBox.appendChild(row);
+		}
+
+		fitPresetNames();
+	}
+
+	// The name column is as wide as the longest name, so adding a longer one
+	// never makes it wrap. Measured on a canvas, which also answers while the
+	// panel is still hidden.
+	function fitPresetNames()
+	{
+		var names = presetsBox.querySelectorAll(".sb-preset-name");
+		if (names.length === 0) { return; }
+
+		var style = window.getComputedStyle(names[0]);
+		var font = style.fontWeight + " " + style.fontSize + " " + style.fontFamily;
+
+		var widest = 0;
+		for (var i = 0; i < names.length; i++)
+		{
+			widest = Math.max(widest, measureWith(font, names[i].textContent));
+		}
+
+		presetsBox.style.setProperty("--sb-name-width", Math.ceil(widest) + 4 + "px");
 	}
 
 	function makeControl(f)
@@ -623,15 +780,19 @@
 		label.setAttribute("for", id);
 		row.appendChild(label);
 
+		// Built from the live value, not from the default: buildControls also runs
+		// after a preset has changed the state, and the fields have to follow.
+		var current = state[f.dvar];
+
 		if (f.kind === "color")
 		{
 			var wrap = el("div", "sb-colorwrap");
 			var picker = el("input");
 			picker.type = "color"; picker.className = "kf-color"; picker.id = id;
-			picker.value = toHex(parseRgba(f.def));
+			picker.value = toHex(parseRgba(current));
 			picker.setAttribute("aria-label", f.dvar);
 			var text = el("input");
-			text.type = "text"; text.className = "sb-value"; text.value = f.def;
+			text.type = "text"; text.className = "sb-value"; text.value = current;
 			text.id = id + "-value";
 			text.spellcheck = false; text.autocomplete = "off";
 			text.setAttribute("aria-label", f.dvar + " value");
@@ -658,7 +819,7 @@
 			var slot = el("div", "sb-slot");
 			var box = el("input");
 			box.type = "checkbox"; box.className = "sb-check"; box.id = id;
-			box.checked = !!f.def;
+			box.checked = !!current;
 			box.addEventListener("change", function () { state[f.dvar] = box.checked ? 1 : 0; update(); });
 			slot.appendChild(box);
 			row.appendChild(slot);
@@ -668,7 +829,7 @@
 			var input = el("input");
 			input.type = f.kind === "num" ? "number" : "text";
 			input.className = "sb-value"; input.id = id;
-			input.value = f.def;
+			input.value = current;
 			if (f.kind === "num") { input.min = f.min; input.max = f.max; input.step = f.step; }
 			input.spellcheck = false; input.autocomplete = "off";
 			input.addEventListener("input", function () { state[f.dvar] = input.value; update(); });
@@ -713,6 +874,7 @@
 	function init()
 	{
 		controlsBox = document.getElementById("sb-controls");
+		presetsBox = document.getElementById("sb-presets");
 		screenBox = document.getElementById("sb-screen");
 		previewBox = document.getElementById("sb-preview");
 		outBind = document.getElementById("sb-out-bind");
@@ -725,6 +887,7 @@
 
 		resetState();
 		buildControls();
+		buildPresets();
 		update();
 		readBackdropAspect();
 
