@@ -13,6 +13,7 @@
 	<script src="js/rcon.js" defer></script>
 	<script src="js/dvars.js" defer></script>
 	<script src="js/scoreboard.js" defer></script>
+	<script src="js/faq.js" defer></script>
 </head>
 
 <body>
@@ -40,6 +41,8 @@
 				aria-selected="false" tabindex="-1">killfeed colors</button>
 			<button class="tab" type="button" role="tab" id="tab-sb" aria-controls="panel-sb"
 				aria-selected="false" tabindex="-1">scoreboard generator</button>
+			<button class="tab" type="button" role="tab" id="tab-faq" aria-controls="panel-faq"
+				aria-selected="false" tabindex="-1">FAQ</button>
 		</div>
 
 		<section class="panel" id="panel-checker" role="tabpanel" aria-labelledby="tab-checker" tabindex="0">
@@ -188,6 +191,24 @@
 				</div>
 				<pre class="kf-output" id="sb-out-teams"></pre>
 			</div>
+		</section>
+
+		<section class="panel" id="panel-faq" role="tabpanel" aria-labelledby="tab-faq" tabindex="0" hidden>
+			<p class="lede">Answers to the questions that keep coming up around config_mp.cfg.
+				Every dvar below was checked against the game itself.</p>
+
+			<div class="dv-bar">
+				<label class="visually-hidden" for="fq-search">Search the FAQ</label>
+				<input class="dv-search" type="search" id="fq-search" placeholder="Search the FAQ&hellip;"
+					spellcheck="false" autocomplete="off">
+				<span class="dv-count" id="fq-count" aria-live="polite"></span>
+			</div>
+
+			<p class="hint" id="fq-hint" role="status"></p>
+
+			<p class="dv-empty" id="fq-empty" hidden></p>
+
+			<div id="fq-list"></div>
 		</section>
 	</main>
 

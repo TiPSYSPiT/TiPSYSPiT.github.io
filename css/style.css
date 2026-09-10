@@ -29,6 +29,9 @@
 	--red-line: rgba(196, 50, 44, 0.11);
 	--orange-line: rgba(168, 106, 6, 0.13);
 
+	/* the page width, shared by the content and the footer rule above it */
+	--page-width: 1180px;
+
 	--radius: 10px;
 	--radius-sm: 6px;
 
@@ -135,7 +138,7 @@ a:hover
 .wrap
 {
 	width: 100%;
-	max-width: 1180px;
+	max-width: var(--page-width);
 	margin: 0 auto;
 	padding: 56px 20px 40px;
 }
@@ -1322,14 +1325,24 @@ pre
 .footer
 {
 	margin-top: auto;
-	padding: 24px 20px 28px;
-	max-width: 920px;
+	padding: 0 20px 28px;
+	max-width: var(--page-width);
 	width: 100%;
 	margin-left: auto;
 	margin-right: auto;
-	border-top: 1px solid var(--border);
 	color: var(--muted);
 	font-size: 12px;
+}
+
+/* The rule sits on a child, not on .footer itself: a border on .footer would
+   span its padding as well and come out 40px longer than the one under the
+   tabs, which is drawn on a box that already sits inside .wrap's padding. */
+.footer::before
+{
+	content: "";
+	display: block;
+	margin-bottom: 24px;
+	border-top: 1px solid var(--border);
 }
 
 .footer-gh
@@ -1432,4 +1445,130 @@ pre
 	{
 		transition: none !important;
 	}
+}
+
+/* ---------- FAQ ---------- */
+
+.fq-group[hidden]
+{
+	display: none;
+}
+
+.fq-item
+{
+	padding: 14px 0;
+	border-top: 1px solid var(--border);
+}
+
+.fq-item:first-of-type
+{
+	padding-top: 4px;
+	border-top: 0;
+}
+
+.fq-item[hidden]
+{
+	display: none;
+}
+
+.fq-q
+{
+	margin: 0 0 6px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.fq-a
+{
+	margin: 0 0 10px;
+	max-width: 78ch;
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+/* One width for the copy button and for the gap the button-less rows leave,
+   so every code field ends on the same edge. */
+.fq-cmd
+{
+	--fq-copy-w: 76px;
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-bottom: 6px;
+}
+
+.fq-kind
+{
+	flex: 0 0 58px;
+	text-align: left;
+	padding-top: 5px;
+	color: var(--muted);
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+/* key field on the bindable rows: same box metrics as .fq-code, so the row
+   keeps one height */
+.fq-key
+{
+	flex: 0 0 64px;
+	width: 64px;
+	min-width: 0;
+	padding: 6px 8px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	color: inherit;
+	font-family: var(--mono);
+	font-size: 12.5px;
+	line-height: 1.55;
+	text-align: center;
+}
+
+/* middle column of the menu tables, fixed so the commands line up */
+.fq-desc
+{
+	flex: 0 0 140px;
+	padding-top: 5px;
+	font-size: 12px;
+}
+
+.fq-code
+{
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 6px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	font-family: var(--mono);
+	font-size: 12.5px;
+	line-height: 1.55;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.fq-copy,
+.fq-copy-space
+{
+	flex: 0 0 var(--fq-copy-w);
+}
+
+/* the same box metrics as .fq-code, so both are exactly as tall */
+.fq-copy
+{
+	padding: 6px 10px;
+	font-size: 12.5px;
+	line-height: 1.55;
+}
+
+.fq-note
+{
+	margin: 10px 0 0;
+	max-width: 78ch;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.6;
 }

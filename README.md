@@ -15,6 +15,8 @@ match servers usually disallow.
 
 - Forbidden DVAR names are marked red, forbidden contents in binds and values
   orange. The name list covers 318 known cheat and cheat-menu names.
+- 33 protected client DVARs are never flagged, not even when the name contains a
+  banned word.
 - Flagged lines are highlighted right in the text, with line numbers beside it.
 - Every finding has **Jump to this line** and **Remove this line**.
 - **Load .cfg** opens a local file, **Copy** puts the config on the clipboard,
@@ -61,6 +63,13 @@ Build your scoreboard and see it before you go in-game.
 - The output comes in three blocks with a copy button each: the `bind TAB` line
   for the values the mod resets on every team change, the `seta` lines for the
   board and the ping graph, and the `seta` lines for the team names and colours.
+
+### FAQ
+
+Answers to the questions that keep coming up around `config_mp.cfg`, searchable
+by question, answer or command. Each answer gives the config line and the
+console command, with a copy button on both.
+
 
 ## Files
 

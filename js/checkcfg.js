@@ -53,9 +53,35 @@
 		"trace", "tracker", "vstr", "wall", "wait"
 	];
 
+	// Protected DVARs: client settings a server is not allowed to overwrite.
+	// They are always fine in a config, so they are taken out of the line before
+	// the substring rules run. Without that, cg_debugInfoCornerOffset trips the
+	// "info" rule purely because of the letters in its name.
+	var PROTECTED_DVARS = [
+		"cg_chatHeight", "cg_chatTime", "cg_debugInfoCornerOffset", "cg_drawBreathHint",
+		"cg_drawFPS", "cg_drawLagometer", "cg_drawMantleHint", "cg_fov", "cg_fovScale",
+		"cg_hudChatPosition", "cg_hudProneY", "cg_hudSayPosition", "cg_teamChatsOnly",
+		"cl_mouseAccel", "com_maxfps", "compassFriendlyHeight", "compassFriendlyWidth",
+		"compassObjectiveHeight", "compassObjectiveWidth", "compassObjectiveIconHeight",
+		"compassObjectiveIconWidth", "compassPlayerHeight", "compassPlayerWidth",
+		"r_aspectRatio", "r_displayRefresh", "r_gamma", "r_inGameVideo", "r_mode",
+		"r_vsync", "snd_volume", "ui_connectScreenTextGlowColor", "waypointIconHeight",
+		"waypointIconWidth"
+	];
+
+	// Ordinary Promod menu calls that read like a banned word: the killspec
+	// entry of the B4 menu carries "kill" in its name. Masked the same way as
+	// the protected DVARs, and deliberately narrow -- "killspec" on its own is
+	// still judged by the substring rules, only the menu call is exempt.
+	var PROTECTED_PATTERNS = [
+		/quickpromod\s+killspec/g
+	];
+
 	// Pre-lowercased lookups so we do not re-lowercase inside the scan loop.
 	var DVARS_LOWER = DISALLOWED_DVARS.map(function (v) { return v.toLowerCase(); });
 	var CONTENTS_LOWER = DISALLOWED_CONTENTS.map(function (v) { return v.toLowerCase(); });
+	var PROTECTED_LOWER = PROTECTED_DVARS.map(function (v) { return v.toLowerCase(); });
+	var BLANKS = PROTECTED_LOWER.map(function (v) { return new Array(v.length + 1).join(" "); });
 
 	var BIND_RE = /^bind\s+(\S+)\s+(.+)$/i;
 	var SET_RE = /^set[aus]?\s+(\S+)\s+(.+)$/i;
@@ -110,9 +136,35 @@
 		return value;
 	}
 
+	// Blanks out every protected DVAR name, keeping the length so nothing else
+	// shifts, so that only the rest of the line is judged by the substring rules.
+	function maskProtected(lower)
+	{
+		for (var i = 0; i < PROTECTED_LOWER.length; i++)
+		{
+			var name = PROTECTED_LOWER[i];
+			var at = lower.indexOf(name);
+			while (at !== -1)
+			{
+				lower = lower.slice(0, at) + BLANKS[i] + lower.slice(at + name.length);
+				at = lower.indexOf(name, at + name.length);
+			}
+		}
+
+		for (var p = 0; p < PROTECTED_PATTERNS.length; p++)
+		{
+			lower = lower.replace(PROTECTED_PATTERNS[p], function (hit)
+			{
+				return new Array(hit.length + 1).join(" ");
+			});
+		}
+
+		return lower;
+	}
+
 	function findDisallowedContent(value)
 	{
-		var lower = value.toLowerCase();
+		var lower = maskProtected(value.toLowerCase());
 		for (var i = 0; i < CONTENTS_LOWER.length; i++)
 		{
 			if (lower.indexOf(CONTENTS_LOWER[i]) !== -1)
@@ -123,9 +175,20 @@
 		return null;
 	}
 
+	function isProtected(lower)
+	{
+		for (var i = 0; i < PROTECTED_LOWER.length; i++)
+		{
+			if (lower === PROTECTED_LOWER[i]) { return true; }
+		}
+		return false;
+	}
+
 	function findDisallowedDvar(name)
 	{
 		var lower = name.toLowerCase();
+		if (isProtected(lower)) { return null; }   // protected wins over the ban list
+
 		for (var i = 0; i < DVARS_LOWER.length; i++)
 		{
 			if (lower === DVARS_LOWER[i])
