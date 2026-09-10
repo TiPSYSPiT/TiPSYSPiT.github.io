@@ -67,8 +67,9 @@ Build your scoreboard and see it before you go in-game.
 ### FAQ
 
 Answers to the questions that keep coming up around `config_mp.cfg`, searchable
-by question, answer or command. Each answer gives the config line and the
-console command, with a copy button on both.
+by question, answer or command. It opens with what to install for the CD version,
+the Steam version and FPS Challenge, and the settings answers give both the
+config line and the console command, with a copy button on each.
 
 
 ## Files

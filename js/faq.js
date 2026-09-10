@@ -37,6 +37,68 @@
 	};
 
 	var ENTRIES = [
+		/* ---------- Getting started ---------- */
+		{
+			group: "Getting started",
+			q: "I have the game on disc. What do I install, and in what order?",
+			a: "Four things, and the order matters: each patch expects the one before it.",
+			steps: [
+				{ text: "Install Call of Duty 4 from your discs." },
+				{ text: "Apply patch 1.6." },
+				{ text: "Apply patch 1.7 on top of it." },
+				{ text: "Install the CoD4X 21.3 client.", link: "https://cod4x.ovh/t/cod4x-client-and-server-files/24",
+					linkText: "cod4x.ovh" }
+			]
+		},
+		{
+			group: "Getting started",
+			q: "I bought the game on Steam. What do I still need?",
+			a: "Only the last step. Steam keeps the game patched to 1.7 for you, so the official " +
+				"patches are already done by the time it finishes installing.",
+			steps: [
+				{ text: "Buy and install Call of Duty 4: Modern Warfare through Steam." },
+				{ text: "Install the CoD4X 21.3 client.", link: "https://cod4x.ovh/t/cod4x-client-and-server-files/24",
+					linkText: "cod4x.ovh" }
+			]
+		},
+		{
+			group: "Getting started",
+			q: "What do I need to play on FPS Challenge?",
+			a: "A working 1.7 install, then two IDs on your profile and three downloads. The " +
+				"anticheat has to be able to tell who you are before it lets you onto a server, " +
+				"which is what the IDs are for.",
+			steps: [
+				{ text: "Register at FPS Challenge and sign in.", link: "https://fpschallenge.eu/",
+					linkText: "fpschallenge.eu" },
+				{ text: "Put your Steam ID and your TeamSpeak 3 ID into the Identifiers section " +
+					"of your profile. Without them you get onto neither the game servers nor the " +
+					"TeamSpeak, which is at fpschallenge." },
+				{ text: "Install the CoD4X 21.4 client.",
+					link: "https://fpschallenge.b-cdn.net/public/gamefiles/cod4/cod4x_client_21_4.zip",
+					linkText: "cod4x_client_21_4.zip",
+					sub: [
+						"Extract the archive.",
+						"Copy the cod4-client-manualinstall_21.4 folder into your CoD4 folder.",
+						"Open that folder and run install.cmd.",
+						"Start the game once. It updates the CoD4X client by itself."
+					] },
+				{ text: "Apply the 21.5 hotfix on top.",
+					link: "https://fpschallenge.b-cdn.net/public/gamefiles/cod4/cod4x_client_21_5.zip",
+					linkText: "cod4x_client_21_5.zip",
+					sub: [
+						"Extract the archive and take the cod4x_021.dll out of it.",
+						"Overwrite the file of the same name in the bin folder below."
+					] },
+				{ text: "Install the FPS Challenge anticheat.",
+					link: "https://dl.fpschallenge.eu/anticheat/FPSCACInstaller.msi",
+					linkText: "FPSCACInstaller.msi",
+					sub: ["Run the installer and follow it through."] }
+			],
+			rows: [
+				{ label: "hotfix", desc: "target folder", text: "%localappdata%\\CallofDuty4MW\\bin\\cod4x_021" }
+			]
+		},
+
 		/* ---------- HUD and display ---------- */
 		{
 			group: "HUD and display",
@@ -455,6 +517,43 @@
 		if (entry.cfg) { item.appendChild(commandRow({ label: "config", text: entry.cfg })); }
 		if (entry.cmd) { item.appendChild(commandRow({ label: "console", text: entry.cmd })); }
 
+		// a few answers are a procedure rather than a setting
+		var stepText = [];
+		if (entry.steps)
+		{
+			var list = el("ol", "fq-steps");
+			for (var st = 0; st < entry.steps.length; st++)
+			{
+				var step = entry.steps[st];
+				var li = el("li", null, step.text);
+				stepText.push(step.text);
+
+				if (step.link)
+				{
+					li.appendChild(document.createTextNode(" "));
+					var link = el("a", "fq-link", step.linkText || "download");
+					link.href = step.link;
+					link.target = "_blank";
+					link.rel = "noopener noreferrer";
+					li.appendChild(link);
+				}
+
+				if (step.sub)
+				{
+					var subs = el("ul", "fq-substeps");
+					for (var sb = 0; sb < step.sub.length; sb++)
+					{
+						subs.appendChild(el("li", null, step.sub[sb]));
+						stepText.push(step.sub[sb]);
+					}
+					li.appendChild(subs);
+				}
+
+				list.appendChild(li);
+			}
+			item.appendChild(list);
+		}
+
 		// some answers are neither: a list of paths or a menu table, each row
 		// carrying its own label and, where it helps, a description
 		var extra = [];
@@ -471,7 +570,7 @@
 
 		// one lowercased haystack per entry, so filtering stays a substring test
 		var haystack = [entry.q, entry.a, entry.cfg, entry.cmd, entry.note]
-			.concat(extra).filter(Boolean).join(" ").toLowerCase();
+			.concat(stepText).concat(extra).filter(Boolean).join(" ").toLowerCase();
 
 		return { node: item, text: haystack };
 	}

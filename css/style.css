@@ -1509,6 +1509,34 @@ pre
 	letter-spacing: 0.04em;
 }
 
+.fq-steps,
+.fq-substeps
+{
+	margin: 0 0 10px;
+	padding-left: 20px;
+	max-width: 78ch;
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.65;
+}
+
+.fq-steps > li
+{
+	margin-bottom: 5px;
+}
+
+.fq-substeps
+{
+	margin: 4px 0 0;
+	list-style: disc;
+}
+
+.fq-link
+{
+	font-family: var(--mono);
+	font-size: 12px;
+}
+
 /* key field on the bindable rows: same box metrics as .fq-code, so the row
    keeps one height */
 .fq-key
