@@ -46,7 +46,7 @@
 				{ text: "Install Call of Duty 4 from your discs." },
 				{ text: "Apply patch 1.6." },
 				{ text: "Apply patch 1.7 on top of it." },
-				{ text: "Install the CoD4X 21.3 client.", link: "https://cod4x.ovh/t/cod4x-client-and-server-files/24",
+				{ text: "Install the CoD4X 21.8 client.", link: "https://cod4x.ovh/t/releases/24",
 					linkText: "cod4x.ovh" }
 			]
 		},
@@ -57,7 +57,7 @@
 				"patches are already done by the time it finishes installing.",
 			steps: [
 				{ text: "Buy and install Call of Duty 4: Modern Warfare through Steam." },
-				{ text: "Install the CoD4X 21.3 client.", link: "https://cod4x.ovh/t/cod4x-client-and-server-files/24",
+				{ text: "Install the CoD4X 21.8 client.", link: "https://cod4x.ovh/t/releases/24",
 					linkText: "cod4x.ovh" }
 			]
 		},
