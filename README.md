@@ -28,6 +28,13 @@ A Promod rcon reference with a copy button on every command: login and server
 commands, promod modes with their syntax and examples, game modes, match control,
 and all 21 maps.
 
+### server configuration
+
+Everything a `server.cfg` normally sets, grouped by purpose, with a copy button
+per block: identity, slots and passwords, logging, connection limits, anti-cheat,
+voice, downloads, one block per gametype and the map rotation. Each setting
+carries the default and range the engine actually registers.
+
 ### dvars
 
 All 1196 CoD4 DVARs, sorted by name and searchable by name or description.
@@ -63,6 +70,11 @@ Build your scoreboard and see it before you go in-game.
 - The output comes in three blocks with a copy button each: the `bind TAB` line
   for the values the mod resets on every team change, the `seta` lines for the
   board and the ping graph, and the `seta` lines for the team names and colours.
+
+### demos
+
+A link to the [CoD4 demo viewer](https://tipsyspit.github.io/cod4-demo/), a separate
+tool that loads a demo file in the browser and lays out what is in it.
 
 ### FAQ
 

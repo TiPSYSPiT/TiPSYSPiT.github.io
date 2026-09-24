@@ -11,6 +11,7 @@
 	<script src="js/checkcfg.js" defer></script>
 	<script src="js/killfeed.js" defer></script>
 	<script src="js/rcon.js" defer></script>
+	<script src="js/serverconfig.js" defer></script>
 	<script src="js/dvars.js" defer></script>
 	<script src="js/scoreboard.js" defer></script>
 	<script src="js/faq.js" defer></script>
@@ -35,12 +36,16 @@
 				aria-selected="true">config checker</button>
 			<button class="tab" type="button" role="tab" id="tab-rcon" aria-controls="panel-rcon"
 				aria-selected="false" tabindex="-1">rcon commands</button>
+			<button class="tab" type="button" role="tab" id="tab-srv" aria-controls="panel-srv"
+				aria-selected="false" tabindex="-1">server configuration</button>
 			<button class="tab" type="button" role="tab" id="tab-dvars" aria-controls="panel-dvars"
 				aria-selected="false" tabindex="-1">dvars</button>
 			<button class="tab" type="button" role="tab" id="tab-killfeed" aria-controls="panel-killfeed"
 				aria-selected="false" tabindex="-1">killfeed colors</button>
 			<button class="tab" type="button" role="tab" id="tab-sb" aria-controls="panel-sb"
 				aria-selected="false" tabindex="-1">scoreboard generator</button>
+			<button class="tab" type="button" role="tab" id="tab-demos" aria-controls="panel-demos"
+				aria-selected="false" tabindex="-1">demos</button>
 			<button class="tab" type="button" role="tab" id="tab-faq" aria-controls="panel-faq"
 				aria-selected="false" tabindex="-1">FAQ</button>
 		</div>
@@ -87,6 +92,15 @@
 			<p class="hint" id="rc-hint" role="status"></p>
 
 			<div id="rc-list"></div>
+		</section>
+
+		<section class="panel" id="panel-srv" role="tabpanel" aria-labelledby="tab-srv" tabindex="0" hidden>
+			<p class="lede">Settings for a server.cfg, grouped by what they do. Every name here was
+				checked against the game itself, and the defaults are the engine's own.</p>
+
+			<p class="hint" id="sc-hint" role="status"></p>
+
+			<div id="sc-list"></div>
 		</section>
 
 		<section class="panel" id="panel-dvars" role="tabpanel" aria-labelledby="tab-dvars" tabindex="0" hidden>
@@ -190,6 +204,23 @@
 					<button class="btn btn-sm" type="button" id="sb-copy-teams">Copy</button>
 				</div>
 				<pre class="kf-output" id="sb-out-teams"></pre>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-demos" role="tabpanel" aria-labelledby="tab-demos" tabindex="0" hidden>
+			<p class="lede">A separate tool for CoD4 demo files. It opens in a new tab.</p>
+
+			<div class="rc-group dm-card">
+				<a class="btn btn-primary dm-open" href="https://tipsyspit.github.io/cod4-demo/" target="_blank"
+					rel="noopener noreferrer">Open the CoD4 demo viewer</a>
+
+				<ul class="dm-list">
+					<li>Load a CoD4 demo straight into your browser and analyse it.</li>
+					<li>Every value in the demo, laid out clearly.</li>
+					<li>Map view with background maps.</li>
+					<li>Runs entirely on your machine &mdash; nothing is uploaded.</li>
+					<li>Free, with nothing to install.</li>
+				</ul>
 			</div>
 		</section>
 
