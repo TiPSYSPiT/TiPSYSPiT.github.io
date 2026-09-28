@@ -90,7 +90,9 @@ config line and the console command, with a copy button on each.
 index.html      the page
 css/style.css   styling, light and dark
 js/             one file per tab, plus the tab switching
-img/            the backdrop for the scoreboard preview
+assets/         the scoreboard backdrop, and killfeed-icons.js: the killfeed
+                icons as data URLs, so they can be measured from disk too
+tools/          embed-icons.pl rebuilds killfeed-icons.js from a folder of PNGs
 ```
 
 ## Credits

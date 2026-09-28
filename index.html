@@ -9,6 +9,7 @@
 	<link href="css/style.css" rel="stylesheet">
 	<script src="js/tabs.js" defer></script>
 	<script src="js/checkcfg.js" defer></script>
+	<script src="assets/killfeed-icons.js" defer></script>
 	<script src="js/killfeed.js" defer></script>
 	<script src="js/rcon.js" defer></script>
 	<script src="js/serverconfig.js" defer></script>
@@ -134,6 +135,24 @@
 
 				<div class="kf-rows" id="kf-rows"></div>
 
+				<div class="kf-opt">
+					<label class="kf-opt-label" for="kf-msgtime" title="con_gameMsgWindow0MsgTime">Display time</label>
+					<input class="kf-value kf-num" type="number" id="kf-msgtime" value="5" min="0" max="999"
+						step="any" inputmode="decimal" autocomplete="off" title="Seconds, 0 to 999"
+						aria-describedby="kf-msgtime-desc">
+					<p class="kf-opt-desc" id="kf-msgtime-desc">Sets the time (in seconds) that kill notifications
+						remain in the killfeed window.</p>
+				</div>
+
+				<div class="kf-opt">
+					<label class="kf-opt-label" for="kf-lines" title="con_gameMsgWindow0LineCount">Line count</label>
+					<input class="kf-value kf-num" type="number" id="kf-lines" value="4" min="1" max="10"
+						step="1" inputmode="numeric" autocomplete="off" title="Whole number, 1 to 10"
+						aria-describedby="kf-lines-desc">
+					<p class="kf-opt-desc" id="kf-lines-desc">Adjusts the maximum number of simultaneous kill lines
+						shown in the feed at once.</p>
+				</div>
+
 				<div class="actions">
 					<div class="tools">
 						<button class="btn" type="button" id="kf-reset">Reset</button>
@@ -156,6 +175,14 @@
 					<button class="btn btn-sm" type="button" id="kf-copy-bind">Copy</button>
 				</div>
 				<pre class="kf-output" id="kf-output-bind"></pre>
+			</div>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Console commands</span>
+					<button class="btn btn-sm" type="button" id="kf-copy-cmds">Copy</button>
+				</div>
+				<pre class="kf-output" id="kf-output-cmds"></pre>
 			</div>
 		</section>
 

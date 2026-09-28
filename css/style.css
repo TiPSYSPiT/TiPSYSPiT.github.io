@@ -432,13 +432,65 @@ a:hover
 	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
 }
 
-.kf-weapon
+/* The icons come uncropped, so each is a clip box: this height is the visible
+   height of every icon, killfeed.js gives the box the shape of the icon's
+   visible part and places the whole image inside so only that part shows. */
+.kf-icon
 {
 	flex: 0 0 auto;
-	width: 34px;
-	height: 12px;
-	fill: #e6e6e6;
+	position: relative;
+	display: block;
+	height: 14px;
+	overflow: hidden;
 	filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
+	user-select: none;
+}
+
+.kf-icon img
+{
+	position: absolute;
+	display: block;
+	max-width: none;
+}
+
+/* Until the icons are measured the lines keep their place but stay unseen,
+   so the preview neither jumps nor shows icons at the wrong size. */
+.kf-feed.is-loading > .kf-line
+{
+	visibility: hidden;
+}
+
+/* The two killfeed window options, laid out like the colour rows above. */
+.kf-opt
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 10px;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--border);
+}
+
+.kf-opt-label
+{
+	flex: 0 0 110px;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.kf-num
+{
+	width: 84px;
+	min-width: 0;
+}
+
+.kf-opt-desc
+{
+	flex: 1 1 100%;
+	margin: 0;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.5;
 }
 
 /* ---------- scoreboard generator ---------- */
@@ -686,7 +738,7 @@ a:hover
 	position: relative;
 	overflow: hidden;
 	background-color: #6d6a58;
-	background-image: url("../img/preview-bg.png");
+	background-image: url("../assets/scoreboard/preview-bg.png");
 	background-position: center;
 	background-size: cover;
 }
@@ -1430,6 +1482,15 @@ pre
 		flex: 1 1 30%;
 		width: auto;
 		min-width: 0;
+	}
+
+	/* The killfeed option fields share .kf-value but hold short numbers, so
+	   they stay beside their label instead of taking the colour rows' layout. */
+	.kf-num
+	{
+		order: 0;
+		flex: 0 0 84px;
+		width: 84px;
 	}
 
 	.dv-name

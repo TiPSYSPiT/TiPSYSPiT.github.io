@@ -901,6 +901,8 @@
 		{
 			tabButton.parentNode.addEventListener("click", fitPreview);
 			tabButton.parentNode.addEventListener("keyup", fitPreview);
+			// also covers a tab opened by a link, or by the back button
+			tabButton.parentNode.addEventListener("tabchange", fitPreview);
 		}
 
 		if (typeof window.ResizeObserver === "function")

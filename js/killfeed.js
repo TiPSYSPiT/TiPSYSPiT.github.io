@@ -20,14 +20,84 @@
 		{ dvar: "g_TeamColor_Axis", label: "Axis", rgba: [1, 0.541, 0.361, 1] }
 	];
 
-	// Sample rows for the preview. Each kill is scored by one team against the
-	// other, so both colours show up in both positions.
+	// The icons as data URLs, from assets/killfeed-icons.js. They come
+	// uncropped, with very different amounts of transparent margin, so each
+	// one is measured once and only its visible part is shown (see measureIcon).
+	// Data URLs rather than image files because an image loaded from a file://
+	// URL cannot be read back from a canvas, and the page must work from disk.
+	var ICONS = window.KILLFEED_ICONS || {};
+
+	// Alpha (of 255) a pixel needs to count as visible. Below that it cannot be
+	// seen, but a stray one would still widen the box; real antialiased edges
+	// sit well above it.
+	var ALPHA_THRESHOLD = 4;
+
+	// Promod X weapons (weapons/mp, silencer variants share the icon) and the
+	// icon showing the killIcon each weapon file names. The icon keys follow
+	// the icon names without the hud_icon_ prefix; where they differ, the icon
+	// name is noted.
+	var WEAPONS = {
+		ak47_mp: { name: "AK-47", icon: "ak47" },
+		ak74u_mp: { name: "AK-74u", icon: "akd74u" },                // hud_icon_ak74u
+		beretta_mp: { name: "M9 Beretta", icon: "m9beretta" },
+		colt45_mp: { name: "M1911 .45", icon: "colt45" },            // hud_icon_colt_45
+		deserteagle_mp: { name: "Desert Eagle", icon: "desert_eagle" },
+		deserteaglegold_mp: { name: "Gold Desert Eagle", icon: "desert_eagle" },
+		g3_mp: { name: "G3", icon: "g3" },
+		g36c_mp: { name: "G36C", icon: "g36c_mp" },
+		m1014_mp: { name: "M1014", icon: "benelli_m4" },
+		m14_mp: { name: "M14", icon: "m14" },
+		m16_mp: { name: "M16A4", icon: "m16a4" },                     // hud_icon_m16a4_grenade
+		m4_mp: { name: "M4 Carbine", icon: "m4carbine" },
+		m40a3_mp: { name: "M40A3", icon: "m40a3" },
+		mp44_mp: { name: "MP44", icon: "mp44" },
+		mp5_mp: { name: "MP5", icon: "mp5" },
+		remington700_mp: { name: "R700", icon: "remington_700" },    // hud_icon_remington700
+		usp_mp: { name: "USP .45", icon: "usp_45" },
+		uzi_mp: { name: "Mini-Uzi", icon: "mini_uzi" },
+		winchester1200_mp: { name: "W1200", icon: "winchester1200" }, // hud_icon_winchester_1200
+		frag_grenade_mp: { name: "Frag grenade", icon: "grenade" },  // hud_us_grenade
+		smoke_grenade_mp: { name: "Smoke grenade", icon: "grenade" }
+		// flash_grenade_mp has an empty killIcon: a flashbang cannot kill
+	};
+
+	// Killfeed icons that belong to a way of dying rather than to a weapon.
+	var SPECIAL = {
+		headshot: { name: "headshot", icon: "headshot" },
+		knife: { name: "melee", icon: "knife" },
+		car: { name: "car explosion", icon: "car" },
+		falling: { name: "fall", icon: "falling" },
+		suicide: { name: "suicide", icon: "suicide" }
+	};
+
+	// Sample kills for the preview, enough for the highest line count. Each kill
+	// is scored by one team against the other, so both colours show up in both
+	// positions. A fall or a suicide has no attacker, as in the game.
 	var PREVIEW_ROWS = [
-		{ attacker: "alpha", victim: "bravo", team: 0 },
-		{ attacker: "charlie", victim: "delta", team: 1 },
-		{ attacker: "echo", victim: "foxtrot", team: 0 },
-		{ attacker: "golf", victim: "hotel", team: 1 }
+		{ attacker: "alpha", victim: "bravo", team: 0, weapon: "ak47_mp", headshot: true },
+		{ attacker: "charlie", victim: "delta", team: 1, weapon: "m4_mp" },
+		{ attacker: "echo", victim: "foxtrot", team: 0, weapon: "m40a3_mp" },
+		{ attacker: "golf", victim: "hotel", team: 1, weapon: "deserteagle_mp" },
+		{ attacker: "india", victim: "juliet", team: 0, kind: "knife" },
+		{ attacker: "kilo", victim: "lima", team: 1, weapon: "frag_grenade_mp" },
+		{ attacker: "mike", victim: "november", team: 0, kind: "car" },
+		{ victim: "oscar", team: 1, kind: "falling" },
+		{ victim: "papa", team: 0, kind: "suicide" },
+		{ attacker: "quebec", victim: "romeo", team: 1, weapon: "mp5_mp" }
 	];
+
+	// con_gameMsgWindow0 is the killfeed window. MsgTime is a float with no
+	// upper bound in the engine, capped here at 999. The defaults are the
+	// engine's own: 5 seconds, 4 lines.
+	// LineCount goes up to 10 here, but stock CoD4 registers it as an int from
+	// 1 to 9 (cl_console.cpp) and ignores anything outside that: Dvar_SetVariant
+	// prints "is not a valid value" and keeps the old value.
+	var OPTIONS = {
+		msgTime: { dvar: "con_gameMsgWindow0MsgTime", def: 5, min: 0, max: 999, integer: false,
+			label: "Display time", unit: "seconds" },
+		lineCount: { dvar: "con_gameMsgWindow0LineCount", def: 4, min: 1, max: 10, integer: true,
+			label: "Line count", unit: "lines" }
+	};
 
 	var HINT_RESET_MS = 3000;
 
@@ -35,10 +105,21 @@
 	var keyField = null;
 	var actionField = null;
 	var bindBox = null;
+	var cmdsBox = null;
 	var feedBox = null;
 	var hint = null;
 	var defaultHint = "";
 	var hintTimer = null;
+
+	// Visible box of each icon by key, filled once by measureIcons. Until it
+	// is, the preview stays hidden rather than showing icons that jump.
+	var iconBoxes = {};
+	var iconsReady = false;
+
+	// Last valid value of each option; a field holding something invalid never
+	// reaches the output or the preview.
+	var optionValues = { msgTime: OPTIONS.msgTime.def, lineCount: OPTIONS.lineCount.def };
+	var optionFields = { msgTime: null, lineCount: null };
 
 	function setHint(message, isError)
 	{
@@ -278,6 +359,95 @@
 		return "bind " + key + ' "' + parts.join("; ") + '"';
 	}
 
+	// The two killfeed window settings, as config lines of their own.
+	function buildCommands()
+	{
+		return [
+			"seta " + OPTIONS.msgTime.dvar + ' "' + formatChannel(optionValues.msgTime) + '"',
+			"seta " + OPTIONS.lineCount.dvar + ' "' + optionValues.lineCount + '"'
+		].join("\n");
+	}
+
+	/* ---------- killfeed options ---------- */
+
+	// A number in range, or null. Line count must be a whole number; the display
+	// time may carry decimals, since the dvar is a float.
+	function parseOption(key, raw)
+	{
+		var spec = OPTIONS[key];
+		var text = String(raw).trim();
+		if (text === "")
+		{
+			return null;
+		}
+
+		var value = Number(text);
+		if (!isFinite(value) || value < spec.min || value > spec.max)
+		{
+			return null;
+		}
+		if (spec.integer && Math.floor(value) !== value)
+		{
+			return null;
+		}
+
+		return value;
+	}
+
+	function onOptionInput(key)
+	{
+		var field = optionFields[key];
+		var value = parseOption(key, field.value);
+
+		if (value === null)
+		{
+			field.classList.add("is-invalid");
+			return;
+		}
+
+		field.classList.remove("is-invalid");
+		var changedLines = key === "lineCount" && value !== optionValues.lineCount;
+		optionValues[key] = value;
+
+		if (changedLines)
+		{
+			buildPreview();
+		}
+		renderOutput();
+	}
+
+	// Leaving an invalid value behind puts the last good one back and says why.
+	function onOptionBlur(key)
+	{
+		var field = optionFields[key];
+		if (!field.classList.contains("is-invalid"))
+		{
+			return;
+		}
+
+		var spec = OPTIONS[key];
+		field.classList.remove("is-invalid");
+		field.value = spec.integer ? String(optionValues[key]) : formatChannel(optionValues[key]);
+		setHint(spec.label + " takes " + (spec.integer ? "a whole number " : "a number ") +
+			"from " + spec.min + " to " + spec.max + " " + spec.unit + ". Kept " + field.value + ".", true);
+	}
+
+	function resetOptions()
+	{
+		for (var key in OPTIONS)
+		{
+			if (OPTIONS.hasOwnProperty(key))
+			{
+				optionValues[key] = OPTIONS[key].def;
+				if (optionFields[key] !== null)
+				{
+					optionFields[key].value = String(OPTIONS[key].def);
+					optionFields[key].classList.remove("is-invalid");
+				}
+			}
+		}
+	}
+
 	// textContent, never innerHTML: the bind key and action are free text.
 	function fill(box, text, placeholder)
 	{
@@ -296,6 +466,7 @@
 		var bind = buildBindLine(collectEntries());
 		fill(bindBox, bind === null ? "" : bind,
 			"Enter a bind key and action to generate this line.");
+		fill(cmdsBox, buildCommands(), "");
 		renderPreview();
 	}
 
@@ -307,38 +478,147 @@
 			", " + Math.round(rgba[2] * 255) + ", " + rgba[3] + ")";
 	}
 
-	// A rifle silhouette standing in for the weapon icon, which is a game asset.
-	function makeWeapon()
+	// The smallest rectangle holding every pixel with alpha above the
+	// threshold, in the image's own pixels. An image that cannot be read back
+	// keeps its full size, so it still shows, just with its margin.
+	function measureIcon(key, canvas)
 	{
-		var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		svg.setAttribute("class", "kf-weapon");
-		svg.setAttribute("viewBox", "0 0 48 16");
-		svg.setAttribute("aria-hidden", "true");
-		svg.setAttribute("focusable", "false");
+		var img = new Image();
+		img.src = ICONS[key];
 
-		var shapes = [
-			["rect", { x: 1, y: 6, width: 30, height: 2.5 }],
-			["rect", { x: 12, y: 4.5, width: 13, height: 5.5 }],
-			["polygon", { points: "17,10 22,10 21,15 16,15" }],
-			["polygon", { points: "25,4.5 34,4.5 38,11 33,11 25,10" }]
-		];
-
-		for (var i = 0; i < shapes.length; i++)
+		return img.decode().then(function ()
 		{
-			var node = document.createElementNS("http://www.w3.org/2000/svg", shapes[i][0]);
-			for (var key in shapes[i][1])
+			var width = img.naturalWidth;
+			var height = img.naturalHeight;
+			var box = { x: 0, y: 0, w: width, h: height, width: width, height: height, img: img };
+
+			var data;
+			try
 			{
-				if (shapes[i][1].hasOwnProperty(key))
+				canvas.width = width;
+				canvas.height = height;
+				var ctx = canvas.getContext("2d", { willReadFrequently: true });
+				ctx.drawImage(img, 0, 0);
+				data = ctx.getImageData(0, 0, width, height).data;
+			}
+			catch (err)
+			{
+				return box;
+			}
+
+			var left = width, top = height, right = -1, bottom = -1;
+			for (var y = 0; y < height; y++)
+			{
+				for (var x = 0; x < width; x++)
 				{
-					node.setAttribute(key, shapes[i][1][key]);
+					if (data[(y * width + x) * 4 + 3] > ALPHA_THRESHOLD)
+					{
+						if (x < left) { left = x; }
+						if (x > right) { right = x; }
+						if (y < top) { top = y; }
+						bottom = y;
+					}
 				}
 			}
-			svg.appendChild(node);
-		}
 
-		return svg;
+			if (right !== -1)
+			{
+				box.x = left;
+				box.y = top;
+				box.w = right - left + 1;
+				box.h = bottom - top + 1;
+			}
+			return box;
+		}, function ()
+		{
+			return null;
+		});
 	}
 
+	// Every icon once. They share one canvas, which is safe because each draws
+	// and reads back in a single step. The decoded image stays in the cache
+	// with its box, so the preview's copies of it are ready the moment they
+	// are added and never paint in late.
+	function measureIcons()
+	{
+		var canvas = document.createElement("canvas");
+		return Promise.all(Object.keys(ICONS).map(function (key)
+		{
+			return measureIcon(key, canvas).then(function (box)
+			{
+				iconBoxes[key] = box;
+			});
+		}));
+	}
+
+	function percent(fraction)
+	{
+		return (fraction * 100) + "%";
+	}
+
+	// A box as tall as the CSS says, in the shape of the icon's visible part,
+	// holding the whole image scaled and shifted so only that part shows. It
+	// is all in percent of the box, so the one height in the CSS decides the
+	// size of every icon.
+	function makeIcon(entry)
+	{
+		var clip = document.createElement("span");
+		clip.className = "kf-icon";
+		clip.setAttribute("role", "img");
+		clip.setAttribute("aria-label", entry.name);
+
+		var box = iconBoxes[entry.icon];
+		if (!box)
+		{
+			return clip;
+		}
+
+		clip.style.aspectRatio = box.w + " / " + box.h;
+
+		var img = document.createElement("img");
+		img.src = ICONS[entry.icon];
+		img.alt = "";
+		img.draggable = false;
+		img.style.width = percent(box.width / box.w);
+		img.style.height = percent(box.height / box.h);
+		img.style.left = percent(-box.x / box.w);
+		img.style.top = percent(-box.y / box.h);
+		clip.appendChild(img);
+		return clip;
+	}
+
+	function makeNick(name, role)
+	{
+		var span = document.createElement("span");
+		span.className = "kf-nick";
+		span.setAttribute("data-role", role);
+		span.textContent = name;
+		return span;
+	}
+
+	// Name - icon - name, as in the game. A headshot shows the headshot icon
+	// in place of the weapon, not next to it. A kill with no attacker (a fall,
+	// a suicide) is just the icon and the victim.
+	function makeLine(kill)
+	{
+		var line = document.createElement("div");
+		line.className = "kf-line";
+		line.setAttribute("data-team", String(kill.team));
+
+		if (kill.attacker)
+		{
+			line.appendChild(makeNick(kill.attacker, "attacker"));
+		}
+
+		var icon = kill.headshot ? SPECIAL.headshot
+			: (kill.weapon ? WEAPONS[kill.weapon] : SPECIAL[kill.kind]);
+		line.appendChild(makeIcon(icon));
+
+		line.appendChild(makeNick(kill.victim, kill.attacker ? "victim" : "self"));
+		return line;
+	}
+
+	// As many lines as con_gameMsgWindow0LineCount allows.
 	function buildPreview()
 	{
 		if (feedBox === null)
@@ -347,28 +627,19 @@
 		}
 
 		feedBox.innerHTML = "";
+		feedBox.classList.toggle("is-loading", !iconsReady);
 
-		for (var i = 0; i < PREVIEW_ROWS.length; i++)
+		var count = Math.min(optionValues.lineCount, PREVIEW_ROWS.length);
+		for (var i = 0; i < count; i++)
 		{
-			var line = document.createElement("div");
-			line.className = "kf-line";
-
-			var attacker = document.createElement("span");
-			attacker.className = "kf-nick";
-			attacker.textContent = PREVIEW_ROWS[i].attacker;
-
-			var victim = document.createElement("span");
-			victim.className = "kf-nick";
-			victim.textContent = PREVIEW_ROWS[i].victim;
-
-			line.appendChild(attacker);
-			line.appendChild(makeWeapon());
-			line.appendChild(victim);
-			feedBox.appendChild(line);
+			feedBox.appendChild(makeLine(PREVIEW_ROWS[i]));
 		}
+
+		renderPreview();
 	}
 
-	// Attacker and victim are on opposite teams, so each line shows both colours.
+	// The attacker takes their team's colour and the victim the other one; with
+	// no attacker, the victim keeps their own.
 	function renderPreview()
 	{
 		if (feedBox === null || rowsBox === null)
@@ -385,12 +656,15 @@
 		var colours = [cssColor(readRgba(rows[0])), cssColor(readRgba(rows[1]))];
 		var lines = feedBox.querySelectorAll(".kf-line");
 
-		for (var i = 0; i < lines.length && i < PREVIEW_ROWS.length; i++)
+		for (var i = 0; i < lines.length; i++)
 		{
-			var team = PREVIEW_ROWS[i].team;
+			var team = Number(lines[i].getAttribute("data-team"));
 			var nicks = lines[i].querySelectorAll(".kf-nick");
-			nicks[0].style.color = colours[team];
-			nicks[1].style.color = colours[team === 0 ? 1 : 0];
+			for (var n = 0; n < nicks.length; n++)
+			{
+				var role = nicks[n].getAttribute("data-role");
+				nicks[n].style.color = colours[role === "victim" ? 1 - team : team];
+			}
 		}
 	}
 
@@ -491,7 +765,7 @@
 
 		copyText(text).then(function ()
 		{
-			setHint(count === 1 ? "Bind line copied." : count + " " + label + " lines copied.");
+			setHint(label === "bind" ? "Bind line copied." : count + " " + label + " lines copied.");
 		}, function ()
 		{
 			setHint("Could not copy \u2014 select the text and copy manually.", true);
@@ -506,6 +780,7 @@
 		keyField = document.getElementById("kf-key");
 		actionField = document.getElementById("kf-action");
 		bindBox = document.getElementById("kf-output-bind");
+		cmdsBox = document.getElementById("kf-output-cmds");
 		feedBox = document.getElementById("kf-feed");
 		hint = document.getElementById("kf-hint");
 
@@ -519,11 +794,32 @@
 			defaultHint = hint.textContent;
 		}
 
+		optionFields.msgTime = document.getElementById("kf-msgtime");
+		optionFields.lineCount = document.getElementById("kf-lines");
+		resetOptions();
+
 		renderRows(DEFAULT_ROWS);
 		buildPreview();
 		renderOutput();
 
+		measureIcons().then(function ()
+		{
+			iconsReady = true;
+			buildPreview();
+		});
+
 		rowsBox.addEventListener("input", onRowInput);
+
+		["msgTime", "lineCount"].forEach(function (key)
+		{
+			var field = optionFields[key];
+			if (field === null)
+			{
+				return;
+			}
+			field.addEventListener("input", function () { onOptionInput(key); });
+			field.addEventListener("blur", function () { onOptionBlur(key); });
+		});
 
 		if (keyField !== null)
 		{
@@ -550,6 +846,8 @@
 			reset.addEventListener("click", function ()
 			{
 				renderRows(DEFAULT_ROWS);
+				resetOptions();
+				buildPreview();
 				renderOutput();
 				setHint("Reset to the default DVARs.");
 			});
@@ -564,6 +862,14 @@
 			});
 		}
 
+		var copyCmds = document.getElementById("kf-copy-cmds");
+		if (copyCmds !== null)
+		{
+			copyCmds.addEventListener("click", function ()
+			{
+				copyBox(cmdsBox, "console");
+			});
+		}
 	}
 
 	if (document.readyState === "loading")
