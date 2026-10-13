@@ -283,6 +283,7 @@
 		value.autocomplete = "off";
 		value.title = "Red, green, blue and alpha from 0 to 1";
 		value.setAttribute("aria-label", "Value: red green blue alpha");
+		window.Decimal.attachList(value);
 
 		var hex = document.createElement("input");
 		hex.type = "text";
@@ -381,8 +382,8 @@
 			return null;
 		}
 
-		var value = Number(text);
-		if (!isFinite(value) || value < spec.min || value > spec.max)
+		var value = window.Decimal.parse(text);
+		if (value === null || value < spec.min || value > spec.max)
 		{
 			return null;
 		}
@@ -443,6 +444,7 @@
 				{
 					optionFields[key].value = String(OPTIONS[key].def);
 					optionFields[key].classList.remove("is-invalid");
+					window.Decimal.sync(optionFields[key]);
 				}
 			}
 		}
@@ -817,6 +819,9 @@
 			{
 				return;
 			}
+			var spec = OPTIONS[key];
+			window.Decimal.attach(field, { min: spec.min, max: spec.max, step: 1, integer: spec.integer,
+				buttons: true, label: spec.label });
 			field.addEventListener("input", function () { onOptionInput(key); });
 			field.addEventListener("blur", function () { onOptionBlur(key); });
 		});

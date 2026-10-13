@@ -136,22 +136,24 @@
 		{ group: "Teams", dvar: "g_TeamColor_Allies", kind: "color", def: "0.847 0.992 0.576 1", label: "Allies ^8 / ^9" },
 		{ group: "Teams", dvar: "g_TeamColor_Axis", kind: "color", def: "0.561 0.655 0.843 1", label: "Axis ^8 / ^9" },
 
-		{ group: "Layout", dvar: "cg_scoreboardWidth", kind: "num", def: 400, min: 200, max: 640, step: 5, label: "Scoreboard Width" },
-		{ group: "Layout", dvar: "cg_scoreboardHeight", kind: "num", def: 485, min: 200, max: 600, step: 5, label: "Scoreboard Height" },
-		{ group: "Layout", dvar: "cg_scoreboardItemHeight", kind: "num", def: 15, min: 8, max: 40, step: 1, label: "Scoreboard Item Height" },
-		{ group: "Layout", dvar: "cg_scoreboardBannerHeight", kind: "num", def: 25, min: 10, max: 60, step: 1, label: "Scoreboard Banner Height" },
-		{ group: "Layout", dvar: "cg_scoreboardHeaderFontScale", kind: "num", def: 0.2, min: 0.1, max: 0.6, step: 0.01, label: "Scoreboard Header Font Scale" },
-		{ group: "Layout", dvar: "cg_scoreboardFont", kind: "num", def: 0, min: 0, max: 6, step: 1, label: "Scoreboard Font" },
-		{ group: "Layout", dvar: "cg_scoreboardScrollStep", kind: "num", def: 3, min: 1, max: 8, step: 1, label: "Scoreboard Scroll Step" },
-		{ group: "Layout", dvar: "cg_scoreboardTextOffset", kind: "num", def: 0.5, min: 0, max: 4, step: 0.1, label: "Scoreboard Text Offset" },
-		{ group: "Layout", dvar: "cg_scoreboardRankFontScale", kind: "num", def: 0.1, min: 0, max: 1, step: 0.05, label: "Scoreboard Rank Font Scale" },
+		// min, max and int are the limits iw3mp.exe 1.7 registers each dvar
+		// with (Infinity where the engine has none); step is what - and + add.
+		{ group: "Layout", dvar: "cg_scoreboardWidth", kind: "num", def: 400, min: 0, max: Infinity, step: 1, label: "Scoreboard Width" },
+		{ group: "Layout", dvar: "cg_scoreboardHeight", kind: "num", def: 485, min: 0, max: Infinity, step: 1, label: "Scoreboard Height" },
+		{ group: "Layout", dvar: "cg_scoreboardItemHeight", kind: "num", def: 15, min: 1, max: 1000, step: 1, int: true, label: "Scoreboard Item Height" },
+		{ group: "Layout", dvar: "cg_scoreboardBannerHeight", kind: "num", def: 25, min: 1, max: 100, step: 1, int: true, label: "Scoreboard Banner Height" },
+		{ group: "Layout", dvar: "cg_scoreboardHeaderFontScale", kind: "num", def: 0.2, min: 0, max: Infinity, step: 0.01, label: "Scoreboard Header Font Scale" },
+		{ group: "Layout", dvar: "cg_scoreboardFont", kind: "num", def: 0, min: 0, max: 6, step: 1, int: true, label: "Scoreboard Font" },
+		{ group: "Layout", dvar: "cg_scoreboardScrollStep", kind: "num", def: 3, min: 1, max: 8, step: 1, int: true, label: "Scoreboard Scroll Step" },
+		{ group: "Layout", dvar: "cg_scoreboardTextOffset", kind: "num", def: 0.5, min: 0, max: Infinity, step: 0.01, label: "Scoreboard Text Offset" },
+		{ group: "Layout", dvar: "cg_scoreboardRankFontScale", kind: "num", def: 0.1, min: 0, max: Infinity, step: 0.01, label: "Scoreboard Rank Font Scale" },
 
 		{ group: "Ping", dvar: "cg_scoreboardPingText", kind: "bool", def: 1, label: "Ping Text" },
 		{ group: "Ping", dvar: "cg_scoreboardPingGraph", kind: "bool", def: 0, label: "Ping Graph" },
-		{ group: "Ping", dvar: "cg_ScoresPing_MaxBars", kind: "num", def: 5, min: 1, max: 10, step: 1, label: "Ping MaxBars" },
-		{ group: "Ping", dvar: "cg_ScoresPing_Interval", kind: "num", def: 25, min: 1, max: 500, step: 1, label: "Ping Interval" },
-		{ group: "Ping", dvar: "cg_scoreboardPingHeight", kind: "num", def: 0.7, min: 0.1, max: 1, step: 0.01, label: "Ping Height" },
-		{ group: "Ping", dvar: "cg_scoreboardPingWidth", kind: "num", def: 0.036, min: 0.01, max: 0.2, step: 0.002, label: "Ping Width" },
+		{ group: "Ping", dvar: "cg_ScoresPing_MaxBars", kind: "num", def: 5, min: 1, max: 10, step: 1, int: true, label: "Ping MaxBars" },
+		{ group: "Ping", dvar: "cg_ScoresPing_Interval", kind: "num", def: 25, min: 1, max: 500, step: 1, int: true, label: "Ping Interval" },
+		{ group: "Ping", dvar: "cg_scoreboardPingHeight", kind: "num", def: 0.7, min: 0, max: 1, step: 0.01, label: "Ping Height" },
+		{ group: "Ping", dvar: "cg_scoreboardPingWidth", kind: "num", def: 0.036, min: 0, max: 1, step: 0.001, label: "Ping Width" },
 		{ group: "Ping", dvar: "cg_ScoresPing_HighColor", kind: "color", def: "0.8 0 0 1", label: "Ping HighColor" },
 		{ group: "Ping", dvar: "cg_ScoresPing_MedColor", kind: "color", def: "0.8 0.8 0 1", label: "Ping MedColor" },
 		{ group: "Ping", dvar: "cg_ScoresPing_LowColor", kind: "color", def: "0 0.75 0 1", label: "Ping LowColor" },
@@ -796,6 +798,7 @@
 			text.id = id + "-value";
 			text.spellcheck = false; text.autocomplete = "off";
 			text.setAttribute("aria-label", f.dvar + " value");
+			window.Decimal.attachList(text);
 
 			picker.addEventListener("input", function ()
 			{
@@ -827,12 +830,41 @@
 		else
 		{
 			var input = el("input");
-			input.type = f.kind === "num" ? "number" : "text";
+			input.type = "text";
 			input.className = "sb-value"; input.id = id;
 			input.value = current;
-			if (f.kind === "num") { input.min = f.min; input.max = f.max; input.step = f.step; }
 			input.spellcheck = false; input.autocomplete = "off";
-			input.addEventListener("input", function () { state[f.dvar] = input.value; update(); });
+			if (f.kind === "num")
+			{
+				// A text field with a decimal point in every language (decimal.js);
+				// anything that is not a number keeps the last good value.
+				input.setAttribute("aria-label", f.label);
+				var stepper = window.Decimal.attach(input, { min: f.min, max: f.max, step: f.step,
+					integer: f.int === true, buttons: true, label: f.label });
+				// A number outside the dvar's limits counts as the nearest one,
+				// an int dvar takes whole numbers; the field shows that once you
+				// leave it.
+				input.addEventListener("input", function ()
+				{
+					var value = window.Decimal.parse(input.value);
+					input.classList.toggle("is-invalid", value === null);
+					if (value === null) { return; }
+					if (f.int) { value = Math.round(value); }
+					state[f.dvar] = Math.min(f.max, Math.max(f.min, value));
+					update();
+				});
+				input.addEventListener("blur", function ()
+				{
+					input.classList.remove("is-invalid");
+					input.value = fmt(state[f.dvar]);
+				});
+				row.appendChild(stepper);
+				return row;
+			}
+			else
+			{
+				input.addEventListener("input", function () { state[f.dvar] = input.value; update(); });
+			}
 			row.appendChild(input);
 		}
 

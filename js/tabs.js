@@ -145,12 +145,17 @@
 				return;
 			}
 
+			// The arrows follow the way the bar runs (see tablayout.js).
+			var vertical = list.getAttribute("aria-orientation") === "vertical";
+			var nextKey = vertical ? "ArrowDown" : "ArrowRight";
+			var prevKey = vertical ? "ArrowUp" : "ArrowLeft";
+
 			var next = -1;
-			if (event.key === "ArrowRight")
+			if (event.key === nextKey)
 			{
 				next = (index + 1) % tabs.length;
 			}
-			else if (event.key === "ArrowLeft")
+			else if (event.key === prevKey)
 			{
 				next = (index - 1 + tabs.length) % tabs.length;
 			}

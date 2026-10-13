@@ -32,6 +32,12 @@
 	/* the page width, shared by the content and the footer rule above it */
 	--page-width: 1180px;
 
+	/* With the tabs in a column the page grows by that column, so the panels
+	   keep the width they have under a row of tabs. */
+	--sidebar-width: 200px;
+	--sidebar-gap: 36px;
+	--layout-width: calc(var(--page-width) + var(--sidebar-width) + var(--sidebar-gap));
+
 	--radius: 10px;
 	--radius-sm: 6px;
 
@@ -138,7 +144,7 @@ a:hover
 .wrap
 {
 	width: 100%;
-	max-width: var(--page-width);
+	max-width: var(--layout-width);
 	margin: 0 auto;
 	padding: 56px 20px 40px;
 }
@@ -168,6 +174,52 @@ a:hover
 	font-size: 22px;
 	font-weight: 600;
 	letter-spacing: -0.01em;
+}
+
+/* The two buttons that turn the tab bar between a column and a row. */
+.tab-layout
+{
+	display: inline-flex;
+	gap: 2px;
+	margin-left: auto;
+	padding: 2px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+}
+
+.tab-layout-btn
+{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: none;
+	color: var(--muted);
+	cursor: pointer;
+	transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.tab-layout-btn svg
+{
+	display: block;
+	fill: currentColor;
+}
+
+.tab-layout-btn:hover
+{
+	color: var(--text);
+}
+
+.tab-layout-btn[aria-pressed="true"]
+{
+	background-color: var(--field);
+	color: var(--text);
+	box-shadow: inset 0 0 0 1px var(--border);
 }
 
 .lede
@@ -214,6 +266,91 @@ a:hover
 {
 	color: var(--text);
 	border-bottom-color: var(--accent);
+}
+
+/* Tabs top to bottom, the default: a column to the left of the panels, with
+   the active tab marked on the column's edge the way the row marks it on its
+   bottom line. A row of tabs is the rules above, kept for data-tabs=horizontal. */
+:root[data-tabs="horizontal"]
+{
+	--layout-width: var(--page-width);
+}
+
+:root:not([data-tabs="horizontal"]) .tabs
+{
+	flex-direction: column;
+	flex-wrap: nowrap;
+	gap: 2px;
+}
+
+:root:not([data-tabs="horizontal"]) .tab
+{
+	bottom: auto;
+	padding: 8px 14px 8px 0;
+	border-bottom: 0;
+	text-align: left;
+}
+
+@media (min-width: 721px)
+{
+	:root:not([data-tabs="horizontal"]) .wrap
+	{
+		display: grid;
+		grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+		column-gap: var(--sidebar-gap);
+		align-items: start;
+	}
+
+	:root:not([data-tabs="horizontal"]) .header
+	{
+		grid-column: 1 / -1;
+	}
+
+	/* sticky, so the tabs stay in reach on a long panel */
+	:root:not([data-tabs="horizontal"]) .tabs
+	{
+		position: sticky;
+		top: 20px;
+		grid-column: 1;
+		grid-row: 2;
+		margin-bottom: 0;
+		border-bottom: 0;
+		border-right: 1px solid var(--border);
+	}
+
+	:root:not([data-tabs="horizontal"]) .tab
+	{
+		right: -1px;
+		border-right: 2px solid transparent;
+	}
+
+	:root:not([data-tabs="horizontal"]) .tab.is-active
+	{
+		border-right-color: var(--accent);
+	}
+
+	:root:not([data-tabs="horizontal"]) .panel
+	{
+		grid-column: 2;
+		grid-row: 2;
+		min-width: 0;
+	}
+}
+
+/* On a phone there is no room beside the panels, so the column stands above
+   them, still top to bottom. */
+@media (max-width: 720px)
+{
+	:root:not([data-tabs="horizontal"]) .tab
+	{
+		padding-left: 12px;
+		border-left: 2px solid transparent;
+	}
+
+	:root:not([data-tabs="horizontal"]) .tab.is-active
+	{
+		border-left-color: var(--accent);
+	}
 }
 
 .panel:focus
@@ -337,7 +474,8 @@ a:hover
 }
 
 .kf-value.is-invalid,
-.kf-hex.is-invalid
+.kf-hex.is-invalid,
+.sb-value.is-invalid
 {
 	border-color: var(--red);
 	color: var(--red);
@@ -488,6 +626,320 @@ a:hover
 {
 	flex: 1 1 100%;
 	margin: 0;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+/* ---------- number field with - and + (decimal.js) ---------- */
+
+/* The buttons take the field's height, whatever the tab's field is. */
+.num-stepper
+{
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: stretch;
+	gap: 4px;
+}
+
+.num-step
+{
+	flex: 0 0 28px;
+	width: 28px;
+	padding: 0;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	color: var(--text);
+	font-family: var(--sans);
+	font-size: 15px;
+	line-height: 1;
+	cursor: pointer;
+	user-select: none;
+	touch-action: manipulation;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.num-step:hover:not(:disabled)
+{
+	border-color: var(--border-strong);
+	background-color: var(--surface);
+}
+
+.num-step:disabled
+{
+	opacity: 0.4;
+	cursor: default;
+}
+
+/* Scoreboard fields all end on one line; a number field gives up the room
+   its two buttons need. */
+.num-stepper .sb-value
+{
+	width: calc(27ch + 18px - 64px);
+}
+
+/* ---------- minimap generator ---------- */
+
+/* The info tooltips may reach past the card's edge, so it does not clip. */
+.mm-card
+{
+	overflow: visible;
+}
+
+/* Label plus info icon, as wide as the killfeed labels but with room for the
+   longer names here. */
+.mm-opt-head
+{
+	display: inline-flex;
+	flex: 0 0 170px;
+	align-items: center;
+	gap: 6px;
+}
+
+.mm-opt-head .kf-opt-label
+{
+	flex: 0 1 auto;
+}
+
+/* The allowed range, right beside the field. */
+.mm-range-hint
+{
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.mm-badges
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.mm-badge
+{
+	padding: 1px 8px;
+	border: 1px solid currentColor;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.mm-badge.is-cheat
+{
+	color: var(--red);
+	background-color: var(--red-tint);
+}
+
+/* Info icon; its text shows on hover and on keyboard focus or a tap. */
+.mm-tip
+{
+	position: relative;
+	display: inline-flex;
+	flex: 0 0 auto;
+	cursor: help;
+}
+
+.mm-tip:focus
+{
+	outline: 0;
+}
+
+.mm-tip-icon
+{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--border-strong);
+	border-radius: 50%;
+	color: var(--muted);
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 11px;
+	font-style: italic;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.mm-tip:hover .mm-tip-icon,
+.mm-tip:focus-visible .mm-tip-icon
+{
+	border-color: var(--text);
+	color: var(--text);
+}
+
+.mm-tip-text
+{
+	position: absolute;
+	left: -6px;
+	top: calc(100% + 8px);
+	z-index: 10;
+	display: none;
+	width: max-content;
+	max-width: min(280px, calc(100vw - 190px));
+	padding: 8px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+	color: var(--text);
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.45;
+	white-space: normal;
+	pointer-events: none;
+}
+
+/* display, not visibility: a hidden bubble must not widen the page. */
+.mm-tip:hover .mm-tip-text,
+.mm-tip:focus .mm-tip-text
+{
+	display: block;
+}
+
+.mm-select
+{
+	height: 30px;
+	max-width: 100%;
+	padding: 0 6px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	color: inherit;
+	font-family: inherit;
+	font-size: 13px;
+}
+
+.mm-advanced
+{
+	border-bottom: 1px solid var(--border);
+}
+
+.mm-advanced-head
+{
+	padding: 10px 12px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.mm-advanced-head:focus-visible
+{
+	outline: 2px solid var(--focus);
+	outline-offset: -2px;
+}
+
+.mm-advanced[open] > .mm-advanced-head
+{
+	border-bottom: 1px solid var(--border);
+}
+
+.mm-advanced .kf-opt:last-child
+{
+	border-bottom: 0;
+}
+
+/* Map, position and facing: what the preview shows, not part of the config. */
+.mm-scene
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 20px;
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--border);
+}
+
+.mm-field
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.mm-field-label
+{
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.mm-field-facing
+{
+	flex: 1 1 260px;
+}
+
+.mm-range
+{
+	flex: 1 1 auto;
+	min-width: 80px;
+	accent-color: var(--accent);
+}
+
+.mm-facing-out
+{
+	flex: 0 0 auto;
+	min-width: 64px;
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* The canvas is the top-left corner of the screen. It gets the same out of
+   focus backdrop as the killfeed preview: the minimap is see-through in game,
+   so it is shown over something like a game, in both themes. */
+.mm-stage
+{
+	position: relative;
+	padding: 16px;
+	background-color: var(--field);
+}
+
+.mm-canvas
+{
+	display: block;
+	width: 100%;
+	max-width: 720px;
+	margin: 0 auto;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	background-color: #55564a;
+	background-image:
+		radial-gradient(115% 85% at 22% 28%, rgba(151, 148, 126, 0.55) 0%, rgba(151, 148, 126, 0) 58%),
+		radial-gradient(85% 70% at 68% 58%, rgba(88, 88, 74, 0.55) 0%, rgba(88, 88, 74, 0) 62%),
+		radial-gradient(70% 60% at 92% 18%, rgba(120, 116, 96, 0.35) 0%, rgba(120, 116, 96, 0) 70%),
+		radial-gradient(140% 130% at 45% 45%, rgba(20, 20, 14, 0) 42%, rgba(20, 20, 14, 0.5) 100%);
+}
+
+.mm-status
+{
+	position: absolute;
+	right: 28px;
+	bottom: 26px;
+	margin: 0;
+	padding: 4px 10px;
+	border-radius: var(--radius-sm);
+	background-color: rgba(0, 0, 0, 0.55);
+	color: #ececea;
+	font-size: 12px;
+}
+
+.mm-status[hidden]
+{
+	display: none;
+}
+
+.mm-note
+{
+	margin: 0;
+	padding: 10px 16px;
+	border-top: 1px solid var(--border);
 	color: var(--muted);
 	font-size: 12px;
 	line-height: 1.5;
@@ -1378,7 +1830,7 @@ pre
 {
 	margin-top: auto;
 	padding: 0 20px 28px;
-	max-width: var(--page-width);
+	max-width: var(--layout-width);
 	width: 100%;
 	margin-left: auto;
 	margin-right: auto;

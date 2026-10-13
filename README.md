@@ -8,6 +8,11 @@ Live at <https://tipsyspit.github.io>.
 
 ## Tabs
 
+The tabs run top to bottom in a column beside the page by default; the two
+buttons at the top right switch them to a row, left to right. The choice is
+remembered in your browser. Every tab can be linked to directly, e.g.
+`#minimap-generator`.
+
 ### config checker
 
 Paste a config or load a `.cfg` file, and it flags the lines that leagues and
@@ -71,6 +76,20 @@ Build your scoreboard and see it before you go in-game.
   for the values the mod resets on every team change, the `seta` lines for the
   board and the ping graph, and the `seta` lines for the team names and colours.
 
+### minimap generator
+
+Size the minimap and its icons and see the result on a real map.
+
+- Every compass dvar a player may set and that changes the multiplayer minimap:
+  `compassSize`, the player, teammate and objective icon sizes, map rotation,
+  and under **Advanced** the opacity and range of far icons, the tickertape
+  width and the fade time. Defaults and limits are the engine's.
+- The preview draws the compass the way the game does: the game's own frame,
+  tickertape, icons and minimap textures, each map's corners, north and compass
+  range, S&D spawns and bomb sites. Pick a map, a position and the way you
+  face.
+- The output is one `seta` line per dvar, with a copy button.
+
 ### demos
 
 A link to the [CoD4 demo viewer](https://tipsyspit.github.io/cod4-demo/), a separate
@@ -90,9 +109,14 @@ config line and the console command, with a copy button on each.
 index.html      the page
 css/style.css   styling, light and dark
 js/             one file per tab, plus the tab switching
+js/tablayout.js the tab bar's column or row, applied before the page is drawn
 assets/         the scoreboard backdrop, and killfeed-icons.js: the killfeed
                 icons as data URLs, so they can be measured from disk too
-tools/          embed-icons.pl rebuilds killfeed-icons.js from a folder of PNGs
+assets/minimap/ minimap data: maps.js and icons.js, and one script per map
+                with its texture, loaded when that map is picked
+tools/          embed-icons.pl rebuilds killfeed-icons.js from a folder of PNGs;
+                build-minimap.py rebuilds assets/minimap/ from a CoD4 install
+                and cod4-ff (needs Pillow)
 ```
 
 ## Credits

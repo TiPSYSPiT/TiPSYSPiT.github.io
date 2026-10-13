@@ -7,14 +7,19 @@
 	<meta name="color-scheme" content="light dark">
 	<title>CoD4 Tools</title>
 	<link href="css/style.css" rel="stylesheet">
+	<script src="js/tablayout.js"></script>
 	<script src="js/tabs.js" defer></script>
 	<script src="js/checkcfg.js" defer></script>
+	<script src="js/decimal.js" defer></script>
 	<script src="assets/killfeed-icons.js" defer></script>
 	<script src="js/killfeed.js" defer></script>
 	<script src="js/rcon.js" defer></script>
 	<script src="js/serverconfig.js" defer></script>
 	<script src="js/dvars.js" defer></script>
 	<script src="js/scoreboard.js" defer></script>
+	<script src="assets/minimap/icons.js" defer></script>
+	<script src="assets/minimap/maps.js" defer></script>
+	<script src="js/minimap.js" defer></script>
 	<script src="js/faq.js" defer></script>
 </head>
 
@@ -30,9 +35,32 @@
 					   M858 650 L858 830 L690 830 Z" />
 			</svg>
 			<h1>CoD4 Tools</h1>
+
+			<div class="tab-layout" role="group" aria-label="Tab layout">
+				<button class="tab-layout-btn" type="button" data-tab-layout="vertical" aria-pressed="true"
+					title="Tabs top to bottom">
+					<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+						<rect x="1.5" y="2" width="4" height="2.4" rx="0.6" />
+						<rect x="1.5" y="6.8" width="4" height="2.4" rx="0.6" />
+						<rect x="1.5" y="11.6" width="4" height="2.4" rx="0.6" />
+						<rect x="7.5" y="2" width="7" height="12" rx="1" opacity="0.35" />
+					</svg>
+					<span class="visually-hidden">Tabs top to bottom</span>
+				</button>
+				<button class="tab-layout-btn" type="button" data-tab-layout="horizontal" aria-pressed="false"
+					title="Tabs left to right">
+					<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+						<rect x="1.5" y="1.5" width="3.6" height="2.6" rx="0.6" />
+						<rect x="6.2" y="1.5" width="3.6" height="2.6" rx="0.6" />
+						<rect x="10.9" y="1.5" width="3.6" height="2.6" rx="0.6" />
+						<rect x="1.5" y="6" width="13" height="8.5" rx="1" opacity="0.35" />
+					</svg>
+					<span class="visually-hidden">Tabs left to right</span>
+				</button>
+			</div>
 		</header>
 
-		<div class="tabs" role="tablist" aria-label="Tools">
+		<div class="tabs" role="tablist" aria-label="Tools" aria-orientation="vertical">
 			<button class="tab is-active" type="button" role="tab" id="tab-checker" aria-controls="panel-checker"
 				aria-selected="true">config checker</button>
 			<button class="tab" type="button" role="tab" id="tab-rcon" aria-controls="panel-rcon"
@@ -45,6 +73,8 @@
 				aria-selected="false" tabindex="-1">killfeed colors</button>
 			<button class="tab" type="button" role="tab" id="tab-sb" aria-controls="panel-sb"
 				aria-selected="false" tabindex="-1">scoreboard generator</button>
+			<button class="tab" type="button" role="tab" id="tab-mm" aria-controls="panel-mm"
+				aria-selected="false" tabindex="-1">minimap generator</button>
 			<button class="tab" type="button" role="tab" id="tab-demos" aria-controls="panel-demos"
 				aria-selected="false" tabindex="-1">demos</button>
 			<button class="tab" type="button" role="tab" id="tab-faq" aria-controls="panel-faq"
@@ -137,8 +167,8 @@
 
 				<div class="kf-opt">
 					<label class="kf-opt-label" for="kf-msgtime" title="con_gameMsgWindow0MsgTime">Display time</label>
-					<input class="kf-value kf-num" type="number" id="kf-msgtime" value="5" min="0" max="999"
-						step="any" inputmode="decimal" autocomplete="off" title="Seconds, 0 to 999"
+					<input class="kf-value kf-num" type="text" id="kf-msgtime" value="5" inputmode="decimal"
+						autocomplete="off" spellcheck="false" title="Seconds, 0 to 999"
 						aria-describedby="kf-msgtime-desc">
 					<p class="kf-opt-desc" id="kf-msgtime-desc">Sets the time (in seconds) that kill notifications
 						remain in the killfeed window.</p>
@@ -146,8 +176,8 @@
 
 				<div class="kf-opt">
 					<label class="kf-opt-label" for="kf-lines" title="con_gameMsgWindow0LineCount">Line count</label>
-					<input class="kf-value kf-num" type="number" id="kf-lines" value="4" min="1" max="10"
-						step="1" inputmode="numeric" autocomplete="off" title="Whole number, 1 to 10"
+					<input class="kf-value kf-num" type="text" id="kf-lines" value="4" inputmode="numeric"
+						autocomplete="off" spellcheck="false" title="Whole number, 1 to 10"
 						aria-describedby="kf-lines-desc">
 					<p class="kf-opt-desc" id="kf-lines-desc">Adjusts the maximum number of simultaneous kill lines
 						shown in the feed at once.</p>
@@ -231,6 +261,79 @@
 					<button class="btn btn-sm" type="button" id="sb-copy-teams">Copy</button>
 				</div>
 				<pre class="kf-output" id="sb-out-teams"></pre>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-mm" role="tabpanel" aria-labelledby="tab-mm" tabindex="0" hidden>
+			<p class="lede">Size the minimap and its icons, see the result on a real map, and copy the lines
+				into your config. The preview draws the compass the way the game does, from the game's own
+				images, map corners and compass range.</p>
+
+			<div class="card mm-card">
+				<div id="mm-options"></div>
+
+				<details class="mm-advanced">
+					<summary class="mm-advanced-head">Advanced</summary>
+					<div id="mm-options-advanced"></div>
+				</details>
+
+				<div class="actions">
+					<div class="tools">
+						<button class="btn" type="button" id="mm-reset">Reset</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Minimap preview</span>
+				</div>
+
+				<div class="mm-scene">
+					<label class="mm-field">
+						<span class="mm-field-label">Map</span>
+						<select class="mm-select" id="mm-map"></select>
+					</label>
+					<label class="mm-field">
+						<span class="mm-field-label">Position</span>
+						<select class="mm-select" id="mm-pos">
+							<option value="attackers">Attacker spawn</option>
+							<option value="defenders">Defender spawn</option>
+							<option value="a">Bombsite A</option>
+							<option value="b">Bombsite B</option>
+						</select>
+					</label>
+					<label class="mm-field mm-field-facing">
+						<span class="mm-field-label">Facing</span>
+						<input class="mm-range" type="range" id="mm-facing" min="0" max="359" step="1" value="0">
+						<output class="mm-facing-out" id="mm-facing-out" for="mm-facing">0&deg; N</output>
+					</label>
+				</div>
+
+				<div class="mm-stage" id="mm-stage">
+					<canvas class="mm-canvas" id="mm-canvas" role="img" aria-label="Minimap preview"></canvas>
+					<p class="mm-status" id="mm-status" hidden></p>
+				</div>
+
+				<p class="mm-note" id="mm-note"></p>
+			</div>
+
+			<p class="hint" id="mm-hint" role="status"></p>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Console commands</span>
+					<button class="btn btn-sm" type="button" id="mm-copy">Copy</button>
+				</div>
+				<pre class="kf-output" id="mm-output"></pre>
+			</div>
+
+			<div class="kf-out" id="mm-out-cheat" hidden>
+				<div class="kf-out-head">
+					<span class="kf-out-title">Cheat protected &mdash; only with sv_cheats 1</span>
+					<button class="btn btn-sm" type="button" id="mm-copy-cheat">Copy</button>
+				</div>
+				<pre class="kf-output" id="mm-output-cheat"></pre>
 			</div>
 		</section>
 
