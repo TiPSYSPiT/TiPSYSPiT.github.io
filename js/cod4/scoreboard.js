@@ -14,7 +14,10 @@
 {
 	"use strict";
 
-	var HINT_RESET_MS = 3000;
+	var el = window.UI.el;
+	var copyText = window.UI.copyText;
+	var setHint = function () {};
+
 
 	// cg_scoreboard_mp.cpp: columnInfo / columnInfoWithPing
 	var COLUMNS_PLAIN = [
@@ -168,27 +171,21 @@
 	var controlsBox = null, screenBox = null, previewBox = null, hint = null;
 	var outBind = null, outBoard = null, outTeams = null;
 	var ladderBox = null, presetsBox = null, previewWatcher = null;
-	var defaultHint = "", hintTimer = null;
 
 	/* ---------- helpers ---------- */
-
-	function setHint(message, isError)
-	{
-		if (hint === null) { return; }
-		window.clearTimeout(hintTimer);
-		hint.textContent = message;
-		hint.classList.toggle("is-error", isError === true);
-		hintTimer = window.setTimeout(function ()
-		{
-			hint.textContent = defaultHint;
-			hint.classList.remove("is-error");
-		}, HINT_RESET_MS);
-	}
 
 	function fmt(n)
 	{
 		var s = Number(n).toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
 		return s === "" || s === "-0" ? "0" : s;
+	}
+
+	// "r g b" or "r g b a": numbers, separated by spaces or commas.
+	function isRgba(raw)
+	{
+		var parts = String(raw).trim().split(/[\s,]+/);
+		return (parts.length === 3 || parts.length === 4) &&
+			parts.every(function (p) { return window.Decimal.parse(p) !== null; });
 	}
 
 	function parseRgba(raw)
@@ -256,14 +253,6 @@
 		}
 		if (buffer !== "") { out.push({ text: buffer, color: current }); }
 		return out;
-	}
-
-	function el(tag, className, text)
-	{
-		var node = document.createElement(tag);
-		if (className) { node.className = className; }
-		if (text !== undefined) { node.textContent = text; }
-		return node;
 	}
 
 	/* ---------- preview ---------- */
@@ -636,28 +625,6 @@
 		outTeams.textContent = sortLines(teams).join("\n");
 	}
 
-	function copyText(text)
-	{
-		if (navigator.clipboard && navigator.clipboard.writeText)
-		{
-			return navigator.clipboard.writeText(text);
-		}
-		return new Promise(function (resolve, reject)
-		{
-			var helper = document.createElement("textarea");
-			helper.value = text;
-			helper.setAttribute("readonly", "");
-			helper.style.position = "fixed";
-			helper.style.top = "-1000px";
-			document.body.appendChild(helper);
-			helper.select();
-			var ok = false;
-			try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
-			document.body.removeChild(helper);
-			if (ok) { resolve(); } else { reject(new Error("copy rejected")); }
-		});
-	}
-
 	/* ---------- controls ---------- */
 
 	function update()
@@ -807,11 +774,22 @@
 				text.value = state[f.dvar];
 				update();
 			});
+			// Three or four numbers; anything else keeps the last good colour
+			// instead of turning it white.
 			text.addEventListener("input", function ()
 			{
+				var ok = isRgba(text.value);
+				text.classList.toggle("is-invalid", !ok);
+				if (!ok) { return; }
 				state[f.dvar] = text.value;
 				picker.value = toHex(parseRgba(text.value));
 				update();
+			});
+			text.addEventListener("blur", function ()
+			{
+				if (!text.classList.contains("is-invalid")) { return; }
+				text.classList.remove("is-invalid");
+				text.value = state[f.dvar];
 			});
 
 			wrap.appendChild(picker); wrap.appendChild(text);
@@ -863,7 +841,26 @@
 			}
 			else
 			{
-				input.addEventListener("input", function () { state[f.dvar] = input.value; update(); });
+				// A team name goes into a seta value and into the bind line: a
+				// quote would end the value early and a semicolon would start a
+				// new command, so a name with either keeps the last good one.
+				input.addEventListener("input", function ()
+				{
+					var bad = /[";]/.test(input.value);
+					input.classList.toggle("is-invalid", bad);
+					if (bad)
+					{
+						setHint(f.label + " cannot contain quotes or semicolons.", true);
+						return;
+					}
+					state[f.dvar] = input.value;
+					update();
+				});
+				input.addEventListener("blur", function ()
+				{
+					input.classList.remove("is-invalid");
+					input.value = state[f.dvar];
+				});
 			}
 			row.appendChild(input);
 		}
@@ -913,9 +910,9 @@
 		outBoard = document.getElementById("sb-out-board");
 		outTeams = document.getElementById("sb-out-teams");
 		hint = document.getElementById("sb-hint");
+		setHint = window.UI.hint(hint);
 
 		if (controlsBox === null || screenBox === null || outBind === null) { return; }
-		if (hint !== null) { defaultHint = hint.textContent; }
 
 		resetState();
 		buildControls();

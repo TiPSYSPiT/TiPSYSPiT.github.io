@@ -11,8 +11,11 @@
 {
 	"use strict";
 
+	var el = window.UI.el;
+	var copyText = window.UI.copyText;
+	var setHint = function () {};
+
 	var COPIED_RESET_MS = 1200;
-	var HINT_RESET_MS = 3000;
 
 	var SECTIONS = [
 		{
@@ -247,54 +250,8 @@
 	];
 
 	var list = null, hint = null;
-	var defaultHint = "", hintTimer = null;
 
 	/* ---------- helpers ---------- */
-
-	function el(tag, className, text)
-	{
-		var node = document.createElement(tag);
-		if (className) { node.className = className; }
-		if (text !== undefined) { node.textContent = text; }
-		return node;
-	}
-
-	function setHint(message, isError)
-	{
-		if (hint === null) { return; }
-		window.clearTimeout(hintTimer);
-		hint.textContent = message;
-		hint.classList.toggle("is-error", isError === true);
-		hintTimer = window.setTimeout(function ()
-		{
-			hint.textContent = defaultHint;
-			hint.classList.remove("is-error");
-		}, HINT_RESET_MS);
-	}
-
-	function copyText(text)
-	{
-		if (navigator.clipboard && navigator.clipboard.writeText)
-		{
-			return navigator.clipboard.writeText(text);
-		}
-
-		return new Promise(function (resolve, reject)
-		{
-			var helper = document.createElement("textarea");
-			helper.value = text;
-			helper.setAttribute("readonly", "");
-			helper.style.position = "fixed";
-			helper.style.opacity = "0";
-			document.body.appendChild(helper);
-			helper.select();
-
-			var ok = false;
-			try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
-			document.body.removeChild(helper);
-			if (ok) { resolve(); } else { reject(new Error("copy rejected")); }
-		});
-	}
 
 	/* ---------- rendering ---------- */
 
@@ -362,9 +319,9 @@
 	{
 		list = document.getElementById("sc-list");
 		hint = document.getElementById("sc-hint");
+		setHint = window.UI.hint(hint);
 
 		if (list === null) { return; }
-		if (hint !== null) { defaultHint = hint.textContent; }
 
 		for (var i = 0; i < SECTIONS.length; i++)
 		{

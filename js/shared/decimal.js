@@ -261,7 +261,6 @@
 
 	window.Decimal = {
 		parse: parse,
-		normalizeList: normalizeList,
 		attach: attach,
 		attachList: attachList,
 		sync: sync

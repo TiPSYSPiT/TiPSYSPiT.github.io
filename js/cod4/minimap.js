@@ -10,14 +10,17 @@
  * screen units, so the sizes compare one to one with what the dvars say.
  *
  * Images and map data come from tools/build-minimap.py:
- *   assets/minimap/icons.js   window.MINIMAP_ICONS (frame, tickertape, icons)
- *   assets/minimap/maps.js    window.MINIMAP_MAPS  (corners, north, range, spawns)
- *   assets/minimap/<map>.js   window.MINIMAP_IMAGES[<map>], loaded on demand
+ *   js/cod4/minimap/icons.js  window.MINIMAP_ICONS (frame, tickertape, icons)
+ *   js/cod4/minimap/maps.js   window.MINIMAP_MAPS  (corners, north, range, spawns)
+ *   js/cod4/minimap/<map>.js  window.MINIMAP_IMAGES[<map>], loaded on demand
  * All are plain scripts holding data URLs, so the preview works from disk too.
  */
 (function ()
 {
 	"use strict";
+
+	var copyText = window.UI.copyText;
+	var setHint = function () {};
 
 	var ICONS = window.MINIMAP_ICONS || {};
 	var MAPS = window.MINIMAP_MAPS || [];
@@ -33,10 +36,8 @@
 	// Width and height of an icon always get the same value: Promod refuses
 	// to play with the two different.
 	//
-	// cheat: the flags iw3mp.exe 1.7 registers each dvar with (read from the
-	// executable; the patched 1.8 executable registers them the same way).
-	//   false   archive only, any player can set it
-	//   true    cheat protected (0x80): needs sv_cheats 1
+	// Whether a dvar is cheat protected (registered with 0x80, needs sv_cheats
+	// 1) comes from the dvars tab's data, window.COD4_DVARS: see cheatFlags().
 	//
 	// Left out on purpose: compassObjectiveArrow*, compassMinRadius,
 	// compassMinRange and compassObjectiveDrawLines are registered in
@@ -46,37 +47,35 @@
 
 	var OPTIONS = [
 		{ key: "size", dvars: ["compassSize"], def: 1, min: 0.01, max: Infinity, step: 0.01, label: "Size",
-			cheat: false,
 			desc: "Scales the whole compass: the map, its frame and every icon on it." },
 		{ key: "player", dvars: ["compassPlayerWidth", "compassPlayerHeight"], def: 18.75, min: 0, max: Infinity,
-			step: 0.01, label: "Player icon size", cheat: false, info: PROMOD_EQUAL,
+			step: 0.01, label: "Player icon size", info: PROMOD_EQUAL,
 			desc: "Size of your own arrow in the middle of the compass, used for its width and height." },
 		{ key: "friendly", dvars: ["compassFriendlyWidth", "compassFriendlyHeight"], def: 18.75, min: 0, max: Infinity,
-			step: 0.01, label: "Teammate icon size", cheat: false, info: PROMOD_EQUAL,
+			step: 0.01, label: "Teammate icon size", info: PROMOD_EQUAL,
 			desc: "Size of the teammate arrows, used for their width and height. The game uses the same " +
 				"size for the red dots of enemies that fire or show up on radar." },
 		{ key: "objective", dvars: ["compassObjectiveWidth", "compassObjectiveHeight"], def: 20, min: 0, max: Infinity,
-			step: 0.01, label: "Objective icon size", cheat: false,
+			step: 0.01, label: "Objective icon size",
 			desc: "Size of objective icons such as the bomb sites A and B, used for their width and height." },
-		{ key: "rotation", dvars: ["compassRotation"], def: 1, bool: true, label: "Map rotation", cheat: false,
+		{ key: "rotation", dvars: ["compassRotation"], def: 1, bool: true, label: "Map rotation",
 			on: "1 — the map turns, you point up", off: "0 — north stays up, your arrow turns",
 			desc: "Whether the map turns with you or stays with north at the top." }
 	];
 
 	var ADVANCED = [
 		{ key: "objMinAlpha", dvars: ["compassObjectiveMinAlpha"], def: 1, min: 0, max: 1, step: 0.01,
-			label: "Far icon opacity", cheat: false,
+			label: "Far icon opacity",
 			desc: "Opacity, from 0 to 1, of objectives and teammates beyond the compass range. They fade " +
 				"towards this value until Far icon range and keep it after that." },
 		{ key: "objMaxRange", dvars: ["compassObjectiveMaxRange"], def: 2048, min: 0, max: Infinity, step: 1,
-			label: "Far icon range", cheat: false,
+			label: "Far icon range",
 			desc: "Distance in game units at which far objectives and teammates reach Far icon opacity." },
 		{ key: "tapeStretch", dvars: ["compassTickertapeStretch"], def: 0.5, min: 0.01, max: 1, step: 0.01,
-			label: "Tickertape", cheat: false,
+			label: "Tickertape",
 			desc: "How much of the full circle the heading strip above the map shows: 0.5 is half of it, " +
 				"1 the whole of it." },
 		{ key: "fade", dvars: ["hud_fade_compass"], def: 0, min: 0, max: 30, step: 1, label: "Fade time",
-			cheat: false,
 			desc: "Seconds until the compass fades out, 0 to keep it on screen. The preview fades it too; " +
 				"change anything to bring it back." }
 	];
@@ -101,12 +100,10 @@
 	// CG_FadeHudMenu: once the fade time is up the compass fades over 700 ms.
 	var FADE_MS = 700;
 
-	var HINT_RESET_MS = 3000;
 
 	var values = {};
 	var fields = {};
 	var hint = null;
-	var hintTimer = null;
 	var output = null;
 	var outputCheat = null;
 	var outputCheatBox = null;
@@ -130,24 +127,6 @@
 	var started = false;
 
 	/* ---------- hint ---------- */
-
-	function setHint(message, isError)
-	{
-		if (hint === null)
-		{
-			return;
-		}
-
-		window.clearTimeout(hintTimer);
-		hint.textContent = message;
-		hint.classList.toggle("is-error", isError === true);
-
-		hintTimer = window.setTimeout(function ()
-		{
-			hint.textContent = "";
-			hint.classList.remove("is-error");
-		}, HINT_RESET_MS);
-	}
 
 	/* ---------- options ---------- */
 
@@ -194,6 +173,21 @@
 		tip.appendChild(icon);
 		tip.appendChild(bubble);
 		return tip;
+	}
+
+	// An option is cheat protected when one of its dvars is registered with
+	// the cheat flag, as the dvars tab's data says (js/cod4/dvars-data.js).
+	function cheatFlags()
+	{
+		var cheat = {};
+		(window.COD4_DVARS || []).forEach(function (e)
+		{
+			cheat[e.n.toLowerCase()] = e.c === true;
+		});
+		OPTIONS.concat(ADVANCED).forEach(function (spec)
+		{
+			spec.cheat = spec.dvars.some(function (name) { return cheat[name.toLowerCase()] === true; });
+		});
 	}
 
 	function makeBadge(spec)
@@ -972,7 +966,7 @@
 		};
 
 		var script = document.createElement("script");
-		script.src = "assets/minimap/" + map.id + ".js";
+		script.src = "js/cod4/minimap/" + map.id + ".js";
 		script.onload = function ()
 		{
 			var url = window.MINIMAP_IMAGES && window.MINIMAP_IMAGES[map.id];
@@ -1052,46 +1046,6 @@
 
 	/* ---------- copy ---------- */
 
-	function copyText(text)
-	{
-		if (navigator.clipboard && navigator.clipboard.writeText)
-		{
-			return navigator.clipboard.writeText(text);
-		}
-
-		return new Promise(function (resolve, reject)
-		{
-			var helper = document.createElement("textarea");
-			helper.value = text;
-			helper.setAttribute("readonly", "");
-			helper.style.position = "fixed";
-			helper.style.top = "-1000px";
-			document.body.appendChild(helper);
-			helper.select();
-
-			var copied = false;
-			try
-			{
-				copied = document.execCommand("copy");
-			}
-			catch (err)
-			{
-				copied = false;
-			}
-
-			document.body.removeChild(helper);
-
-			if (copied)
-			{
-				resolve();
-			}
-			else
-			{
-				reject(new Error("copy command rejected"));
-			}
-		});
-	}
-
 	/* ---------- wiring ---------- */
 
 	function init()
@@ -1105,6 +1059,7 @@
 		}
 
 		hint = document.getElementById("mm-hint");
+		setHint = window.UI.hint(hint);
 		output = document.getElementById("mm-output");
 		outputCheat = document.getElementById("mm-output-cheat");
 		outputCheatBox = document.getElementById("mm-out-cheat");
@@ -1117,6 +1072,7 @@
 		facingInput = document.getElementById("mm-facing");
 		facingOut = document.getElementById("mm-facing-out");
 
+		cheatFlags();
 		OPTIONS.forEach(function (opt) { optionsBox.appendChild(makeOptionRow(opt)); });
 		ADVANCED.forEach(function (opt) { advancedBox.appendChild(makeOptionRow(opt)); });
 		resetOptions();
@@ -1173,7 +1129,8 @@
 			new window.ResizeObserver(function () { render(); }).observe(stage);
 		}
 
-		var list = document.querySelector('[role="tablist"]');
+		var tab = document.getElementById("tab-mm");
+		var list = tab !== null ? tab.parentNode : null;
 		if (list !== null)
 		{
 			list.addEventListener("tabchange", function ()

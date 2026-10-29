@@ -6,6 +6,10 @@
 {
 	"use strict";
 
+	var escapeHtml = window.UI.escapeHtml;
+	var copyText = window.UI.copyText;
+	var setHint = function () {};
+
 	// Exact DVAR names that are not allowed. Cheat menus declare these as
 	// aliases with set, so a plain name is enough to catch them.
 	var DISALLOWED_DVARS = [
@@ -89,10 +93,8 @@
 	var MAX_SNIPPET = 300;
 	var MAX_FILE_BYTES = 2 * 1024 * 1024;
 	var DOWNLOAD_FILE_NAME = "config_mp.cfg";
-	var HINT_RESET_MS = 3000;
 	var HIGHLIGHT_DEBOUNCE_MS = 120;
 
-	var HTML_ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 
 	var input = null;
 	var output = null;
@@ -105,18 +107,11 @@
 	var copyBtn = null;
 	var downloadBtn = null;
 
-	var defaultHint = "";
-	var hintTimer = null;
 	var gutterLines = -1;
 	var highlightsOn = false;
 	var highlightTimer = null;
 
 	/* ---------- scanning ---------- */
-
-	function escapeHtml(text)
-	{
-		return String(text).replace(/[&<>"']/g, function (ch) { return HTML_ESCAPES[ch]; });
-	}
 
 	function snippet(line)
 	{
@@ -432,24 +427,6 @@
 
 	/* ---------- status line ---------- */
 
-	function setHint(message, isError)
-	{
-		if (hint === null)
-		{
-			return;
-		}
-
-		window.clearTimeout(hintTimer);
-		hint.textContent = message;
-		hint.classList.toggle("is-error", isError === true);
-
-		hintTimer = window.setTimeout(function ()
-		{
-			hint.textContent = defaultHint;
-			hint.classList.remove("is-error");
-		}, HINT_RESET_MS);
-	}
-
 	function showResultTools(show)
 	{
 		if (copyBtn !== null)
@@ -606,47 +583,6 @@
 		reader.readAsText(file);
 	}
 
-	function copyText(text)
-	{
-		if (navigator.clipboard && navigator.clipboard.writeText)
-		{
-			return navigator.clipboard.writeText(text);
-		}
-
-		// Fallback for browsers that gate the async clipboard API.
-		return new Promise(function (resolve, reject)
-		{
-			var helper = document.createElement("textarea");
-			helper.value = text;
-			helper.setAttribute("readonly", "");
-			helper.style.position = "fixed";
-			helper.style.top = "-1000px";
-			document.body.appendChild(helper);
-			helper.select();
-
-			var copied = false;
-			try
-			{
-				copied = document.execCommand("copy");
-			}
-			catch (err)
-			{
-				copied = false;
-			}
-
-			document.body.removeChild(helper);
-
-			if (copied)
-			{
-				resolve();
-			}
-			else
-			{
-				reject(new Error("copy command rejected"));
-			}
-		});
-	}
-
 	function copyConfig()
 	{
 		copyText(input.value).then(function ()
@@ -685,6 +621,7 @@
 		gutterBox = document.querySelector(".gutter-box");
 		highlights = document.getElementById("highlights");
 		hint = document.getElementById("hint");
+		setHint = window.UI.hint(hint);
 		fileInput = document.getElementById("file");
 		uploadBtn = document.getElementById("upload");
 		copyBtn = document.getElementById("copy");
@@ -693,11 +630,6 @@
 		if (input === null || output === null)
 		{
 			return;
-		}
-
-		if (hint !== null)
-		{
-			defaultHint = hint.textContent;
 		}
 
 		renderGutter();

@@ -168,6 +168,11 @@ a:hover
 	color: var(--text);
 }
 
+.brand[hidden]
+{
+	display: none;
+}
+
 .header h1
 {
 	margin: 0;
@@ -227,6 +232,74 @@ a:hover
 	margin: 0 0 20px;
 	color: var(--muted);
 	font-size: 14px;
+}
+
+/* ---------- games ---------- */
+
+/* One button per game above its tab bar, drawn like the other controls of the
+   page: the active game gets the accent border, the others stay muted. */
+.game-switch
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.game-btn
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 14px 6px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	color: var(--muted);
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+	cursor: pointer;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.game-btn:hover
+{
+	color: var(--text);
+	border-color: var(--border-strong);
+}
+
+.game-btn.is-active
+{
+	color: var(--text);
+	border-color: var(--accent);
+	box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.game-icon
+{
+	display: block;
+	width: 20px;
+	height: 20px;
+	transition: opacity 0.15s ease;
+}
+
+.game-btn:not(.is-active) .game-icon
+{
+	opacity: 0.65;
+}
+
+/* The bars are children of this box, but lay out as if they were the page's
+   own: the column layout below places .tabs directly. */
+.game-tabs
+{
+	display: contents;
+}
+
+.tabs[hidden]
+{
+	display: none;
 }
 
 /* ---------- tabs ---------- */
@@ -301,7 +374,8 @@ a:hover
 		align-items: start;
 	}
 
-	:root:not([data-tabs="horizontal"]) .header
+	:root:not([data-tabs="horizontal"]) .header,
+	:root:not([data-tabs="horizontal"]) .game-switch
 	{
 		grid-column: 1 / -1;
 	}
@@ -312,7 +386,7 @@ a:hover
 		position: sticky;
 		top: 20px;
 		grid-column: 1;
-		grid-row: 2;
+		grid-row: 3;
 		margin-bottom: 0;
 		border-bottom: 0;
 		border-right: 1px solid var(--border);
@@ -332,7 +406,7 @@ a:hover
 	:root:not([data-tabs="horizontal"]) .panel
 	{
 		grid-column: 2;
-		grid-row: 2;
+		grid-row: 3;
 		min-width: 0;
 	}
 }
@@ -475,7 +549,10 @@ a:hover
 
 .kf-value.is-invalid,
 .kf-hex.is-invalid,
-.sb-value.is-invalid
+.kf-key.is-invalid,
+.kf-action.is-invalid,
+.sb-value.is-invalid,
+.fq-key.is-invalid
 {
 	border-color: var(--red);
 	color: var(--red);
@@ -1190,7 +1267,7 @@ a:hover
 	position: relative;
 	overflow: hidden;
 	background-color: #6d6a58;
-	background-image: url("../assets/scoreboard/preview-bg.png");
+	background-image: url("../assets/cod4/scoreboard/preview-bg.png");
 	background-position: center;
 	background-size: cover;
 }
@@ -1425,91 +1502,6 @@ a:hover
 	border-radius: var(--radius);
 	background-color: var(--surface);
 	overflow: hidden;
-}
-
-.dv-row
-{
-	display: flex;
-	flex-wrap: wrap;
-	align-items: baseline;
-	gap: 4px 16px;
-	padding: 9px 16px;
-	border-bottom: 1px solid var(--border);
-}
-
-.dv-row:last-child
-{
-	border-bottom: 0;
-}
-
-.dv-row[hidden]
-{
-	display: none;
-}
-
-.dv-name
-{
-	flex: 0 0 auto;
-	/* the longest name is 46 characters, hud_healthOverlay_phaseThree_toAlphaMultiplier */
-	width: 47ch;
-	font-family: var(--mono);
-	font-size: 13px;
-	font-weight: 600;
-	white-space: nowrap;
-}
-
-/* A phone has no room for the full column, so let the name wrap again there. */
-@media (max-width: 720px)
-{
-	.dv-name
-	{
-		width: auto;
-		max-width: 100%;
-		white-space: normal;
-		overflow-wrap: anywhere;
-	}
-}
-
-.dv-body
-{
-	flex: 1 1 260px;
-	min-width: 0;
-}
-
-.dv-desc
-{
-	margin: 0;
-	color: var(--muted);
-	font-size: 13px;
-	line-height: 1.5;
-}
-
-.dv-meta
-{
-	margin: 2px 0 0;
-	color: var(--muted);
-	font-family: var(--mono);
-	font-size: 12px;
-	line-height: 1.5;
-	opacity: 0.85;
-}
-
-.dv-meta b
-{
-	color: var(--text);
-	font-weight: 600;
-}
-
-.dv-values b
-{
-	color: var(--text);
-	opacity: 0.8;
-}
-
-.dv-type
-{
-	color: var(--text);
-	opacity: 0.75;
 }
 
 /* ---------- form ---------- */
@@ -1824,6 +1816,441 @@ pre
 	color: var(--text);
 }
 
+/* ---------- dvar tables: CoD4 and CoD2 ---------- */
+
+/* The search bar and frame of .dv-*, with the fields in columns. */
+.d2-filters
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	margin-bottom: 12px;
+	font-size: 13px;
+}
+
+.d2-check
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	cursor: pointer;
+}
+
+.d2-check input
+{
+	margin: 0;
+	accent-color: var(--accent);
+}
+
+.d2-filter-label
+{
+	margin-left: 8px;
+	color: var(--muted);
+	font-weight: 600;
+}
+
+.d2-list
+{
+	overflow-x: auto;
+}
+
+.d2-table
+{
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.d2-table th
+{
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--border);
+	background-color: var(--field);
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 600;
+	text-align: left;
+	white-space: nowrap;
+}
+
+.d2-table td
+{
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--border);
+	vertical-align: baseline;
+}
+
+.d2-table tbody tr:last-child td
+{
+	border-bottom: 0;
+}
+
+.d2-row[hidden]
+{
+	display: none;
+}
+
+.d2-sort
+{
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.d2-sort:hover
+{
+	color: var(--text);
+}
+
+.d2-arrow
+{
+	margin-left: 4px;
+	font-size: 9px;
+}
+
+/* The name stays on one line; a protection tag that does not fit beside it
+   goes under it, so a long name does not widen the column further. */
+.d2-name
+{
+	white-space: nowrap;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--text);
+	font-family: var(--mono);
+	font-size: 13px;
+	font-weight: 600;
+	text-align: left;
+	cursor: copy;
+}
+
+.d2-name:hover
+{
+	text-decoration: underline;
+	text-decoration-color: var(--border-strong);
+	text-underline-offset: 2px;
+}
+
+.d2-cheat
+{
+	display: inline-block;
+	margin-top: 3px;
+	padding: 0 7px;
+	border: 1px solid currentColor;
+	border-radius: 999px;
+	background-color: var(--orange-tint);
+	color: var(--orange);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.d2-def,
+.d2-num
+{
+	font-family: var(--mono);
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+/* Most defaults are short numbers; the few long strings wrap instead of
+   pushing the description out. */
+.d2-def
+{
+	max-width: 22ch;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.d2-type
+{
+	color: var(--muted);
+	white-space: nowrap;
+}
+
+/* A few descriptions name another dvar 46 characters long: it may break, or
+   it alone would make the table wider than its frame. */
+.d2-desc
+{
+	min-width: 24ch;
+	color: var(--muted);
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.d2-from
+{
+	font-size: 11px;
+	opacity: 0.75;
+	white-space: nowrap;
+}
+
+.d2-from::before
+{
+	content: "\2014\00a0";
+}
+
+.d2-values,
+.d2-alt
+{
+	display: block;
+	margin-top: 2px;
+	color: var(--muted);
+	font-size: 11px;
+	white-space: normal;
+}
+
+.d2-note
+{
+	margin-left: 4px;
+	padding: 0 4px;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	color: var(--muted);
+	font-family: var(--sans);
+	font-size: 10px;
+	cursor: help;
+}
+
+.d2-none
+{
+	color: var(--border-strong);
+}
+
+.d2-empty
+{
+	color: var(--muted);
+}
+
+.d2-sources
+{
+	white-space: nowrap;
+}
+
+.d2-src
+{
+	display: inline-block;
+	margin-right: 4px;
+	padding: 0 6px;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.6;
+}
+
+/* The protection tags are buttons that open the popover. */
+.dv-tagbtn
+{
+	font-family: var(--sans);
+	cursor: pointer;
+}
+
+.dv-tagbtn:hover
+{
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.dv-tag
+{
+	display: inline-block;
+	margin-top: 3px;
+	padding: 0 7px;
+	border: 1px solid var(--border-strong);
+	border-radius: 999px;
+	background-color: var(--field);
+	color: var(--muted);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.6;
+	white-space: nowrap;
+}
+
+.dv-tag-enforced
+{
+	border-color: currentColor;
+	color: var(--text);
+}
+
+/* A protection without a tag: a small "i" opens its popover. */
+.dv-info
+{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	margin-left: 2px;
+	padding: 0;
+	border: 1px solid var(--border-strong);
+	border-radius: 50%;
+	background: none;
+	color: var(--muted);
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 11px;
+	font-style: italic;
+	font-weight: 600;
+	line-height: 1;
+	vertical-align: 1px;
+	cursor: pointer;
+}
+
+.dv-info:hover,
+.dv-info[aria-expanded="true"]
+{
+	border-color: var(--muted);
+	color: var(--text);
+}
+
+.dv-info.dv-tagbtn:hover
+{
+	text-decoration: none;
+}
+
+.dv-first
+{
+	margin-left: 0;
+}
+
+.dv-select
+{
+	height: 28px;
+	padding: 0 6px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	color: inherit;
+	font: inherit;
+}
+
+.dv-panel
+{
+	position: relative;
+}
+
+.dv-pop
+{
+	position: absolute;
+	z-index: 20;
+	width: min(360px, calc(100vw - 32px));
+	padding: 10px 12px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.dv-pop[hidden]
+{
+	display: none;
+}
+
+.dv-pop p
+{
+	margin: 0;
+}
+
+.dv-pop-title
+{
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.dv-pop .dv-pop-text
+{
+	margin-top: 4px;
+	color: var(--muted);
+}
+
+.dv-pop .dv-pop-ref
+{
+	margin-top: 6px;
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 11px;
+	overflow-wrap: anywhere;
+}
+
+/* A phone has no room for seven columns: each dvar becomes a block, the
+   short fields in a row under its name, each with its column's name. */
+@media (max-width: 720px)
+{
+	.d2-table,
+	.d2-table tbody,
+	.d2-table tr,
+	.d2-table td
+	{
+		display: block;
+	}
+
+	.d2-table thead tr
+	{
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.d2-table thead th:not(:first-child)
+	{
+		display: none;
+	}
+
+	.d2-table thead th
+	{
+		width: 100%;
+	}
+
+	.d2-table tr.d2-row
+	{
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 2px 14px;
+		padding: 9px 12px;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.d2-table tr.d2-row[hidden],
+	.d2-table td.d2-blank
+	{
+		display: none;
+	}
+
+	.d2-name
+	{
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+
+	.d2-table td
+	{
+		padding: 0;
+		border-bottom: 0;
+	}
+
+	.d2-table .d2-namecell,
+	.d2-table .d2-desc
+	{
+		flex: 1 1 100%;
+		white-space: normal;
+	}
+
+	.d2-table td[data-label]:not(.d2-namecell):not(.d2-desc)::before
+	{
+		content: attr(data-label) " ";
+		color: var(--muted);
+		font-family: var(--sans);
+		font-size: 11px;
+	}
+}
+
 /* ---------- footer ---------- */
 
 .footer
@@ -1943,12 +2370,6 @@ pre
 		order: 0;
 		flex: 0 0 84px;
 		width: 84px;
-	}
-
-	.dv-name
-	{
-		width: auto;
-		flex: 1 1 100%;
 	}
 }
 
@@ -2114,6 +2535,26 @@ pre
 	line-height: 1.6;
 }
 
+/* On a phone the rows of the menu tables (label, description, key, command,
+   button) do not fit on one line: the command and its button wrap below. */
+@media (max-width: 720px)
+{
+	.fq-cmd:has(.fq-desc)
+	{
+		flex-wrap: wrap;
+	}
+
+	.fq-cmd:has(.fq-desc) .fq-desc
+	{
+		flex: 1 1 auto;
+	}
+
+	.fq-cmd:has(.fq-desc) .fq-code
+	{
+		flex-basis: calc(100% - var(--fq-copy-w) - 10px);
+	}
+}
+
 /* ---------- server configuration ---------- */
 
 .sc-head
@@ -2190,6 +2631,13 @@ a.btn
 .dm-open
 {
 	margin-bottom: 14px;
+}
+
+.dm-placeholder
+{
+	margin: 0;
+	color: var(--muted);
+	font-size: 13px;
 }
 
 .dm-list

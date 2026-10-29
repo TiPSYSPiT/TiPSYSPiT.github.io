@@ -6,33 +6,52 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="color-scheme" content="light dark">
 	<title>CoD4 Tools</title>
+	<link rel="icon" id="favicon" href="assets/cod4/icons/cod4.ico" sizes="any">
 	<link href="css/style.css" rel="stylesheet">
-	<script src="js/tablayout.js"></script>
-	<script src="js/tabs.js" defer></script>
-	<script src="js/checkcfg.js" defer></script>
-	<script src="js/decimal.js" defer></script>
-	<script src="assets/killfeed-icons.js" defer></script>
-	<script src="js/killfeed.js" defer></script>
-	<script src="js/rcon.js" defer></script>
-	<script src="js/serverconfig.js" defer></script>
-	<script src="js/dvars.js" defer></script>
-	<script src="js/scoreboard.js" defer></script>
-	<script src="assets/minimap/icons.js" defer></script>
-	<script src="assets/minimap/maps.js" defer></script>
-	<script src="js/minimap.js" defer></script>
-	<script src="js/faq.js" defer></script>
+	<!-- shared first, then each game; js/shared/tabs.js runs below the navigation boxes -->
+	<script src="js/shared/tablayout.js"></script>
+	<script src="js/shared/ui.js"></script>
+	<script src="js/shared/games.js"></script>
+	<script src="js/shared/decimal.js" defer></script>
+	<script src="js/shared/dvar-table.js" defer></script>
+	<script src="js/cod4/game.js"></script>
+	<script src="js/cod4/checkcfg.js" defer></script>
+	<script src="js/cod4/killfeed-icons.js" defer></script>
+	<script src="js/cod4/killfeed.js" defer></script>
+	<script src="js/cod4/rcon.js" defer></script>
+	<script src="js/cod4/serverconfig.js" defer></script>
+	<script src="js/cod4/dvars-data.js" defer></script>
+	<script src="js/cod4/dvars.js" defer></script>
+	<script src="js/cod4/scoreboard.js" defer></script>
+	<script src="js/cod4/minimap/icons.js" defer></script>
+	<script src="js/cod4/minimap/maps.js" defer></script>
+	<script src="js/cod4/minimap.js" defer></script>
+	<script src="js/cod4/faq.js" defer></script>
+	<script src="js/cod2/game.js"></script>
+	<script src="js/cod2/dvars-data.js" defer></script>
+	<script src="js/cod2/dvars.js" defer></script>
 </head>
 
 <body>
 	<main class="wrap">
 		<header class="header">
-			<svg class="brand" viewBox="0 0 1254 1254" width="34" height="34" aria-hidden="true" focusable="false">
+			<svg class="brand" data-game="cod4" viewBox="0 0 1254 1254" width="34" height="34" aria-hidden="true"
+				focusable="false">
 				<path fill="currentColor" fill-rule="evenodd"
 					d="M626.5 171.2 L728.1 484 L1057 484 L790.9 677.3 L626.5 796.8 L360.4 990.1 L462.1 677.3 L196 484 L524.9 484 Z
 					   M626.5 380 L681.3 548.5 L858.5 548.5 L715.1 652.7 L626.5 717.1 L537.9 652.7 L394.5 548.5 L571.7 548.5 Z" />
 				<path fill="currentColor" fill-rule="evenodd"
 					d="M858 575 L958 575 L958 830 L1020 830 L1020 895 L958 895 L958 1000 L858 1000 L858 895 L610 895 L610 830 Z
 					   M858 650 L858 830 L690 830 Z" />
+			</svg>
+			<svg class="brand" data-game="cod2" viewBox="0 0 1254 1254" width="34" height="34" aria-hidden="true"
+				focusable="false" hidden>
+				<path fill="currentColor" fill-rule="evenodd"
+					d="M626.5 171.2 L728.1 484 L1057 484 L790.9 677.3 L626.5 796.8 L360.4 990.1 L462.1 677.3 L196 484 L524.9 484 Z
+					   M626.5 380 L681.3 548.5 L858.5 548.5 L715.1 652.7 L626.5 717.1 L537.9 652.7 L394.5 548.5 L571.7 548.5 Z" />
+				<path fill="currentColor"
+					d="M650 575 L1000 575 L1000 820 L745 820 L745 910 L1010 910 L1010 1000 L645 1000 L645 735 L900 735
+					   L900 665 L650 665 Z" />
 			</svg>
 			<h1>CoD4 Tools</h1>
 
@@ -60,26 +79,9 @@
 			</div>
 		</header>
 
-		<div class="tabs" role="tablist" aria-label="Tools" aria-orientation="vertical">
-			<button class="tab is-active" type="button" role="tab" id="tab-checker" aria-controls="panel-checker"
-				aria-selected="true">config checker</button>
-			<button class="tab" type="button" role="tab" id="tab-rcon" aria-controls="panel-rcon"
-				aria-selected="false" tabindex="-1">rcon commands</button>
-			<button class="tab" type="button" role="tab" id="tab-srv" aria-controls="panel-srv"
-				aria-selected="false" tabindex="-1">server configuration</button>
-			<button class="tab" type="button" role="tab" id="tab-dvars" aria-controls="panel-dvars"
-				aria-selected="false" tabindex="-1">dvars</button>
-			<button class="tab" type="button" role="tab" id="tab-killfeed" aria-controls="panel-killfeed"
-				aria-selected="false" tabindex="-1">killfeed colors</button>
-			<button class="tab" type="button" role="tab" id="tab-sb" aria-controls="panel-sb"
-				aria-selected="false" tabindex="-1">scoreboard generator</button>
-			<button class="tab" type="button" role="tab" id="tab-mm" aria-controls="panel-mm"
-				aria-selected="false" tabindex="-1">minimap generator</button>
-			<button class="tab" type="button" role="tab" id="tab-demos" aria-controls="panel-demos"
-				aria-selected="false" tabindex="-1">demos</button>
-			<button class="tab" type="button" role="tab" id="tab-faq" aria-controls="panel-faq"
-				aria-selected="false" tabindex="-1">FAQ</button>
-		</div>
+		<div class="game-switch" id="game-switch" role="tablist" aria-label="Game"></div>
+		<div class="game-tabs" id="game-tabs"></div>
+		<script src="js/shared/tabs.js"></script>
 
 		<section class="panel" id="panel-checker" role="tabpanel" aria-labelledby="tab-checker" tabindex="0">
 			<p class="lede">Paste or load a config to scan it for disallowed DVARs and binds. Nothing is
@@ -134,20 +136,67 @@
 			<div id="sc-list"></div>
 		</section>
 
-		<section class="panel" id="panel-dvars" role="tabpanel" aria-labelledby="tab-dvars" tabindex="0" hidden>
-			<p class="lede">Every CoD4 dvar with its in-game description, sorted by name.
-				Filter by name or description.</p>
+		<section class="panel dv-panel" id="panel-dvars" role="tabpanel" aria-labelledby="tab-dvars" tabindex="0" hidden>
+			<p class="lede">Every CoD4 dvar from the stock 1.7 game, CoD4x and Promod X, with default, range and type
+				as the game registers them. Click a name to copy it as a config line, a tag or &#9432; to see why it is
+				protected.</p>
 
 			<div class="dv-bar">
-				<label class="visually-hidden" for="dv-search">Filter dvars</label>
-				<input class="dv-search" type="search" id="dv-search" placeholder="Filter dvars&hellip;"
+				<label class="visually-hidden" for="d4-search">Filter dvars</label>
+				<input class="dv-search" type="search" id="d4-search" placeholder="Filter by name or description&hellip;"
 					spellcheck="false" autocomplete="off">
-				<span class="dv-count" id="dv-count" aria-live="polite"></span>
+				<span class="dv-count" id="d4-count" aria-live="polite"></span>
 			</div>
 
-			<p class="dv-empty" id="dv-empty" hidden></p>
+			<div class="d2-filters" role="group" aria-label="Filters">
+				<label class="d2-check" for="d4-protection"><span class="d2-filter-label dv-first">Protection</span>
+					<select class="dv-select" id="d4-protection">
+						<option value="">any</option>
+						<option value="cheat">cheat protected</option>
+						<option value="Engine">cheat flag in stock 1.7</option>
+						<option value="CoD4x">cheat flag from CoD4x</option>
+						<option value="Promod">Promod enforced</option>
+						<option value="Read-only">read-only</option>
+						<option value="Init only">init only</option>
+						<option value="unknown">unknown</option>
+						<option value="none">none</option>
+					</select>
+				</label>
+				<span class="d2-filter-label">Source</span>
+				<label class="d2-check"><input type="checkbox" data-source="stock" checked> stock</label>
+				<label class="d2-check"><input type="checkbox" data-source="cod4x" checked> CoD4x</label>
+				<label class="d2-check"><input type="checkbox" data-source="promod" checked> Promod X</label>
+			</div>
 
-			<div class="dv-list" id="dv-list"></div>
+			<p class="hint" id="d4-hint" role="status"></p>
+
+			<p class="dv-empty" id="d4-empty" hidden></p>
+
+			<div class="dv-list d2-list">
+				<table class="d2-table">
+					<thead>
+						<tr>
+							<th scope="col" aria-sort="ascending">
+								<button class="d2-sort" type="button" id="d4-sort">Name <span class="d2-arrow"
+										aria-hidden="true">&#9650;</span></button>
+							</th>
+							<th scope="col">Default</th>
+							<th scope="col">Min</th>
+							<th scope="col">Max</th>
+							<th scope="col">Type</th>
+							<th scope="col">Description</th>
+							<th scope="col">Source</th>
+						</tr>
+					</thead>
+					<tbody id="d4-body"></tbody>
+				</table>
+			</div>
+
+			<div class="dv-pop" id="d4-pop" role="dialog" aria-labelledby="d4-pop-title" hidden>
+				<p class="dv-pop-title" id="d4-pop-title"></p>
+				<p class="dv-pop-text" id="d4-pop-text"></p>
+				<p class="dv-pop-ref" id="d4-pop-ref"></p>
+			</div>
 		</section>
 
 		<section class="panel" id="panel-killfeed" role="tabpanel" aria-labelledby="tab-killfeed" tabindex="0" hidden>
@@ -177,7 +226,7 @@
 				<div class="kf-opt">
 					<label class="kf-opt-label" for="kf-lines" title="con_gameMsgWindow0LineCount">Line count</label>
 					<input class="kf-value kf-num" type="text" id="kf-lines" value="4" inputmode="numeric"
-						autocomplete="off" spellcheck="false" title="Whole number, 1 to 10"
+						autocomplete="off" spellcheck="false" title="Whole number, 1 to 9"
 						aria-describedby="kf-lines-desc">
 					<p class="kf-opt-desc" id="kf-lines-desc">Adjusts the maximum number of simultaneous kill lines
 						shown in the feed at once.</p>
@@ -370,6 +419,100 @@
 			<p class="dv-empty" id="fq-empty" hidden></p>
 
 			<div id="fq-list"></div>
+		</section>
+
+		<!-- ========== CoD2 ========== -->
+
+		<section class="panel dv-panel" id="panel-cod2-dvars" role="tabpanel" aria-labelledby="tab-cod2-dvars" tabindex="0"
+			hidden>
+			<p class="lede">Every CoD2 dvar from the stock 1.3 game, CoD2x and zPAM, with default, range and type as
+				the game registers them. Click a name to copy it as a config line, a tag or &#9432; to see why it
+				is protected.</p>
+
+			<div class="dv-bar">
+				<label class="visually-hidden" for="d2-search">Filter dvars</label>
+				<input class="dv-search" type="search" id="d2-search" placeholder="Filter by name or description&hellip;"
+					spellcheck="false" autocomplete="off">
+				<span class="dv-count" id="d2-count" aria-live="polite"></span>
+			</div>
+
+			<div class="d2-filters" role="group" aria-label="Filters">
+				<label class="d2-check" for="d2-protection"><span class="d2-filter-label dv-first">Protection</span>
+					<select class="dv-select" id="d2-protection">
+						<option value="">any</option>
+						<option value="cheat">cheat protected</option>
+						<option value="Engine">cheat flag in stock 1.3</option>
+						<option value="CoD2x">cheat flag from CoD2x</option>
+						<option value="CoD2x enforced">CoD2x enforced</option>
+						<option value="set by zPAM">set by zPAM</option>
+						<option value="Read-only">read-only</option>
+						<option value="Write-protected">write-protected</option>
+						<option value="zPAM rules">zPAM rules</option>
+						<option value="unknown">unknown</option>
+						<option value="none">none</option>
+					</select>
+				</label>
+				<span class="d2-filter-label">Source</span>
+				<label class="d2-check"><input type="checkbox" data-source="stock" checked> stock</label>
+				<label class="d2-check"><input type="checkbox" data-source="cod2x" checked> CoD2x</label>
+				<label class="d2-check"><input type="checkbox" data-source="zpam" checked> zPAM</label>
+			</div>
+
+			<p class="hint" id="d2-hint" role="status"></p>
+
+			<p class="dv-empty" id="d2-empty" hidden></p>
+
+			<div class="dv-list d2-list">
+				<table class="d2-table">
+					<thead>
+						<tr>
+							<th scope="col" aria-sort="ascending">
+								<button class="d2-sort" type="button" id="d2-sort">Name <span class="d2-arrow"
+										aria-hidden="true">&#9650;</span></button>
+							</th>
+							<th scope="col">Default</th>
+							<th scope="col">Min</th>
+							<th scope="col">Max</th>
+							<th scope="col">Type</th>
+							<th scope="col">Description</th>
+							<th scope="col">Source</th>
+						</tr>
+					</thead>
+					<tbody id="d2-body"></tbody>
+				</table>
+			</div>
+
+			<div class="dv-pop" id="d2-pop" role="dialog" aria-labelledby="d2-pop-title" hidden>
+				<p class="dv-pop-title" id="d2-pop-title"></p>
+				<p class="dv-pop-text" id="d2-pop-text"></p>
+				<p class="dv-pop-ref" id="d2-pop-ref"></p>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-cod2-demos" role="tabpanel" aria-labelledby="tab-cod2-demos" tabindex="0"
+			hidden>
+			<p class="lede">A separate tool for CoD2 demo files. It opens in a new tab.</p>
+
+			<div class="rc-group dm-card">
+				<a class="btn btn-primary dm-open" href="https://tipsyspit.github.io/cod2-demo/" target="_blank"
+					rel="noopener noreferrer">Open the CoD2 demo viewer</a>
+
+				<ul class="dm-list">
+					<li>Load a CoD2 demo (.dm_1) straight into your browser and replay it.</li>
+					<li>Watch the match top-down in 2D or inside the real map in 3D.</li>
+					<li>Scoreboard, round by round results, chat and events.</li>
+					<li>Works with CoD2 1.0 to 1.3 and CoD2x 1.4, stock servers and zPAM.</li>
+					<li>Runs entirely on your machine &mdash; nothing is uploaded.</li>
+				</ul>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-cod2-faq" role="tabpanel" aria-labelledby="tab-cod2-faq" tabindex="0" hidden>
+			<p class="lede">Answers to the questions that keep coming up around CoD2 configs.</p>
+
+			<div class="rc-group dm-card">
+				<p class="dm-placeholder">The CoD2 FAQ is not written yet.</p>
+			</div>
 		</section>
 	</main>
 

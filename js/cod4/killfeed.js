@@ -13,6 +13,9 @@
 {
 	"use strict";
 
+	var copyText = window.UI.copyText;
+	var setHint = function () {};
+
 	// Each row shows a short label but always emits the full DVAR name, which
 	// is kept in the row's data-dvar attribute.
 	var DEFAULT_ROWS = [
@@ -20,7 +23,7 @@
 		{ dvar: "g_TeamColor_Axis", label: "Axis", rgba: [1, 0.541, 0.361, 1] }
 	];
 
-	// The icons as data URLs, from assets/killfeed-icons.js. They come
+	// The icons as data URLs, from js/cod4/killfeed-icons.js. They come
 	// uncropped, with very different amounts of transparent margin, so each
 	// one is measured once and only its visible part is shown (see measureIcon).
 	// Data URLs rather than image files because an image loaded from a file://
@@ -89,17 +92,19 @@
 	// con_gameMsgWindow0 is the killfeed window. MsgTime is a float with no
 	// upper bound in the engine, capped here at 999. The defaults are the
 	// engine's own: 5 seconds, 4 lines.
-	// LineCount goes up to 10 here, but stock CoD4 registers it as an int from
-	// 1 to 9 (cl_console.cpp) and ignores anything outside that: Dvar_SetVariant
+	// LineCount is an int from 1 to 9, as stock CoD4 registers it
+	// (cl_console.cpp): the game ignores anything outside that, Dvar_SetVariant
 	// prints "is not a valid value" and keeps the old value.
 	var OPTIONS = {
 		msgTime: { dvar: "con_gameMsgWindow0MsgTime", def: 5, min: 0, max: 999, integer: false,
 			label: "Display time", unit: "seconds" },
-		lineCount: { dvar: "con_gameMsgWindow0LineCount", def: 4, min: 1, max: 10, integer: true,
+		lineCount: { dvar: "con_gameMsgWindow0LineCount", def: 4, min: 1, max: 9, integer: true,
 			label: "Line count", unit: "lines" }
 	};
 
-	var HINT_RESET_MS = 3000;
+	// A key name that would break the bind line apart.
+	var BIND_KEY_BAD = /[\s";]/;
+
 
 	var rowsBox = null;
 	var keyField = null;
@@ -108,8 +113,6 @@
 	var cmdsBox = null;
 	var feedBox = null;
 	var hint = null;
-	var defaultHint = "";
-	var hintTimer = null;
 
 	// Visible box of each icon by key, filled once by measureIcons. Until it
 	// is, the preview stays hidden rather than showing icons that jump.
@@ -120,24 +123,6 @@
 	// reaches the output or the preview.
 	var optionValues = { msgTime: OPTIONS.msgTime.def, lineCount: OPTIONS.lineCount.def };
 	var optionFields = { msgTime: null, lineCount: null };
-
-	function setHint(message, isError)
-	{
-		if (hint === null)
-		{
-			return;
-		}
-
-		window.clearTimeout(hintTimer);
-		hint.textContent = message;
-		hint.classList.toggle("is-error", isError === true);
-
-		hintTimer = window.setTimeout(function ()
-		{
-			hint.textContent = defaultHint;
-			hint.classList.remove("is-error");
-		}, HINT_RESET_MS);
-	}
 
 	/* ---------- value conversion ---------- */
 
@@ -334,6 +319,23 @@
 		return entries;
 	}
 
+	// What is wrong with the key and action, or null. The line has to stay one
+	// bind command: a key name is one word, so no space, quote or semicolon,
+	// and the action sits inside the quotes, so it may not hold a quote (its
+	// semicolons are fine: they split the action, inside the bind).
+	function bindProblem()
+	{
+		var badKey = BIND_KEY_BAD.test(keyField.value.trim());
+		var badAction = actionField.value.indexOf('"') !== -1;
+		keyField.classList.toggle("is-invalid", badKey);
+		actionField.classList.toggle("is-invalid", badAction);
+		if (badKey)
+		{
+			return "A bind key is one word, without spaces, quotes or semicolons.";
+		}
+		return badAction ? "The action cannot contain quotes." : null;
+	}
+
 	// bind W "+forward; g_TeamColor_Allies 0.498 0.655 1 1; ..."
 	// Re-applies the colours on every key press, so a server that resets them
 	// does not keep them reset. Clearing the key or the action drops the line.
@@ -346,7 +348,7 @@
 
 		var key = keyField.value.trim();
 		var action = actionField.value.trim();
-		if (key === "" || action === "")
+		if (key === "" || action === "" || bindProblem() !== null)
 		{
 			return null;
 		}
@@ -466,8 +468,9 @@
 	function renderOutput()
 	{
 		var bind = buildBindLine(collectEntries());
+		var problem = keyField === null || actionField === null ? null : bindProblem();
 		fill(bindBox, bind === null ? "" : bind,
-			"Enter a bind key and action to generate this line.");
+			problem || "Enter a bind key and action to generate this line.");
 		fill(cmdsBox, buildCommands(), "");
 		renderPreview();
 	}
@@ -714,46 +717,6 @@
 
 	/* ---------- clipboard ---------- */
 
-	function copyText(text)
-	{
-		if (navigator.clipboard && navigator.clipboard.writeText)
-		{
-			return navigator.clipboard.writeText(text);
-		}
-
-		return new Promise(function (resolve, reject)
-		{
-			var helper = document.createElement("textarea");
-			helper.value = text;
-			helper.setAttribute("readonly", "");
-			helper.style.position = "fixed";
-			helper.style.top = "-1000px";
-			document.body.appendChild(helper);
-			helper.select();
-
-			var copied = false;
-			try
-			{
-				copied = document.execCommand("copy");
-			}
-			catch (err)
-			{
-				copied = false;
-			}
-
-			document.body.removeChild(helper);
-
-			if (copied)
-			{
-				resolve();
-			}
-			else
-			{
-				reject(new Error("copy command rejected"));
-			}
-		});
-	}
-
 	function copyBox(box, label)
 	{
 		if (box === null || box.classList.contains("is-empty"))
@@ -785,15 +748,11 @@
 		cmdsBox = document.getElementById("kf-output-cmds");
 		feedBox = document.getElementById("kf-feed");
 		hint = document.getElementById("kf-hint");
+		setHint = window.UI.hint(hint);
 
 		if (rowsBox === null || bindBox === null)
 		{
 			return;
-		}
-
-		if (hint !== null)
-		{
-			defaultHint = hint.textContent;
 		}
 
 		optionFields.msgTime = document.getElementById("kf-msgtime");

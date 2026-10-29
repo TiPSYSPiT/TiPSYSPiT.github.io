@@ -6,7 +6,7 @@ Needs Pillow (with WebP) and the cod4-ff project: its Python package decodes
 the .iwi textures, and its output folder holds the map scripts and entity
 strings that `python python/extract.py --all <game>` wrote.
 
-Writes to assets/minimap/ (or --out):
+Writes to js/cod4/minimap/ (or --out):
 
     maps.js     window.MINIMAP_MAPS: per map the minimap corners, north,
                 compass range, S&D spawns and bomb sites
@@ -190,7 +190,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--game", required=True, help="CoD4 install folder (with main/ and usermaps/)")
     ap.add_argument("--cod4ff", required=True, help="cod4-ff project folder (python/ and output/)")
-    ap.add_argument("--out", default=str(Path(__file__).resolve().parent.parent / "assets" / "minimap"))
+    ap.add_argument("--out", default=str(Path(__file__).resolve().parent.parent / "js" / "cod4" / "minimap"))
     ap.add_argument("--size", type=int, default=1024, help="largest minimap texture size in pixels")
     ap.add_argument("--quality", type=int, default=82, help="WebP quality of the minimap textures")
     args = ap.parse_args()

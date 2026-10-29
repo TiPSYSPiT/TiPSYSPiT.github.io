@@ -43,10 +43,11 @@
 	{
 		root.setAttribute("data-tabs", layout);
 
-		var list = document.querySelector('[role="tablist"]');
-		if (list !== null)
+		// every game has a tab bar of its own
+		var lists = document.querySelectorAll('.tabs[role="tablist"]');
+		for (var j = 0; j < lists.length; j++)
 		{
-			list.setAttribute("aria-orientation", layout);
+			lists[j].setAttribute("aria-orientation", layout);
 		}
 
 		var buttons = document.querySelectorAll("[data-tab-layout]");

@@ -12,8 +12,11 @@
 {
 	"use strict";
 
+	var el = window.UI.el;
+	var copyText = window.UI.copyText;
+	var setHint = function () {};
+
 	var COPIED_RESET_MS = 1500;
-	var HINT_RESET_MS = 3000;
 
 	var GROUPS = [
 		{
@@ -104,66 +107,6 @@
 
 	var list = null;
 	var hint = null;
-	var defaultHint = "";
-	var hintTimer = null;
-
-	function setHint(message, isError)
-	{
-		if (hint === null)
-		{
-			return;
-		}
-
-		window.clearTimeout(hintTimer);
-		hint.textContent = message;
-		hint.classList.toggle("is-error", isError === true);
-
-		hintTimer = window.setTimeout(function ()
-		{
-			hint.textContent = defaultHint;
-			hint.classList.remove("is-error");
-		}, HINT_RESET_MS);
-	}
-
-	function copyText(text)
-	{
-		if (navigator.clipboard && navigator.clipboard.writeText)
-		{
-			return navigator.clipboard.writeText(text);
-		}
-
-		return new Promise(function (resolve, reject)
-		{
-			var helper = document.createElement("textarea");
-			helper.value = text;
-			helper.setAttribute("readonly", "");
-			helper.style.position = "fixed";
-			helper.style.top = "-1000px";
-			document.body.appendChild(helper);
-			helper.select();
-
-			var copied = false;
-			try
-			{
-				copied = document.execCommand("copy");
-			}
-			catch (err)
-			{
-				copied = false;
-			}
-
-			document.body.removeChild(helper);
-
-			if (copied)
-			{
-				resolve();
-			}
-			else
-			{
-				reject(new Error("copy command rejected"));
-			}
-		});
-	}
 
 	// The button confirms on itself, so feedback stays where the eye already is.
 	function makeCopyButton(command)
@@ -205,20 +148,6 @@
 	}
 
 	/* ---------- rendering ---------- */
-
-	function el(tag, className, text)
-	{
-		var node = document.createElement(tag);
-		if (className)
-		{
-			node.className = className;
-		}
-		if (text !== undefined)
-		{
-			node.textContent = text;
-		}
-		return node;
-	}
 
 	function makeItem(item)
 	{
@@ -322,15 +251,11 @@
 	{
 		list = document.getElementById("rc-list");
 		hint = document.getElementById("rc-hint");
+		setHint = window.UI.hint(hint);
 
 		if (list === null)
 		{
 			return;
-		}
-
-		if (hint !== null)
-		{
-			defaultHint = hint.textContent;
 		}
 
 		for (var i = 0; i < GROUPS.length; i++)

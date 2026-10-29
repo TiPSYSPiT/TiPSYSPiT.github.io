@@ -11,8 +11,11 @@
 {
 	"use strict";
 
+	var el = window.UI.el;
+	var copyText = window.UI.copyText;
+	var setHint = function () {};
+
 	var COPIED_RESET_MS = 1200;
-	var HINT_RESET_MS = 3000;
 
 	// KeyboardEvent.code mapped to the name CoD4 binds under, from the keynames
 	// table in cl_keys.cpp. Only keys that produce no character are listed:
@@ -382,54 +385,8 @@
 
 	var list = null, search = null, count = null, empty = null, hint = null;
 	var items = [];
-	var defaultHint = "", hintTimer = null;
 
 	/* ---------- helpers ---------- */
-
-	function el(tag, className, text)
-	{
-		var node = document.createElement(tag);
-		if (className) { node.className = className; }
-		if (text !== undefined) { node.textContent = text; }
-		return node;
-	}
-
-	function setHint(message, isError)
-	{
-		if (hint === null) { return; }
-		window.clearTimeout(hintTimer);
-		hint.textContent = message;
-		hint.classList.toggle("is-error", isError === true);
-		hintTimer = window.setTimeout(function ()
-		{
-			hint.textContent = defaultHint;
-			hint.classList.remove("is-error");
-		}, HINT_RESET_MS);
-	}
-
-	function copyText(text)
-	{
-		if (navigator.clipboard && navigator.clipboard.writeText)
-		{
-			return navigator.clipboard.writeText(text);
-		}
-
-		return new Promise(function (resolve, reject)
-		{
-			var helper = document.createElement("textarea");
-			helper.value = text;
-			helper.setAttribute("readonly", "");
-			helper.style.position = "fixed";
-			helper.style.opacity = "0";
-			document.body.appendChild(helper);
-			helper.select();
-
-			var ok = false;
-			try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
-			document.body.removeChild(helper);
-			if (ok) { resolve(); } else { reject(new Error("copy rejected")); }
-		});
-	}
 
 	/* ---------- rendering ---------- */
 
@@ -480,9 +437,13 @@
 		{
 			var refresh = function ()
 			{
-				// with no key there is nothing to bind to, so show the bare command
+				// with no key there is nothing to bind to, so show the bare command;
+				// a key name is one word, and a space, quote or semicolon in it
+				// would break the bind apart, so such a key binds nothing either
 				var typed = key.value.trim();
-				var line = typed === "" ? spec.text : 'bind ' + typed + ' "' + spec.text + '"';
+				var bad = /[\s";]/.test(typed);
+				key.classList.toggle("is-invalid", bad);
+				var line = typed === "" || bad ? spec.text : 'bind ' + typed + ' "' + spec.text + '"';
 				code.textContent = line;
 				if (button !== null)
 				{
@@ -658,9 +619,9 @@
 		count = document.getElementById("fq-count");
 		empty = document.getElementById("fq-empty");
 		hint = document.getElementById("fq-hint");
+		setHint = window.UI.hint(hint);
 
 		if (list === null || search === null) { return; }
-		if (hint !== null) { defaultHint = hint.textContent; }
 
 		render();
 		filter();
