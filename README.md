@@ -188,6 +188,31 @@ A click on a name copies `seta <name> "<default>"`.
 A link to the [CoD2 demo viewer](https://tipsyspit.github.io/cod2-demo/), a separate
 tool that replays a CoD2 demo in the browser, top-down in 2D or in the real map in 3D.
 
+### rcon
+
+An rcon reference for stock CoD2 1.3, CoD2x and zPAM, built like the CoD4 one:
+a copy button on every command, which copies it as `/rcon <command>`, with
+placeholders in square brackets. Searchable by command or description, with
+filters for the source and the category.
+
+- A short guide on top: `rcon_password` on the server, then `/rcon login`,
+  `/rcon <command>`, `/rcon host` and `/rcon logout`.
+- 66 commands (41 stock, 7 CoD2x, 18 zPAM) in players, chat, maps, match, bots,
+  server and debug, each with syntax, a description and an example. Two that
+  are easy to get wrong: `kick` also bans for `sv_kickBanTime` seconds (only
+  `onlykick` and `clientkick` don't), and `say` / `tell` exist only on a
+  dedicated server.
+- The gametypes and maps, stock and zPAM's map pack, one copy button each;
+  the parts of `pam_mode` and zPAM's examples.
+- zPAM's 48 server settings from its in-game rcon menu, with a warning: in its
+  match modes they go back to the rules' value at the next map.
+- Every command is proven by the CoD2 sources themselves: its registration in
+  the 1.3 executable (CoD2x's decompile, checked against the executable) and
+  the Mac build's named handlers, CoD2x's source, or zPAM's scripts and README.
+  Nothing from CoD4, CoD4x or Promod. The proofs are in the data, not shown.
+- `tools/build-cod2-rcon.py` builds `js/cod2/rcon-data.js` from a CoD2 install,
+  the CoD2x source and the zPAM source; it stops if a command can't be proven.
+
 ### FAQ
 
 Not written yet.
@@ -233,6 +258,8 @@ js/cod4/minimap/        minimap data: maps.js and icons.js, and one script per m
 js/cod2/game.js         CoD2 and its tabs
 js/cod2/dvars.js        the dvars tab
 js/cod2/dvars-data.js   the dvar list (dvars-proof.json: its proofs, not loaded)
+js/cod2/rcon.js         the rcon tab
+js/cod2/rcon-data.js    the rcon commands, with their proofs
 assets/cod4/            icons/cod4.ico and cod4.png (browser tab and game switcher,
                         from the CoD4 demo viewer), scoreboard/preview-bg.png
 assets/cod2/            icons/cod2.ico and cod2.png (from the CoD2 demo viewer)
@@ -240,7 +267,8 @@ tools/                  build-cod4-dvars.py rebuilds js/cod4/dvars-data.js from
                         CoD4, CoD4x and Promod X; build-minimap.py rebuilds
                         js/cod4/minimap/ from a CoD4 install and cod4-ff (needs
                         Pillow); build-cod2-dvars.py rebuilds js/cod2/dvars-data.js
-                        from CoD2, CoD2x and zPAM
+                        and build-cod2-rcon.py js/cod2/rcon-data.js, both from
+                        CoD2, CoD2x and zPAM
 ```
 
 `js/cod4/killfeed-icons.js` is built by `embed-icons.pl`, which is kept outside this

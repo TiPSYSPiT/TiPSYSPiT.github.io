@@ -1452,6 +1452,53 @@ a:hover
 	font-size: 12.5px;
 }
 
+/* CoD2 rcon: the same items, with a source badge beside the command. */
+.r2-head
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 8px;
+}
+
+.r2-head .d2-src
+{
+	margin-right: 0;
+}
+
+.r2-example code
+{
+	font-family: var(--mono);
+	font-size: 12.5px;
+	overflow-wrap: anywhere;
+}
+
+.r2-rules
+{
+	border-color: var(--orange);
+	color: var(--orange);
+	cursor: help;
+}
+
+.r2-warn
+{
+	padding: 8px 10px;
+	border-left: 3px solid var(--orange);
+	border-radius: var(--radius-sm);
+	background-color: var(--orange-tint);
+	color: var(--text);
+}
+
+/* .rc-item and .rc-cell set display, so the filter's hidden needs saying. */
+.r2-group[hidden],
+.r2-block[hidden],
+.r2-group .rc-item[hidden],
+.r2-group .rc-cell[hidden],
+.r2-group .rc-tokens [hidden]
+{
+	display: none;
+}
+
 /* ---------- dvar reference ---------- */
 
 .dv-bar

@@ -10,6 +10,7 @@ window.GAMES.push({
 	tabs: [
 		{ id: "tab-cod2-dvars", panel: "panel-cod2-dvars", label: "dvars", slug: "dvars" },
 		{ id: "tab-cod2-demos", panel: "panel-cod2-demos", label: "demos", slug: "demos" },
+		{ id: "tab-cod2-rcon", panel: "panel-cod2-rcon", label: "rcon", slug: "rcon" },
 		{ id: "tab-cod2-faq", panel: "panel-cod2-faq", label: "FAQ", slug: "faq" }
 	]
 });
