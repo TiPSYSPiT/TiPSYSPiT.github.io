@@ -32,6 +32,8 @@
 	<script src="js/cod2/dvars.js" defer></script>
 	<script src="js/cod2/rcon-data.js" defer></script>
 	<script src="js/cod2/rcon.js" defer></script>
+	<script src="js/cod2/name-data.js" defer></script>
+	<script src="js/cod2/namegen.js" defer></script>
 </head>
 
 <body>
@@ -538,6 +540,66 @@
 			<p class="dv-empty" id="r2-empty" hidden></p>
 
 			<div id="r2-list"></div>
+		</section>
+
+		<section class="panel" id="panel-cod2-name" role="tabpanel" aria-labelledby="tab-cod2-name" tabindex="0"
+			hidden>
+			<p class="lede">Build a player name with CoD2 color codes and see it the way the game draws it, in the
+				game's own font. Type the codes straight in, or click a color.</p>
+
+			<div class="card">
+				<div class="n2-edit">
+					<label class="n2-label" for="n2-input">Name</label>
+					<input class="n2-input" type="text" id="n2-input" value="^1clan^2.^1tag ^4playername"
+						spellcheck="false" autocomplete="off">
+					<div class="n2-palette" id="n2-palette" role="group" aria-label="Color codes"></div>
+				</div>
+
+				<div class="actions">
+					<div class="tools">
+						<button class="btn" type="button" id="n2-random-letters">Random colors per letter</button>
+						<button class="btn" type="button" id="n2-random-words">Random colors per word</button>
+						<button class="btn" type="button" id="n2-strip">Remove colors</button>
+					</div>
+					<label class="d2-check n2-team" for="n2-allies"><span class="d2-filter-label dv-first">^8
+							allies</span>
+						<select class="dv-select" id="n2-allies"></select>
+					</label>
+				</div>
+			</div>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Preview, as the server stores it</span>
+					<span class="n2-count" id="n2-count" aria-live="polite"></span>
+				</div>
+				<div class="n2-stage">
+					<canvas class="n2-canvas" id="n2-canvas" role="img" aria-describedby="n2-plain"></canvas>
+				</div>
+				<p class="n2-plain">Without colors: <code id="n2-plain"></code></p>
+			</div>
+
+			<ul class="n2-warnings" id="n2-warnings" hidden></ul>
+
+			<p class="hint" id="n2-hint" role="status"></p>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Console command</span>
+					<button class="btn btn-sm rc-copy" type="button" id="n2-copy">Copy</button>
+				</div>
+				<pre class="kf-output" id="n2-output"></pre>
+			</div>
+
+			<p class="n2-howto">In game, open the console (~) and paste the line with a slash in front:
+				<code>/seta name "&hellip;"</code>. Or put the line into your <code>config_mp.cfg</code>; the game
+				saves the name there anyway.</p>
+
+			<section class="rc-group">
+				<h2 class="rc-title">Presets</h2>
+				<p class="rc-note">Click "Use" to load one and change it from there.</p>
+				<div class="rc-grid n2-presets" id="n2-presets"></div>
+			</section>
 		</section>
 
 		<section class="panel" id="panel-cod2-faq" role="tabpanel" aria-labelledby="tab-cod2-faq" tabindex="0" hidden>

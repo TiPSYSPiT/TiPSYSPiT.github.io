@@ -213,6 +213,26 @@ filters for the source and the category.
 - `tools/build-cod2-rcon.py` builds `js/cod2/rcon-data.js` from a CoD2 install,
   the CoD2x source and the zPAM source; it stops if a command can't be proven.
 
+### name generator
+
+Type a name with color codes (`^1clan^2.^1tag ^4player`) and see it the way
+the game draws it, in CoD2's own font with its drop shadow; copy the
+`seta name "…"` line.
+
+- One button per color, `^1`–`^9`: it inserts the code at the cursor or colors
+  the selection. `^8` and `^9` are the team colors (allies, axis) and change per
+  map; pick the allies side to see theirs. Random colors per letter or word,
+  and presets to start from.
+- The preview and the command show the name as the server stores it: the
+  client drops `"` `;` `\`, the server removes `^0`, leading spaces, more than
+  3 spaces in a row and a trailing `^`, keeps at most 31 bytes (each `^X`
+  counts 2) and turns a name with nothing visible into `UnnamedPlayer`. The
+  counter shows the bytes; a warning says what changed and why, including
+  zPAM's rules for empty names and `[{…}]`.
+- Colors, team colors, rules and font come from the 1.3 game itself (renderer,
+  scoreboard script, `normalFont` and its texture) and zPAM.
+  `tools/build-cod2-names.py` builds `js/cod2/name-data.js` from them.
+
 ### FAQ
 
 Not written yet.
@@ -260,6 +280,8 @@ js/cod2/dvars.js        the dvars tab
 js/cod2/dvars-data.js   the dvar list (dvars-proof.json: its proofs, not loaded)
 js/cod2/rcon.js         the rcon tab
 js/cod2/rcon-data.js    the rcon commands, with their proofs
+js/cod2/namegen.js      the name generator
+js/cod2/name-data.js    its colors, team colors, name rules and the game font
 assets/cod4/            icons/cod4.ico and cod4.png (browser tab and game switcher,
                         from the CoD4 demo viewer), scoreboard/preview-bg.png
 assets/cod2/            icons/cod2.ico and cod2.png (from the CoD2 demo viewer)
@@ -267,7 +289,8 @@ tools/                  build-cod4-dvars.py rebuilds js/cod4/dvars-data.js from
                         CoD4, CoD4x and Promod X; build-minimap.py rebuilds
                         js/cod4/minimap/ from a CoD4 install and cod4-ff (needs
                         Pillow); build-cod2-dvars.py rebuilds js/cod2/dvars-data.js
-                        and build-cod2-rcon.py js/cod2/rcon-data.js, both from
+                        build-cod2-rcon.py js/cod2/rcon-data.js and
+                        build-cod2-names.py js/cod2/name-data.js, all from
                         CoD2, CoD2x and zPAM
 ```
 
