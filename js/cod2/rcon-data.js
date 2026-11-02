@@ -201,7 +201,7 @@ window.COD2_RCON = {
 				"Call_of_Duty_2_Multiplayer_MAC_1.3.c:286524",
 				"CoD2MP_s.exe@0x1abe78",
 				"CoD2MP_s.exe@0x1ac064",
-				"cod2x/README.md:132"
+				"cod2x/README.md:133"
 			]
 		},
 		{
@@ -217,7 +217,7 @@ window.COD2_RCON = {
 				"Call_of_Duty_2_Multiplayer_MAC_1.3.c:286550",
 				"CoD2MP_s.exe@0x1abe6c",
 				"CoD2MP_s.exe@0x1ac040",
-				"cod2x/README.md:132"
+				"cod2x/README.md:133"
 			]
 		},
 		{
@@ -721,9 +721,9 @@ window.COD2_RCON = {
 			"source": "cod2x",
 			"category": "players",
 			"proof": [
-				"cod2x/src/shared/server.cpp:1323",
-				"cod2x/src/shared/server.cpp:368",
-				"cod2x/README.md:132"
+				"cod2x/src/shared/server.cpp:1377",
+				"cod2x/src/shared/server.cpp:422",
+				"cod2x/README.md:133"
 			]
 		},
 		{
@@ -734,8 +734,8 @@ window.COD2_RCON = {
 			"source": "cod2x",
 			"category": "server",
 			"proof": [
-				"cod2x/src/shared/server.cpp:1326",
-				"cod2x/src/shared/server.cpp:1003"
+				"cod2x/src/shared/server.cpp:1380",
+				"cod2x/src/shared/server.cpp:1057"
 			]
 		},
 		{
@@ -812,7 +812,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam/source/maps/mp/gametypes/global/pam.gsc:17",
 				"zpam/source/maps/mp/gametypes/global/pam.gsc:70",
-				"zpam/source/maps/mp/gametypes/global/pam.gsc:451"
+				"zpam/source/maps/mp/gametypes/global/pam.gsc:453"
 			]
 		},
 		{
@@ -862,7 +862,7 @@ window.COD2_RCON = {
 			"category": "match",
 			"proof": [
 				"zpam/source/maps/mp/gametypes/_matchinfo.gsc:19",
-				"zpam/source/maps/mp/gametypes/_matchinfo.gsc:475"
+				"zpam/source/maps/mp/gametypes/_matchinfo.gsc:489"
 			]
 		},
 		{
@@ -874,7 +874,7 @@ window.COD2_RCON = {
 			"category": "match",
 			"proof": [
 				"zpam/source/maps/mp/gametypes/_matchinfo.gsc:20",
-				"zpam/source/maps/mp/gametypes/_matchinfo.gsc:586"
+				"zpam/source/maps/mp/gametypes/_matchinfo.gsc:600"
 			]
 		},
 		{
@@ -952,7 +952,7 @@ window.COD2_RCON = {
 			"category": "debug",
 			"proof": [
 				"zpam/source/maps/mp/gametypes/global/developer.gsc:11",
-				"zpam/README.md:795"
+				"zpam/README.md:832"
 			]
 		},
 		{
@@ -964,7 +964,7 @@ window.COD2_RCON = {
 			"category": "debug",
 			"proof": [
 				"zpam/source/maps/mp/gametypes/global/developer.gsc:12",
-				"zpam/README.md:809"
+				"zpam/README.md:846"
 			]
 		},
 		{
@@ -976,7 +976,7 @@ window.COD2_RCON = {
 			"category": "debug",
 			"proof": [
 				"zpam/source/maps/mp/gametypes/global/developer.gsc:7",
-				"zpam/README.md:847"
+				"zpam/README.md:884"
 			]
 		},
 		{
@@ -988,7 +988,7 @@ window.COD2_RCON = {
 			"category": "debug",
 			"proof": [
 				"zpam/source/maps/mp/gametypes/global/developer.gsc:10",
-				"zpam/README.md:875"
+				"zpam/README.md:912"
 			]
 		},
 		{
@@ -1000,7 +1000,7 @@ window.COD2_RCON = {
 			"category": "debug",
 			"proof": [
 				"zpam/source/maps/mp/gametypes/global/developer.gsc:8",
-				"zpam/README.md:900"
+				"zpam/README.md:937"
 			]
 		},
 		{
@@ -1067,7 +1067,7 @@ window.COD2_RCON = {
 			"name": "Hold the Flag",
 			"source": "zpam",
 			"proof": [
-				"zpam/README.md:1299",
+				"zpam/README.md:1336",
 				"zpam/source/maps/mp/gametypes/htf.gsc"
 			]
 		},
@@ -1076,7 +1076,7 @@ window.COD2_RCON = {
 			"name": "Retrieval",
 			"source": "zpam",
 			"proof": [
-				"zpam/README.md:1300",
+				"zpam/README.md:1337",
 				"zpam/source/maps/mp/gametypes/re.gsc"
 			]
 		},
@@ -1085,7 +1085,7 @@ window.COD2_RCON = {
 			"name": "Strat",
 			"source": "zpam",
 			"proof": [
-				"zpam/README.md:1301",
+				"zpam/README.md:1338",
 				"zpam/source/maps/mp/gametypes/strat.gsc"
 			]
 		}
@@ -1330,7 +1330,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_breakout_tls.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_breakout_tls.d3dbsp",
-				"zpam/README.md:746"
+				"zpam/README.md:783"
 			]
 		},
 		{
@@ -1349,7 +1349,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_burgundy_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_burgundy_fix.d3dbsp",
-				"zpam/README.md:742"
+				"zpam/README.md:779"
 			]
 		},
 		{
@@ -1368,7 +1368,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_carentan_bal.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_carentan_bal.d3dbsp",
-				"zpam/README.md:754"
+				"zpam/README.md:791"
 			]
 		},
 		{
@@ -1387,7 +1387,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_carentan_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_carentan_fix.d3dbsp",
-				"zpam/README.md:745"
+				"zpam/README.md:782"
 			]
 		},
 		{
@@ -1405,7 +1405,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_chelm_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_chelm_fix.d3dbsp",
-				"zpam/README.md:747"
+				"zpam/README.md:784"
 			]
 		},
 		{
@@ -1424,7 +1424,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_crossroads.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_crossroads.d3dbsp",
-				"zpam/README.md:753"
+				"zpam/README.md:790"
 			]
 		},
 		{
@@ -1443,7 +1443,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_dawnville_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_dawnville_fix.d3dbsp",
-				"zpam/README.md:743"
+				"zpam/README.md:780"
 			]
 		},
 		{
@@ -1462,7 +1462,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_dawnville_sun.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_dawnville_sun.d3dbsp",
-				"zpam/README.md:752"
+				"zpam/README.md:789"
 			]
 		},
 		{
@@ -1482,7 +1482,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_leningrad_mjr.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_leningrad_mjr.d3dbsp",
-				"zpam/README.md:756"
+				"zpam/README.md:793"
 			]
 		},
 		{
@@ -1500,7 +1500,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_leningrad_tls.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_leningrad_tls.d3dbsp",
-				"zpam/README.md:751"
+				"zpam/README.md:788"
 			]
 		},
 		{
@@ -1519,7 +1519,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_matmata_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_matmata_fix.d3dbsp",
-				"zpam/README.md:744"
+				"zpam/README.md:781"
 			]
 		},
 		{
@@ -1539,7 +1539,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_railyard_mjr.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_railyard_mjr.d3dbsp",
-				"zpam/README.md:755"
+				"zpam/README.md:792"
 			]
 		},
 		{
@@ -1558,7 +1558,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_toujane_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_toujane_fix.d3dbsp",
-				"zpam/README.md:741"
+				"zpam/README.md:778"
 			]
 		},
 		{
@@ -1577,7 +1577,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_trainstation_bhg.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_trainstation_bhg.d3dbsp",
-				"zpam/README.md:757"
+				"zpam/README.md:794"
 			]
 		},
 		{
@@ -1596,7 +1596,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_trainstation_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_trainstation_fix.d3dbsp",
-				"zpam/README.md:749"
+				"zpam/README.md:786"
 			]
 		},
 		{
@@ -1615,7 +1615,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/mp_vallente_fix.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/mp_vallente_fix.d3dbsp",
-				"zpam/README.md:750"
+				"zpam/README.md:787"
 			]
 		},
 		{
@@ -1630,7 +1630,7 @@ window.COD2_RCON = {
 			"proof": [
 				"zpam_maps_v7.iwd:mp/wawa_3daim.arena:1",
 				"zpam_maps_v7.iwd:maps/mp/wawa_3daim.d3dbsp",
-				"zpam/README.md:748"
+				"zpam/README.md:785"
 			]
 		}
 	],
@@ -1639,85 +1639,85 @@ window.COD2_RCON = {
 			{
 				"name": "pub",
 				"desc": "Public: the server's own settings.",
-				"proof": "zpam/README.md:1320",
+				"proof": "zpam/README.md:1357",
 				"kind": "mode"
 			},
 			{
 				"name": "comp",
 				"desc": "Competitive: 6 seconds strat time, auto recording, team names, ready-up time limit.",
-				"proof": "zpam/README.md:1321",
+				"proof": "zpam/README.md:1358",
 				"kind": "mode"
 			},
 			{
 				"name": "warmup",
 				"desc": "No ready-up, for warming up before a match (DM only).",
-				"proof": "zpam/README.md:1322",
+				"proof": "zpam/README.md:1359",
 				"kind": "mode"
 			},
 			{
 				"name": "mr3, mr10, mr12, mr15",
 				"desc": "Max rounds (S&D and Retrieval only).",
-				"proof": "zpam/README.md:1329",
+				"proof": "zpam/README.md:1366",
 				"kind": "score"
 			},
 			{
 				"name": "20rounds",
 				"desc": "First team to 21 wins (S&D and Retrieval only).",
-				"proof": "zpam/README.md:1330",
+				"proof": "zpam/README.md:1367",
 				"kind": "score"
 			},
 			{
 				"name": "10min, 15min, 30min, 60min, unlim",
 				"desc": "Total time limit (TDM, DM, HQ, CTF and HTF only).",
-				"proof": "zpam/README.md:1331",
+				"proof": "zpam/README.md:1368",
 				"kind": "score"
 			},
 			{
 				"name": "2v2",
 				"desc": "Scoped weapons and shotguns are disabled.",
-				"proof": "zpam/README.md:1337",
+				"proof": "zpam/README.md:1374",
 				"kind": "option"
 			},
 			{
 				"name": "rifle",
 				"desc": "Bolt-action rifles and snipers only, no grenades, no weapon drop.",
-				"proof": "zpam/README.md:1338",
+				"proof": "zpam/README.md:1375",
 				"kind": "option"
 			},
 			{
 				"name": "russian",
 				"desc": "The Russian side is used on Russian maps.",
-				"proof": "zpam/README.md:1339",
+				"proof": "zpam/README.md:1376",
 				"kind": "option"
 			},
 			{
 				"name": "draw",
 				"desc": "No overtime.",
-				"proof": "zpam/README.md:1340",
+				"proof": "zpam/README.md:1377",
 				"kind": "option"
 			},
 			{
 				"name": "lan",
 				"desc": "No ready-up warnings.",
-				"proof": "zpam/README.md:1341",
+				"proof": "zpam/README.md:1378",
 				"kind": "option"
 			},
 			{
 				"name": "custom",
 				"desc": "Custom ruleset.",
-				"proof": "zpam/README.md:1342",
+				"proof": "zpam/README.md:1379",
 				"kind": "option"
 			},
 			{
 				"name": "na",
 				"desc": "North American ruleset.",
-				"proof": "zpam/README.md:1343",
+				"proof": "zpam/README.md:1380",
 				"kind": "option"
 			},
 			{
 				"name": "sa",
 				"desc": "South American ruleset.",
-				"proof": "zpam/README.md:1344",
+				"proof": "zpam/README.md:1381",
 				"kind": "option"
 			}
 		],
@@ -1725,57 +1725,57 @@ window.COD2_RCON = {
 			{
 				"mode": "pub",
 				"desc": "Public mode (custom settings).",
-				"proof": "zpam/README.md:1352"
+				"proof": "zpam/README.md:1389"
 			},
 			{
 				"mode": "comp",
 				"desc": "Competitive mode.",
-				"proof": "zpam/README.md:1353"
+				"proof": "zpam/README.md:1390"
 			},
 			{
 				"mode": "comp_mr3",
 				"desc": "Competitive mode with max round 4.",
-				"proof": "zpam/README.md:1354"
+				"proof": "zpam/README.md:1391"
 			},
 			{
 				"mode": "comp_custom",
 				"desc": "Competitive mode for team mix.",
-				"proof": "zpam/README.md:1355"
+				"proof": "zpam/README.md:1392"
 			},
 			{
 				"mode": "comp_custom_russian",
 				"desc": "Competitive mode for team mix, russian side on russian maps.",
-				"proof": "zpam/README.md:1356"
+				"proof": "zpam/README.md:1393"
 			},
 			{
 				"mode": "comp_2v2",
 				"desc": "Competitive mode, scope and shotgun disabled.",
-				"proof": "zpam/README.md:1357"
+				"proof": "zpam/README.md:1394"
 			},
 			{
 				"mode": "comp_rifle",
 				"desc": "Competitive mode, bolt action and sniper only.",
-				"proof": "zpam/README.md:1358"
+				"proof": "zpam/README.md:1395"
 			},
 			{
 				"mode": "comp_rifle_2v2",
 				"desc": "Competitive mode, bolt action only, sniper disabled.",
-				"proof": "zpam/README.md:1359"
+				"proof": "zpam/README.md:1396"
 			},
 			{
 				"mode": "comp_lan",
 				"desc": "Competitive mode on LAN, no readyup time limits.",
-				"proof": "zpam/README.md:1360"
+				"proof": "zpam/README.md:1397"
 			},
 			{
 				"mode": "comp_na",
 				"desc": "Competitive mode with North American ruleset.",
-				"proof": "zpam/README.md:1361"
+				"proof": "zpam/README.md:1398"
 			},
 			{
 				"mode": "comp_sa",
 				"desc": "Competitive mode with South American ruleset.",
-				"proof": "zpam/README.md:1362"
+				"proof": "zpam/README.md:1399"
 			}
 		]
 	},

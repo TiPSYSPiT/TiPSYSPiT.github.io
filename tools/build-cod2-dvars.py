@@ -1097,7 +1097,9 @@ def protection(e, flags, cheat, x_prot, z_prot):
 def clean_md(text):
     text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)            # images
     text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)         # links
-    text = text.replace("**", "").replace("`", "")
+    # Bold marks go, but not inside `code` (a masked IP is written **.***.***.***).
+    parts = text.split("`")
+    text = "".join(p if i % 2 else p.replace("**", "") for i, p in enumerate(parts))
     text = re.sub(r"<br\s*/?>", " ", text)
     text = re.sub(r"\s+", " ", text).strip(" -;:")
     return text[0].upper() + text[1:] if text else text
@@ -1109,7 +1111,7 @@ def readme_descriptions(path):
     Recognised forms (CoD2x and zPAM write them like this):
       - `name` - text
       - `name 1` - text            (one line per value: "1: text; 2: text")
-      - New cvar `name` to text / ... via new cvar `name` / ... using new cvar `name`
+      - New [client|server] cvar `name` to text / ... via new cvar `name` / ... using new cvar `name`
       - Text (`name`)
       | **Title** - text<br>`name` | ...   (zPAM's settings table)
     """
@@ -1127,7 +1129,7 @@ def readme_descriptions(path):
         if m:
             values.setdefault(m.group(1).lower(), []).append(m.group(2) + ": " + clean_md(m.group(3)))
             continue
-        m = re.match(r"\s*[-*]\s*New cvar `(" + NAME_RE + r")`\s+(?:to\s+)?(.+)$", line)
+        m = re.match(r"\s*[-*]\s*New (?:client |server )?cvar `(" + NAME_RE + r")`\s+(?:to\s+)?(.+)$", line)
         if m:
             out.setdefault(m.group(1).lower(), clean_md(m.group(2)))
             continue

@@ -145,7 +145,7 @@ config line and the console command, with a copy button on each.
 
 ### dvars
 
-Every CoD2 dvar from the stock 1.3 game, CoD2x and zPAM (1243), searchable by
+Every CoD2 dvar from the stock 1.3 game, CoD2x and zPAM (1244), searchable by
 name or description, sortable by name, with filters for the protection and for
 each source. Columns: name, default, min, max, type, description, source.
 A click on a name copies `seta <name> "<default>"`.
@@ -224,11 +224,13 @@ the game draws it, in CoD2's own font with its drop shadow; copy the
   map; pick the allies side to see theirs. Random colors per letter or word,
   and presets to start from.
 - The preview and the command show the name as the server stores it: the
-  client drops `"` `;` `\`, the server removes `^0`, leading spaces, more than
+  client drops `"` `;` `\` and turns `%` into `.`, the server removes `^0`,
+  leading spaces, more than
   3 spaces in a row and a trailing `^`, keeps at most 31 bytes (each `^X`
   counts 2) and turns a name with nothing visible into `UnnamedPlayer`. The
   counter shows the bytes; a warning says what changed and why, including
-  zPAM's rules for empty names and `[{…}]`.
+  zPAM's rules for empty names and `[{…}]`. The colors show on the scoreboard;
+  chat and the name above a player show it without them, in the team color.
 - Colors, team colors, rules and font come from the 1.3 game itself (renderer,
   scoreboard script, `normalFont` and its texture) and zPAM.
   `tools/build-cod2-names.py` builds `js/cod2/name-data.js` from them.

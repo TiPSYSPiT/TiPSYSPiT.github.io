@@ -134,6 +134,14 @@ def name_rules(cod2x, zpam, mac_lines):
 	_, info = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "if ( v9 != 34 && v9 != 59 && v9 != 92 )")
 	_, color_index = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "ColorIndex/*DEFINITION*/")
 	_, name_dvar = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", '"name", "Unknown Soldier", 0x1003u')
+	# Reliable commands (userinfo, configstrings) carry no '%': it becomes '.'.
+	r, _ = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "MSG_WriteReliableCommandToBuffer/*DEFINITION*/")
+	_, percent = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "if ( (_BYTE)v6 != 37 )", r)
+	# Chat and crosshair names go through I_CleanStr: no single color codes there.
+	s, _ = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "G_Say/*DEFINITION*/")
+	_, chat = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "I_CleanStr(", s)
+	c, _ = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "CG_DrawCrosshairNames/*DEFINITION*/")
+	_, crosshair = find_line(mac_lines, "Call_of_Duty_2_Multiplayer_MAC_1.3.c", "I_CleanStr(", c)
 	cb = "source/maps/mp/gametypes/_callbacksetup.gsc"
 	zl = lines_of(os.path.join(zpam, cb))
 	_, empty = find_line(zl, "zpam/" + cb, 'kicked due to using empty name!')
@@ -145,6 +153,8 @@ def name_rules(cod2x, zpam, mac_lines):
 			"maxBytes": size,
 			"zeroDropped": zero,
 			"stripped": info,
+			"percent": percent,
+			"chatClean": [chat, crosshair],
 			"colorIndex": color_index,
 			"nameDvar": name_dvar,
 			"zpamEmpty": empty,

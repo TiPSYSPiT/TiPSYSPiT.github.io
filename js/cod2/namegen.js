@@ -4,7 +4,8 @@
  * js/cod2/name-data.js (built by tools/build-cod2-names.py).
  *
  * What the game does with a name, mirrored here:
- *   - The client drops " ; \ from userinfo values (Info_SetValueForKey).
+ *   - The client drops " ; \ from userinfo values (Info_SetValueForKey), and
+ *     reliable commands turn % into . (MSG_WriteReliableCommandToBuffer).
  *   - The server cleans the name (ClientCleanName, CoD2MP_s.exe 1.3): leading
  *     spaces go, more than 3 spaces in a row are cut to 3, ^0 is removed, a ^ at
  *     the end is dropped, at most 31 bytes are kept with ^X counting 2, and a
@@ -71,6 +72,11 @@
 			{
 				notes.stripped = true;
 				continue;
+			}
+			if (c === "%")
+			{
+				notes.percent = true;
+				c = ".";
 			}
 			if (c < " " || !font.glyphs[c])
 			{
@@ -317,6 +323,10 @@
 		if (notes.stripped)
 		{
 			list.push("The game removes \" ; and \\ from names.");
+		}
+		if (notes.percent)
+		{
+			list.push("The game turns % into . in names.");
 		}
 		if (notes.unsupported)
 		{
