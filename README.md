@@ -143,9 +143,114 @@ config line and the console command, with a copy button on each.
 
 ## CoD2
 
+The tabs, in order: name generator, chat generator, config checker, server
+config, maps, dvars, rcon, demos, FAQ. Everything comes from the CoD2 1.3 game,
+CoD2x and zPAM themselves; nothing from CoD4.
+
+### name generator
+
+Type a name with color codes (`^1clan^2.^1tag ^4player`) and see it the way
+the game draws it, in CoD2's own font with its drop shadow; copy the
+`seta name "…"` line.
+
+- One button per color, `^1`–`^9`: it inserts the code at the cursor or colors
+  the selection. `^8` and `^9` are the team colors (allies, axis) and change per
+  map; pick the allies side to see theirs. Random colors per letter or word,
+  and presets to start from.
+- The preview and the command show the name as the server stores it: the
+  client drops `"` `;` `\` and turns `%` into `.`, the server removes `^0`,
+  leading spaces, more than 3 spaces in a row and a trailing `^`, keeps at most
+  31 bytes (each `^X` counts 2) and turns a name with nothing visible into
+  `UnnamedPlayer`. The counter shows the bytes; a warning says what changed and
+  why, including zPAM's rules for empty names and `[{…}]`. The colors show on
+  the scoreboard; chat and the name above a player show it without them, in
+  the team color.
+- Colors, team colors, rules and font come from the 1.3 game itself (renderer,
+  scoreboard script, `normalFont` and its texture) and zPAM.
+
+### chat generator
+
+Colored `say` / `say_team` messages as binds, previewed the way the chat shows
+them.
+
+- One row per message: bind key (checked against the game's key names, empty
+  for a plain chat line), `say` or `say_team`, the text with its byte counter.
+  The palette and the random colors work on the message being edited; the
+  output is one `bind F5 "say …"` line per message.
+- The preview is the chat line the others see, in the game's font: the name in
+  the team color, `(Dead)` and `(Allies)` / `(Axis)` where they apply, the text
+  white for `say` and cyan for `say_team`, wrapped after 90 characters like the
+  game does.
+- `"` and `;` are left out (they would end the bind or the command), `//` or
+  `/*` ends the message (a comment), `%` becomes `.`, spaces in a row become
+  one, and the server keeps at most 149 bytes; each comes with a warning.
+
+### config checker
+
+Paste a config or load a `.cfg` (it is only read in the browser) and see what
+the game does with every line.
+
+- Syntax errors (open quotes, `set` without a value, bind keys that do not
+  exist), unknown dvars and commands with a "did you mean", values the game
+  rejects (out of range, not a number, not one of the choices), read-only and
+  write-protected dvars, cheat protected ones (orange: no effect without
+  `sv_cheats 1`), what zPAM and CoD2x set or lock, duplicates (only values the
+  game takes count) and latched dvars that change after a restart.
+- A summary with a count per kind that filters the list, a search, the line
+  number of each finding to jump to it.
+- The config with the problem lines commented out (`// [reason]`), to copy or
+  download; unknown dvars stay, since a mod may use them.
+- The rules are the engine's (how it sets a dvar, reads numbers and enum
+  values, splits a line), the commands are every command the game registers
+  (`js/cod2/config-data.js`, built by `tools/build-cod2-config.py`).
+
+### server config
+
+A form that writes a `server.cfg` for a zPAM server, with comments.
+
+- Server info, passwords, downloads, network, CoD2x and logging, with the
+  game's defaults and ranges and zPAM's recommended values. Passwords are never
+  filled in: they start as `CHANGE_ME`, with a warning while they are.
+- `pam_mode` from gametype, mode, score and options, with what each part means
+  and the list of settings it sets at every map start, read from zPAM's rules
+  files; fields the mode overwrites are marked. For `pub` the match settings of
+  the gametype are part of the form.
+- The map rotation: stock maps and zPAM's map pack, a gametype per map, ordered
+  by drag and drop or the arrow buttons; `sv_mapRotation` and `map_rotate` in
+  the output. Warnings for maps zPAM replaces with a `_fix` version, a
+  `pam_mode` a gametype does not take, and more.
+- Copy or download the `server.cfg`; nothing is stored or sent.
+- `js/cod2/server-data.js` is built by `tools/build-cod2-server.py` from zPAM.
+
+### maps
+
+The 15 stock maps as cards: loading screen, name, internal name to copy,
+gametypes (the ones zPAM adds marked). Search and a gametype filter.
+
+- The detail view has the large loading screen, the allies side, the
+  `/rcon map` command (and the zPAM `_fix` version's), the map from above (a
+  top-down render, and zPAM's radar where it has one) and what zPAM changes:
+  the `_fix` version it switches to, the gametypes it adds, the kill triggers
+  it can remove, British instead of Russians.
+- **Tactics** in the detail view opens a drawing board on the map from above,
+  for presenting a tactic: arrows (straight, bent, dashed), pen, line,
+  rectangle, ellipse, filled area, text, numbered Attack / Defence players,
+  smoke, frag and flash with throw paths, view cones, a laser pointer and an
+  eraser; colors, width, opacity, undo / redo. Phases (add, copy, rename,
+  reorder, delete, ← →, onion skin, play), fullscreen, hidden toolbars and a
+  cursor highlight for screen sharing. Every phase exports as PNG
+  (`mp_toujane_tactics_phase1.png`). Nothing is saved: the drawing is gone when
+  the board closes. Mouse, pen and touch (`js/cod2/tactics.js`).
+- `tools/build-cod2-maps.py` (needs Pillow) builds `js/cod2/maps-data.js` and
+  the images in `assets/cod2/maps/`: the loading screens from the game's
+  `.iwi` files, zPAM's radar images, and the top-down renders of the CoD2 demo
+  viewer's map export. For the tactics board it also writes one script per map
+  in `js/cod2/maps/` with the images as data URLs: a canvas that draws an
+  image loaded from `file://` can not be exported, one from a data URL can.
+
 ### dvars
 
-Every CoD2 dvar from the stock 1.3 game, CoD2x and zPAM (1244), searchable by
+Every CoD2 dvar from the stock 1.3 game, CoD2x and zPAM (1246), searchable by
 name or description, sortable by name, with filters for the protection and for
 each source. Columns: name, default, min, max, type, description, source.
 A click on a name copies `seta <name> "<default>"`.
@@ -183,11 +288,6 @@ A click on a name copies `seta <name> "<default>"`.
 - `tools/build-cod2-dvars.py` builds both files from a CoD2 install, the CoD2x
   source and the zPAM source.
 
-### demos
-
-A link to the [CoD2 demo viewer](https://tipsyspit.github.io/cod2-demo/), a separate
-tool that replays a CoD2 demo in the browser, top-down in 2D or in the real map in 3D.
-
 ### rcon
 
 An rcon reference for stock CoD2 1.3, CoD2x and zPAM, built like the CoD4 one:
@@ -213,31 +313,16 @@ filters for the source and the category.
 - `tools/build-cod2-rcon.py` builds `js/cod2/rcon-data.js` from a CoD2 install,
   the CoD2x source and the zPAM source; it stops if a command can't be proven.
 
-### name generator
+### demos
 
-Type a name with color codes (`^1clan^2.^1tag ^4player`) and see it the way
-the game draws it, in CoD2's own font with its drop shadow; copy the
-`seta name "…"` line.
-
-- One button per color, `^1`–`^9`: it inserts the code at the cursor or colors
-  the selection. `^8` and `^9` are the team colors (allies, axis) and change per
-  map; pick the allies side to see theirs. Random colors per letter or word,
-  and presets to start from.
-- The preview and the command show the name as the server stores it: the
-  client drops `"` `;` `\` and turns `%` into `.`, the server removes `^0`,
-  leading spaces, more than
-  3 spaces in a row and a trailing `^`, keeps at most 31 bytes (each `^X`
-  counts 2) and turns a name with nothing visible into `UnnamedPlayer`. The
-  counter shows the bytes; a warning says what changed and why, including
-  zPAM's rules for empty names and `[{…}]`. The colors show on the scoreboard;
-  chat and the name above a player show it without them, in the team color.
-- Colors, team colors, rules and font come from the 1.3 game itself (renderer,
-  scoreboard script, `normalFont` and its texture) and zPAM.
-  `tools/build-cod2-names.py` builds `js/cod2/name-data.js` from them.
+A link to the [CoD2 demo viewer](https://tipsyspit.github.io/cod2-demo/), a separate
+tool that replays a CoD2 demo in the browser, top-down in 2D or in the real map in 3D.
 
 ### FAQ
 
-Not written yet.
+Short answers: which tab is for what, how to use a line in game, where the
+config is, why name colors are gone in chat, what `^8` and `^9` show, why a
+setting does not stick, and how to set up a zPAM server.
 
 ## Adding a tool
 
@@ -282,18 +367,45 @@ js/cod2/dvars.js        the dvars tab
 js/cod2/dvars-data.js   the dvar list (dvars-proof.json: its proofs, not loaded)
 js/cod2/rcon.js         the rcon tab
 js/cod2/rcon-data.js    the rcon commands, with their proofs
+js/cod2/text.js         colored text in the game's font, the color palette and the
+                        editing helpers, shared by the name and chat generators
 js/cod2/namegen.js      the name generator
-js/cod2/name-data.js    its colors, team colors, name rules and the game font
+js/cod2/chatgen.js      the chat generator
+js/cod2/name-data.js    colors, team colors, name and chat rules, key names and the
+                        game font
+js/cod2/configcheck.js  the config checker
+js/cod2/config-data.js  every console command of the game and CoD2x
+js/cod2/serverconfig.js the server config
+js/cod2/server-data.js  what each zPAM pam_mode sets, zPAM's example values
+js/cod2/maps.js         the maps tab
+js/cod2/maps-data.js    the stock maps and what zPAM changes on them
+js/cod2/tactics.js      the tactics board of the maps tab
+js/cod2/maps/           one script per map with its overhead images for the board,
+                        loaded when the board opens that map
 assets/cod4/            icons/cod4.ico and cod4.png (browser tab and game switcher,
                         from the CoD4 demo viewer), scoreboard/preview-bg.png
-assets/cod2/            icons/cod2.ico and cod2.png (from the CoD2 demo viewer)
+assets/cod2/            icons/cod2.ico and cod2.png (from the CoD2 demo viewer),
+                        maps/: loading screens, top-down renders and zPAM radars
 tools/                  build-cod4-dvars.py rebuilds js/cod4/dvars-data.js from
                         CoD4, CoD4x and Promod X; build-minimap.py rebuilds
                         js/cod4/minimap/ from a CoD4 install and cod4-ff (needs
-                        Pillow); build-cod2-dvars.py rebuilds js/cod2/dvars-data.js
-                        build-cod2-rcon.py js/cod2/rcon-data.js and
-                        build-cod2-names.py js/cod2/name-data.js, all from
-                        CoD2, CoD2x and zPAM
+                        Pillow). For CoD2, from CoD2, CoD2x and zPAM:
+                        build-cod2-dvars.py, build-cod2-rcon.py,
+                        build-cod2-names.py, build-cod2-config.py,
+                        build-cod2-server.py and build-cod2-maps.py (needs
+                        Pillow and the cod2-demo map export) rebuild the
+                        js/cod2/*-data.js files and assets/cod2/maps/
+```
+
+To rebuild the CoD2 data (Python 3.10+, run from the project root):
+
+```
+python tools/build-cod2-dvars.py  --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3>
+python tools/build-cod2-rcon.py   --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3>
+python tools/build-cod2-names.py  --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3>
+python tools/build-cod2-config.py --cod2 <CoD2> --cod2x <CoD2x>
+python tools/build-cod2-server.py --zpam <zpam3>
+python tools/build-cod2-maps.py   --cod2 <CoD2> --zpam <zpam3> --cod2demo <cod2-demo>
 ```
 
 `js/cod4/killfeed-icons.js` is built by `embed-icons.pl`, which is kept outside this

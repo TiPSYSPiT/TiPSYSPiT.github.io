@@ -1119,8 +1119,20 @@ def readme_descriptions(path):
         return {}
     out = OrderedDict()
     values = OrderedDict()
+    skip_level = 0
     for line in open(path, encoding="utf-8", errors="replace"):
         line = line.rstrip()
+        # The server log section lists log fields ("`name` - nickname"), not dvars.
+        h = re.match(r"(#+)\s+(.*)", line)
+        if h:
+            level = len(h.group(1))
+            if skip_level and level <= skip_level:
+                skip_level = 0
+            if re.match(r"server log\b", h.group(2), re.I):
+                skip_level = level
+            continue
+        if skip_level:
+            continue
         m = re.match(r"\s*[-*]\s*`(" + NAME_RE + r")`\s+-\s+(.+)$", line)
         if m:
             out.setdefault(m.group(1).lower(), clean_md(m.group(2)))

@@ -33,7 +33,16 @@
 	<script src="js/cod2/rcon-data.js" defer></script>
 	<script src="js/cod2/rcon.js" defer></script>
 	<script src="js/cod2/name-data.js" defer></script>
+	<script src="js/cod2/text.js" defer></script>
 	<script src="js/cod2/namegen.js" defer></script>
+	<script src="js/cod2/chatgen.js" defer></script>
+	<script src="js/cod2/config-data.js" defer></script>
+	<script src="js/cod2/configcheck.js" defer></script>
+	<script src="js/cod2/server-data.js" defer></script>
+	<script src="js/cod2/serverconfig.js" defer></script>
+	<script src="js/cod2/maps-data.js" defer></script>
+	<script src="js/cod2/maps.js" defer></script>
+	<script src="js/cod2/tactics.js" defer></script>
 </head>
 
 <body>
@@ -603,12 +612,259 @@
 			</section>
 		</section>
 
+		<section class="panel" id="panel-cod2-chat" role="tabpanel" aria-labelledby="tab-cod2-chat" tabindex="0"
+			hidden>
+			<p class="lede">Colored chat messages for binds: type the codes or click a color, see the lines the way
+				the chat shows them, and copy the binds. Leave the key empty for a plain chat command.</p>
+
+			<div class="card">
+				<div class="n2-edit">
+					<span class="n2-label">Messages</span>
+					<div class="c2-list" id="c2-list"></div>
+					<div class="n2-palette" id="c2-palette" role="group" aria-label="Color codes"></div>
+				</div>
+
+				<div class="actions">
+					<div class="tools">
+						<button class="btn" type="button" id="c2-add">Add message</button>
+						<button class="btn" type="button" id="c2-random-letters">Random colors per letter</button>
+						<button class="btn" type="button" id="c2-random-words">Random colors per word</button>
+						<button class="btn" type="button" id="c2-strip">Remove colors</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Chat preview</span>
+					<span class="n2-count" id="c2-count" aria-live="polite"></span>
+				</div>
+				<div class="c2-options">
+					<label class="d2-check" for="c2-name"><span class="d2-filter-label dv-first">Your name</span>
+						<input class="c2-key c2-name" type="text" id="c2-name" value="Player" spellcheck="false"
+							autocomplete="off">
+					</label>
+					<label class="d2-check" for="c2-team"><span class="d2-filter-label">Team</span>
+						<select class="dv-select" id="c2-team">
+							<option value="allies">Allies</option>
+							<option value="axis">Axis</option>
+						</select>
+					</label>
+					<label class="d2-check"><input type="checkbox" id="c2-dead"> dead</label>
+					<label class="d2-check" for="c2-allies"><span class="d2-filter-label">^8 allies</span>
+						<select class="dv-select" id="c2-allies"></select>
+					</label>
+				</div>
+				<div class="n2-stage">
+					<canvas class="n2-canvas" id="c2-canvas" role="img" aria-label="Chat preview"></canvas>
+				</div>
+			</div>
+
+			<ul class="n2-warnings" id="c2-warnings" hidden></ul>
+
+			<p class="hint" id="c2-hint" role="status"></p>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Binds</span>
+					<button class="btn btn-sm rc-copy" type="button" id="c2-copy">Copy</button>
+				</div>
+				<pre class="kf-output" id="c2-output"></pre>
+			</div>
+
+			<p class="n2-howto">Paste a line into the console (~) with a slash in front, or put the lines into your
+				<code>config_mp.cfg</code>. A message keeps at most 149 bytes, each color code counts 2. In
+				<code>say_team</code> the message is cyan and only your team sees it; spectators always chat to
+				everyone.</p>
+		</section>
+
+		<section class="panel" id="panel-cod2-config" role="tabpanel" aria-labelledby="tab-cod2-config" tabindex="0"
+			hidden>
+			<p class="lede">Paste a CoD2 config or load a .cfg file to see what the game will do with every line: unknown
+				dvars, values it rejects, cheat protected dvars, what zPAM or CoD2x overwrite, duplicates and broken
+				lines. The config stays in your browser; nothing is uploaded or stored.</p>
+
+			<div class="card">
+				<label class="visually-hidden" for="k2-input">Config</label>
+				<textarea class="k2-input" id="k2-input" rows="14" wrap="off" spellcheck="false" autocomplete="off"
+					placeholder="unbindall&#10;bind TAB &quot;+scores&quot;&#10;seta name &quot;^1Player&quot;&#10;..."></textarea>
+
+				<div class="actions">
+					<div class="tools">
+						<input class="visually-hidden" type="file" id="k2-file" accept=".cfg,.txt">
+						<button class="btn" type="button" id="k2-load">Load .cfg</button>
+						<button class="btn" type="button" id="k2-example">Example</button>
+						<button class="btn" type="button" id="k2-clear">Clear</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="k2-summary" id="k2-summary" role="group" aria-label="Findings by category"></div>
+
+			<div class="dv-bar">
+				<label class="visually-hidden" for="k2-search">Filter findings</label>
+				<input class="dv-search" type="search" id="k2-search" placeholder="Filter by dvar, command or text&hellip;"
+					spellcheck="false" autocomplete="off">
+				<span class="dv-count" id="k2-count" aria-live="polite"></span>
+			</div>
+
+			<p class="hint" id="k2-hint" role="status"></p>
+
+			<p class="dv-empty" id="k2-empty" hidden></p>
+
+			<ul class="k2-results" id="k2-results"></ul>
+
+			<div class="kf-out">
+				<div class="kf-out-head">
+					<span class="kf-out-title">Config with problems commented out</span>
+					<span class="k2-out-tools">
+						<button class="btn btn-sm rc-copy" type="button" id="k2-copy">Copy</button>
+						<button class="btn btn-sm" type="button" id="k2-download">Download</button>
+					</span>
+				</div>
+				<pre class="kf-output k2-cleaned" id="k2-cleaned"></pre>
+			</div>
+
+			<p class="n2-howto">Lines with a syntax error, an invalid value, a locked (read-only or write-protected) or cheat protected dvar, and
+				the earlier copies of duplicates get <code>// [reason]</code> in front. Unknown dvars stay, since a mod
+				may use them.</p>
+		</section>
+
+		<section class="panel" id="panel-cod2-server" role="tabpanel" aria-labelledby="tab-cod2-server" tabindex="0"
+			hidden>
+			<p class="lede">Fill in the form and get a server.cfg for a zPAM server, with comments that explain each
+				part. Defaults and ranges come from the game, recommended values from zPAM's own example.</p>
+
+			<div class="s2-layout">
+				<div class="s2-form" id="s2-form"></div>
+
+				<div class="s2-side">
+					<ul class="n2-warnings" id="s2-warnings" hidden></ul>
+
+					<p class="hint" id="s2-hint" role="status"></p>
+
+					<div class="kf-out s2-out">
+						<div class="kf-out-head">
+							<span class="kf-out-title">server.cfg</span>
+							<span class="k2-out-tools">
+								<button class="btn btn-sm rc-copy" type="button" id="s2-copy">Copy</button>
+								<button class="btn btn-sm" type="button" id="s2-download">Download</button>
+							</span>
+						</div>
+						<pre class="kf-output s2-output" id="s2-output"></pre>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="panel" id="panel-cod2-maps" role="tabpanel" aria-labelledby="tab-cod2-maps" tabindex="0"
+			hidden>
+			<p class="lede">The 15 stock multiplayer maps of CoD2 with their internal names, gametypes and loading
+				screens. Open a map for the view from above, the rcon command and what zPAM changes.</p>
+
+			<div class="dv-bar">
+				<label class="visually-hidden" for="m2-search">Filter maps</label>
+				<input class="dv-search" type="search" id="m2-search" placeholder="Filter by name or map&hellip;"
+					spellcheck="false" autocomplete="off">
+				<span class="dv-count" id="m2-count" aria-live="polite"></span>
+			</div>
+
+			<div class="d2-filters" role="group" aria-label="Filters">
+				<label class="d2-check" for="m2-gametype"><span class="d2-filter-label dv-first">Gametype</span>
+					<select class="dv-select" id="m2-gametype">
+						<option value="">any</option>
+					</select>
+				</label>
+			</div>
+
+			<p class="hint" id="m2-hint" role="status"></p>
+
+			<p class="dv-empty" id="m2-empty" hidden></p>
+
+			<div class="m2-grid" id="m2-grid"></div>
+
+			<dialog class="m2-dialog" id="m2-dialog" aria-labelledby="m2-dialog-title">
+				<div class="m2-dialog-head">
+					<h2 class="rc-title m2-dialog-title" id="m2-dialog-title"></h2>
+					<button class="btn btn-sm m2-close" type="button" aria-label="Close">&times;</button>
+				</div>
+				<div class="m2-dialog-body"></div>
+			</dialog>
+		</section>
+
 		<section class="panel" id="panel-cod2-faq" role="tabpanel" aria-labelledby="tab-cod2-faq" tabindex="0" hidden>
 			<p class="lede">Answers to the questions that keep coming up around CoD2 configs.</p>
 
-			<div class="rc-group dm-card">
-				<p class="dm-placeholder">The CoD2 FAQ is not written yet.</p>
-			</div>
+			<section class="rc-group fq-group">
+				<h2 class="rc-title">The tools</h2>
+
+				<div class="fq-item">
+					<h3 class="fq-q">Which tab do I need?</h3>
+					<ul class="fq-steps">
+						<li><a class="fq-link" href="#cod2/name-generator">name generator</a>: a colored player name, previewed in the game's font.</li>
+						<li><a class="fq-link" href="#cod2/chat-generator">chat generator</a>: colored chat messages as binds.</li>
+						<li><a class="fq-link" href="#cod2/config-checker">config checker</a>: what the game does with every line of a .cfg.</li>
+						<li><a class="fq-link" href="#cod2/server-config">server config</a>: a server.cfg for a zPAM server.</li>
+						<li><a class="fq-link" href="#cod2/maps">maps</a>: the stock maps, their internal names and what zPAM changes.</li>
+						<li><a class="fq-link" href="#cod2/dvars">dvars</a> and <a class="fq-link" href="#cod2/rcon">rcon</a>: every dvar and every rcon command, with defaults and syntax.</li>
+					</ul>
+				</div>
+
+				<div class="fq-item">
+					<h3 class="fq-q">How do I use a line from these tools?</h3>
+					<p class="fq-a">Open the console with ~ and paste the line with a slash in front, for example
+						<code>/seta name "^1Player"</code>. To keep it, put the line into your config instead. Nothing you
+						type here leaves your browser.</p>
+				</div>
+
+				<div class="fq-item">
+					<h3 class="fq-q">Where is my config?</h3>
+					<p class="fq-a">In CoD2 1.3 it is <code>main/players/&lt;your profile&gt;/config_mp.cfg</code>. CoD2x
+						always uses <code>main/config_mp.cfg</code>. The game writes your changed settings back into it.</p>
+				</div>
+			</section>
+
+			<section class="rc-group fq-group">
+				<h2 class="rc-title">Names, chat and settings</h2>
+
+				<div class="fq-item">
+					<h3 class="fq-q">Why are the colors of my name gone in chat?</h3>
+					<p class="fq-a">The game removes color codes from the name in chat and in the name above a player; there the
+						name shows in the team color. The scoreboard keeps your colors. The text of a chat message keeps its
+						codes.</p>
+				</div>
+
+				<div class="fq-item">
+					<h3 class="fq-q">What do ^8 and ^9 show?</h3>
+					<p class="fq-a">The team colors: ^8 the allies, ^9 the axis. The map's script sets them, so ^8 is green,
+						blue or red depending on whether the allies are American, British or Russian.</p>
+				</div>
+
+				<div class="fq-item">
+					<h3 class="fq-q">Why does a setting not stick?</h3>
+					<p class="fq-a">It may be cheat protected (only with <code>sv_cheats 1</code>), read-only, out of range, or
+						set by the server: zPAM sets some settings when you join a team, and CoD2x locks others on match
+						servers. The <a class="fq-link" href="#cod2/config-checker">config checker</a> says which one it is
+						for every line.</p>
+				</div>
+			</section>
+
+			<section class="rc-group fq-group">
+				<h2 class="rc-title">Servers</h2>
+
+				<div class="fq-item">
+					<h3 class="fq-q">How do I set up a zPAM server?</h3>
+					<ol class="fq-steps">
+						<li>Put zPAM's .iwd and <code>zpam_maps_v7.iwd</code> into <code>main</code>; leave
+							<code>fs_game</code> empty.</li>
+						<li>Make a server.cfg with the <a class="fq-link" href="#cod2/server-config">server config</a> tab and
+							put it into <code>main</code>.</li>
+						<li>Start the server with <code>+set dedicated 2 +exec server.cfg</code>.</li>
+					</ol>
+					<p class="fq-note">zPAM needs web download (<code>sv_wwwDownload 1</code> and a working
+						<code>sv_wwwBaseURL</code>) so players get its files fast.</p>
+				</div>
+			</section>
 		</section>
 	</main>
 

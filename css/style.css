@@ -1661,6 +1661,1227 @@ a:hover
 	display: inline-flex;
 }
 
+/* ---------- CoD2 FAQ ---------- */
+
+#panel-cod2-faq code
+{
+	font-family: var(--mono);
+	font-size: 0.92em;
+	overflow-wrap: anywhere;
+}
+
+/* ---------- CoD2 chat generator ---------- */
+
+.c2-list
+{
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* Key, chat and remove on one line, the message under them on a phone. */
+.c2-row
+{
+	display: grid;
+	grid-template-columns: 90px auto 1fr auto auto;
+	grid-template-areas: "key mode text count remove";
+	align-items: center;
+	gap: 8px;
+	padding: 8px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+}
+
+.c2-row.is-active
+{
+	border-color: var(--border-strong);
+	box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.c2-key
+{
+	grid-area: key;
+	min-width: 0;
+	height: 32px;
+	padding: 0 8px;
+	border: 1px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	color: inherit;
+	font-family: var(--mono);
+	font-size: 13px;
+}
+
+.c2-key.is-invalid
+{
+	border-color: var(--red);
+	color: var(--red);
+}
+
+.c2-mode
+{
+	grid-area: mode;
+	height: 32px;
+}
+
+.c2-text
+{
+	grid-area: text;
+	height: 32px;
+}
+
+.c2-count
+{
+	grid-area: count;
+	min-width: 6ch;
+	text-align: right;
+}
+
+.c2-remove
+{
+	grid-area: remove;
+}
+
+.c2-name
+{
+	width: 12ch;
+}
+
+.c2-options
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--border);
+	font-size: 13px;
+}
+
+@media (max-width: 720px)
+{
+	.c2-row
+	{
+		grid-template-columns: 1fr auto auto;
+		grid-template-areas:
+			"key mode remove"
+			"text text count";
+	}
+}
+
+/* ---------- CoD2 config checker ---------- */
+
+.k2-input
+{
+	display: block;
+	width: 100%;
+	min-height: 260px;
+	padding: 12px 14px;
+	border: 0;
+	border-bottom: 1px solid var(--border);
+	background-color: var(--field);
+	color: inherit;
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.6;
+	resize: vertical;
+	white-space: pre;
+	overflow: auto;
+}
+
+.k2-input:focus
+{
+	outline: none;
+	background-color: var(--surface);
+}
+
+.k2-summary
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 16px 0 12px;
+}
+
+.k2-chip
+{
+	border-left-width: 3px;
+}
+
+.k2-chip.k2-red
+{
+	border-left-color: var(--red);
+}
+
+.k2-chip.k2-orange
+{
+	border-left-color: var(--orange);
+}
+
+.k2-chip.is-active
+{
+	border-color: var(--text);
+	background-color: var(--field);
+}
+
+.k2-chip:disabled
+{
+	opacity: 0.45;
+	cursor: default;
+}
+
+.k2-results
+{
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.k2-item
+{
+	padding: 10px 14px;
+	border: 1px solid var(--border);
+	border-left: 3px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	font-size: 14px;
+}
+
+.k2-item.k2-red
+{
+	border-left-color: var(--red);
+	background-color: var(--red-tint);
+}
+
+.k2-item.k2-orange
+{
+	border-left-color: var(--orange);
+	background-color: var(--orange-tint);
+}
+
+.k2-head
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 10px;
+}
+
+.k2-head .dv-tag,
+.k2-head .d2-cheat
+{
+	margin-top: 0;
+}
+
+.dv-tag.k2-tag-red
+{
+	border-color: var(--red);
+	color: var(--red);
+}
+
+.k2-line
+{
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--muted);
+	font: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.k2-line:hover
+{
+	color: var(--text);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.k2-source
+{
+	display: block;
+	margin-top: 4px;
+	font-family: var(--mono);
+	font-size: 13px;
+	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+}
+
+.k2-message
+{
+	margin: 4px 0 0;
+	color: var(--muted);
+	font-size: 13px;
+}
+
+.k2-ref
+{
+	margin: 2px 0 0;
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 11px;
+	overflow-wrap: anywhere;
+}
+
+.k2-out-tools
+{
+	display: inline-flex;
+	gap: 6px;
+}
+
+.k2-cleaned
+{
+	max-height: 320px;
+	overflow: auto;
+	white-space: pre;
+}
+
+/* ---------- CoD2 server config ---------- */
+
+/* The form on the left, the server.cfg beside it while there is room. */
+.s2-layout
+{
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	align-items: start;
+	gap: 16px;
+}
+
+.s2-side
+{
+	position: sticky;
+	top: 12px;
+}
+
+.s2-side .n2-warnings
+{
+	margin: 0 0 12px;
+}
+
+.s2-out
+{
+	margin-top: 0;
+}
+
+.s2-output
+{
+	max-height: calc(100vh - 140px);
+	overflow: auto;
+	white-space: pre;
+	font-size: 12px;
+}
+
+.s2-section .kf-opt:last-child
+{
+	border-bottom: 0;
+}
+
+.s2-section[hidden],
+.s2-section .kf-opt[hidden]
+{
+	display: none;
+}
+
+.s2-opt
+{
+	padding-inline: 0;
+}
+
+.s2-label
+{
+	flex-basis: 150px;
+}
+
+.s2-label-code
+{
+	font-family: var(--mono);
+	font-size: 12px;
+	font-weight: 500;
+	overflow-wrap: anywhere;
+}
+
+.s2-text
+{
+	flex: 1 1 160px;
+	min-width: 0;
+	text-align: left;
+}
+
+.s2-select
+{
+	height: 30px;
+}
+
+.s2-pam-tag
+{
+	margin-top: 0;
+}
+
+.s2-pam-tag[hidden]
+{
+	display: none;
+}
+
+.s2-pam,
+.s2-options
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	margin: 12px 0 0;
+	font-size: 13px;
+}
+
+.s2-mode-info
+{
+	margin-top: 12px;
+	font-size: 13px;
+}
+
+.s2-mode
+{
+	margin: 0;
+	font-family: var(--mono);
+	font-weight: 600;
+}
+
+.s2-mode-parts
+{
+	margin: 4px 0 8px;
+	padding-left: 18px;
+	color: var(--muted);
+}
+
+.s2-details summary
+{
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.s2-settings
+{
+	max-height: 260px;
+	margin-top: 8px;
+	overflow: auto;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+}
+
+.s2-setting
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 12px;
+	padding: 4px 8px;
+	border-bottom: 1px solid var(--border);
+}
+
+.s2-setting code
+{
+	font-family: var(--mono);
+	font-size: 12px;
+}
+
+.s2-setting span
+{
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.s2-add
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 12px 0;
+}
+
+.s2-add .dv-select
+{
+	height: 30px;
+}
+
+.s2-add-map
+{
+	flex: 1 1 200px;
+	min-width: 0;
+}
+
+.s2-rotation
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	counter-reset: rot;
+}
+
+.s2-rot
+{
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	counter-increment: rot;
+}
+
+.s2-rot::before
+{
+	content: counter(rot);
+	min-width: 2ch;
+	color: var(--muted);
+	font-size: 12px;
+	text-align: right;
+}
+
+.s2-rot.is-dragging
+{
+	opacity: 0.6;
+}
+
+.s2-rot.is-drop-before
+{
+	box-shadow: 0 -3px 0 var(--accent);
+}
+
+.s2-rot.is-drop-after
+{
+	box-shadow: 0 3px 0 var(--accent);
+}
+
+.s2-handle
+{
+	color: var(--muted);
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+	padding: 4px;
+}
+
+.s2-rot-name
+{
+	display: flex;
+	flex: 1 1 auto;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 2px 8px;
+	min-width: 0;
+	font-size: 13px;
+}
+
+.s2-rot-title
+{
+	font-weight: 600;
+}
+
+.s2-rot-id
+{
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 12px;
+}
+
+.s2-rot-gt
+{
+	height: 28px;
+}
+
+.s2-move
+{
+	padding-inline: 8px;
+}
+
+.s2-rot-empty
+{
+	color: var(--muted);
+	font-size: 13px;
+}
+
+@media (max-width: 1100px)
+{
+	.s2-layout
+	{
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.s2-side
+	{
+		position: static;
+	}
+}
+
+@media (max-width: 520px)
+{
+	.s2-rot
+	{
+		flex-wrap: wrap;
+	}
+
+	.s2-rot-name
+	{
+		flex-basis: calc(100% - 60px);
+	}
+}
+
+/* ---------- CoD2 maps ---------- */
+
+.m2-grid
+{
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 12px;
+}
+
+.m2-card
+{
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background-color: var(--surface);
+}
+
+.m2-card[hidden]
+{
+	display: none;
+}
+
+.m2-open
+{
+	display: block;
+	padding: 0;
+	border: 0;
+	background: #1d1e1a;
+	cursor: pointer;
+}
+
+.m2-thumb
+{
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	transition: opacity 0.15s ease;
+}
+
+.m2-open:hover .m2-thumb
+{
+	opacity: 0.85;
+}
+
+.m2-body
+{
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 8px;
+	padding: 12px;
+}
+
+.m2-name
+{
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.m2-id
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.m2-badges
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.m2-badges .d2-src
+{
+	margin-right: 0;
+}
+
+.m2-zpam
+{
+	border-style: dashed;
+}
+
+.m2-more
+{
+	align-self: flex-start;
+	margin-top: auto;
+}
+
+.m2-dialog
+{
+	width: min(1100px, calc(100vw - 32px));
+	max-height: calc(100vh - 32px);
+	padding: 0;
+	overflow: auto;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background-color: var(--bg);
+	color: var(--text);
+}
+
+.m2-dialog::backdrop
+{
+	background-color: rgba(0, 0, 0, 0.6);
+}
+
+.m2-dialog-head
+{
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--border);
+	background-color: var(--surface);
+}
+
+.m2-dialog-title
+{
+	margin: 0;
+}
+
+.m2-dialog-body
+{
+	display: grid;
+	grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+	gap: 16px;
+	padding: 16px;
+}
+
+.m2-large
+{
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: var(--radius-sm);
+}
+
+.m2-info
+{
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+}
+
+.m2-facts
+{
+	margin: 0;
+}
+
+.m2-notes
+{
+	margin: 0;
+	padding-left: 18px;
+	font-size: 13px;
+}
+
+.m2-notes li + li
+{
+	margin-top: 4px;
+}
+
+.m2-overhead
+{
+	grid-column: 1 / -1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+.m2-views
+{
+	display: flex;
+	gap: 6px;
+}
+
+.m2-view[aria-pressed="true"]
+{
+	border-color: var(--text);
+	background-color: var(--field);
+}
+
+.m2-overhead-img
+{
+	width: min(100%, 640px);
+	height: auto;
+	border-radius: var(--radius-sm);
+	background-color: #1d1e1a;
+}
+
+.m2-caption
+{
+	margin: 0;
+	text-align: center;
+}
+
+@media (max-width: 760px)
+{
+	.m2-dialog-body
+	{
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* ---------- CoD2 tactics board ---------- */
+
+/* Over everything, dark whatever the theme, so it looks the same on a shared screen. */
+.t2-board
+{
+	--t2-bg: #141513;
+	--t2-panel: #1d1e1b;
+	--t2-line: #33342f;
+	--t2-text: #ecebe6;
+	--t2-muted: #9a9a91;
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--t2-bg);
+	color: var(--t2-text);
+	font-size: 13px;
+}
+
+.t2-board[hidden]
+{
+	display: none;
+}
+
+html.t2-open
+{
+	overflow: hidden;
+}
+
+.t2-board .btn
+{
+	border-color: var(--t2-line);
+	background-color: var(--t2-panel);
+	color: var(--t2-text);
+}
+
+.t2-board .btn:hover:not(:disabled)
+{
+	border-color: var(--t2-muted);
+}
+
+.t2-board .btn:disabled
+{
+	opacity: 0.4;
+	cursor: default;
+}
+
+.t2-board .btn[aria-pressed="true"],
+.t2-board .btn.is-active
+{
+	border-color: var(--t2-text);
+	background-color: #2c2d29;
+}
+
+.t2-top
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 16px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--t2-line);
+	background-color: var(--t2-panel);
+}
+
+.t2-title
+{
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.t2-group
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+
+.t2-phase-list
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.t2-phase-list[hidden],
+.t2-rename[hidden]
+{
+	display: none;
+}
+
+.t2-phase.is-active
+{
+	border-color: var(--t2-text);
+}
+
+.t2-rename
+{
+	width: 14ch;
+	height: 28px;
+	padding: 0 8px;
+	border: 1px solid var(--t2-muted);
+	border-radius: var(--radius-sm);
+	background-color: var(--t2-bg);
+	color: inherit;
+	font: inherit;
+}
+
+.t2-actions
+{
+	margin-left: auto;
+}
+
+.t2-close
+{
+	border-color: var(--t2-muted) !important;
+}
+
+.t2-main
+{
+	display: flex;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.t2-tools
+{
+	display: flex;
+	flex: 0 0 210px;
+	flex-direction: column;
+	gap: 12px;
+	padding: 12px;
+	overflow-y: auto;
+	border-right: 1px solid var(--t2-line);
+	background-color: var(--t2-panel);
+}
+
+.t2-tool-grid
+{
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 6px;
+}
+
+.t2-tool
+{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 40px;
+	border: 1px solid var(--t2-line);
+	border-radius: var(--radius-sm);
+	background-color: var(--t2-bg);
+	color: var(--t2-text);
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.t2-tool:hover
+{
+	border-color: var(--t2-muted);
+}
+
+.t2-tool.is-active
+{
+	border-color: #ffd84a;
+	color: #ffd84a;
+}
+
+.t2-options
+{
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.t2-options[hidden]
+{
+	display: none;
+}
+
+.t2-row
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.t2-team
+{
+	flex: 1 1 auto;
+	border-left: 4px solid var(--team) !important;
+}
+
+.t2-num
+{
+	flex: 1 1 0;
+	padding-inline: 0;
+}
+
+.t2-swatches
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.t2-swatch
+{
+	width: 26px;
+	height: 26px;
+	border: 2px solid var(--t2-line);
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+.t2-swatch.is-active
+{
+	border-color: #fff;
+	box-shadow: 0 0 0 2px #000;
+}
+
+.t2-custom
+{
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+
+.t2-field
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	color: var(--t2-muted);
+}
+
+.t2-range
+{
+	width: 110px;
+	accent-color: #ffd84a;
+}
+
+.t2-help
+{
+	margin: 0;
+	color: var(--t2-muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.t2-stage
+{
+	position: relative;
+	display: flex;
+	flex: 1 1 auto;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.t2-map
+{
+	position: relative;
+	flex: 0 0 auto;
+}
+
+.t2-image,
+.t2-canvas
+{
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.t2-image
+{
+	object-fit: contain;
+	user-select: none;
+	-webkit-user-drag: none;
+}
+
+.t2-overlay
+{
+	touch-action: none;
+	cursor: crosshair;
+}
+
+.t2-overlay[data-tool="select"]
+{
+	cursor: default;
+}
+
+.t2-text
+{
+	position: absolute;
+	min-width: 6ch;
+	padding: 0 2px;
+	border: 1px dashed #fff;
+	background: rgba(0, 0, 0, 0.45);
+	font-family: sans-serif;
+	font-weight: 700;
+	line-height: 1.1;
+	outline: none;
+}
+
+.t2-text[hidden]
+{
+	display: none;
+}
+
+.t2-confirm
+{
+	position: absolute;
+	top: 12px;
+	left: 50%;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	max-width: calc(100% - 24px);
+	padding: 10px 12px;
+	border: 1px solid var(--t2-muted);
+	border-radius: var(--radius-sm);
+	background-color: var(--t2-panel);
+	transform: translateX(-50%);
+	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.t2-confirm[hidden]
+{
+	display: none;
+}
+
+.t2-board .t2-danger
+{
+	border-color: var(--red);
+	color: var(--red);
+}
+
+.t2-show
+{
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	display: none;
+	opacity: 0.5;
+}
+
+.t2-show:hover
+{
+	opacity: 1;
+}
+
+/* Presentation: only the map. */
+.t2-board.is-clean .t2-top,
+.t2-board.is-clean .t2-tools
+{
+	display: none;
+}
+
+.t2-board.is-clean .t2-show
+{
+	display: block;
+}
+
+/* On a phone the top bar is one row that scrolls sideways, and the tools go under the map. */
+@media (max-width: 760px)
+{
+	.t2-top
+	{
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		gap: 8px;
+		padding: 6px 8px;
+	}
+
+	.t2-top > *
+	{
+		flex: 0 0 auto;
+		flex-wrap: nowrap;
+	}
+
+	.t2-phase-list
+	{
+		flex-wrap: nowrap;
+	}
+
+	.t2-main
+	{
+		flex-direction: column-reverse;
+	}
+
+	.t2-tools
+	{
+		flex: 0 0 auto;
+		flex-direction: row;
+		flex-wrap: wrap;
+		max-height: 32vh;
+		border-top: 1px solid var(--t2-line);
+		border-right: 0;
+	}
+
+	.t2-tool-grid
+	{
+		grid-template-columns: repeat(8, 40px);
+	}
+
+	.t2-help
+	{
+		display: none;
+	}
+
+	.t2-actions
+	{
+		margin-left: 0;
+	}
+}
+
+.m2-tactics
+{
+	margin-left: 12px;
+}
+
 /* ---------- dvar reference ---------- */
 
 .dv-bar

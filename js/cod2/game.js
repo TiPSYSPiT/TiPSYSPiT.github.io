@@ -8,10 +8,14 @@ window.GAMES.push({
 	icon: "assets/cod2/icons/cod2.png",
 	favicon: "assets/cod2/icons/cod2.ico",
 	tabs: [
-		{ id: "tab-cod2-dvars", panel: "panel-cod2-dvars", label: "dvars", slug: "dvars" },
-		{ id: "tab-cod2-demos", panel: "panel-cod2-demos", label: "demos", slug: "demos" },
-		{ id: "tab-cod2-rcon", panel: "panel-cod2-rcon", label: "rcon", slug: "rcon" },
 		{ id: "tab-cod2-name", panel: "panel-cod2-name", label: "name generator", slug: "name-generator" },
+		{ id: "tab-cod2-chat", panel: "panel-cod2-chat", label: "chat generator", slug: "chat-generator" },
+		{ id: "tab-cod2-config", panel: "panel-cod2-config", label: "config checker", slug: "config-checker" },
+		{ id: "tab-cod2-server", panel: "panel-cod2-server", label: "server config", slug: "server-config" },
+		{ id: "tab-cod2-maps", panel: "panel-cod2-maps", label: "maps", slug: "maps" },
+		{ id: "tab-cod2-dvars", panel: "panel-cod2-dvars", label: "dvars", slug: "dvars" },
+		{ id: "tab-cod2-rcon", panel: "panel-cod2-rcon", label: "rcon", slug: "rcon" },
+		{ id: "tab-cod2-demos", panel: "panel-cod2-demos", label: "demos", slug: "demos" },
 		{ id: "tab-cod2-faq", panel: "panel-cod2-faq", label: "FAQ", slug: "faq" }
 	]
 });
