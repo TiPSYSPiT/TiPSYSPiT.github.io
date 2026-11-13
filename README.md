@@ -211,6 +211,12 @@ A form that writes a `server.cfg` for a zPAM server, with comments.
 - Server info, passwords, downloads, network, CoD2x and logging, with the
   game's defaults and ranges and zPAM's recommended values. Passwords are never
   filled in: they start as `CHANGE_ME`, with a warning while they are.
+- Number fields only put numbers into the config: a value outside the dvar's
+  range or something that is not a number is marked and warned about while
+  typing, and set to the nearest allowed value (or the last good one) when the
+  field is left. `;` and `\` are left out of server info values such as
+  `sv_hostname`, which the game drops anyway (`Info_SetValueForKey`).
+  `sv_hideServerIp` only works with the CoD2x 1.4.6.9 test build.
 - `pam_mode` from gametype, mode, score and options, with what each part means
   and the list of settings it sets at every map start, read from zPAM's rules
   files; fields the mode overwrites are marked. For `pub` the match settings of
@@ -227,32 +233,44 @@ A form that writes a `server.cfg` for a zPAM server, with comments.
 The 15 stock maps as cards: loading screen, name, internal name to copy,
 gametypes (the ones zPAM adds marked). Search and a gametype filter.
 
-- The detail view has the large loading screen, the allies side, the
+- The detail view has the large loading screen, the allies and axis nations,
+  who attacks in Search and Destroy (on every stock map the allies), the
   `/rcon map` command (and the zPAM `_fix` version's), the map from above (a
   top-down render, and zPAM's radar where it has one) and what zPAM changes:
   the `_fix` version it switches to, the gametypes it adds, the kill triggers
   it can remove, British instead of Russians.
 - **Tactics** in the detail view opens a drawing board on the map from above,
   for presenting a tactic: arrows (straight, bent, dashed), pen, line,
-  rectangle, ellipse, filled area, text, numbered Attack / Defence players,
-  smoke, frag and flash with throw paths, view cones, a laser pointer and an
-  eraser; colors, width, opacity, undo / redo. Phases (add, copy, rename,
-  reorder, delete, ← →, onion skin, play), fullscreen, hidden toolbars and a
-  cursor highlight for screen sharing. Every phase exports as PNG
-  (`mp_toujane_tactics_phase1.png`). Nothing is saved: the drawing is gone when
-  the board closes. Mouse, pen and touch (`js/cod2/tactics.js`).
+  rectangle, ellipse, filled area, text, players numbered 1–5 per side, smoke
+  and frag grenades with throw paths, view cones (80°, `cg_fov`'s default), a
+  laser pointer and an eraser; colors, width, opacity, undo / redo.
+  - The sides are the game's: "Allies – British" (the map's nation) and
+    "Axis – German", in the scoreboard colors, with who attacks in S&D. A
+    grenade shows the HUD icon of the thrower's nation (M2 Frag Grenade, MK1
+    Frag Grenade, RGD-33 Stick Grenade, Stielhandgranate; CoD2 has no flash
+    or stun grenade).
+  - A frag's ring is its real 256-unit damage radius, and a scale bar shows game
+    units; both come from the world area each image covers.
+  - Phases (add, copy, rename, reorder, delete, ← →, onion skin, play),
+    fullscreen, hidden toolbars and a cursor highlight for screen sharing.
+    Every phase exports as PNG (`mp_toujane_tactics_phase1.png`), with the
+    scale bar if it is shown. Nothing is saved: the drawing is gone when the
+    board closes. Mouse, pen and touch (`js/cod2/tactics.js`).
 - `tools/build-cod2-maps.py` (needs Pillow) builds `js/cod2/maps-data.js` and
   the images in `assets/cod2/maps/`: the loading screens from the game's
   `.iwi` files, zPAM's radar images, and the top-down renders of the CoD2 demo
-  viewer's map export. For the tactics board it also writes one script per map
-  in `js/cod2/maps/` with the images as data URLs: a canvas that draws an
-  image loaded from `file://` can not be exported, one from a data URL can.
+  viewer's map export, with the world area each covers. It reads the sides from
+  each map's script. For the tactics board it also writes one script per map
+  in `js/cod2/maps/` with the images as data URLs (a canvas that draws an
+  image loaded from `file://` can not be exported, one from a data URL can),
+  and `js/cod2/grenades-data.js`: each nation's frag and smoke grenade with its
+  English name, radius and HUD icon, from the game's weapon files.
 
 ### dvars
 
-Every CoD2 dvar from the stock 1.3 game, CoD2x and zPAM (1246), searchable by
-name or description, sortable by name, with filters for the protection and for
-each source. Columns: name, default, min, max, type, description, source.
+Every CoD2 dvar from the stock 1.3 game, CoD2x and zPAM, plus the dvars only
+the CoD2rev server has (1267 in all), searchable by name or description,
+sortable by name, with filters for the protection and for each source. Columns: name, default, min, max, type, description, source.
 A click on a name copies `seta <name> "<default>"`.
 
 - Each dvar's protection, beside the name; a click on it shows the reason and
@@ -285,8 +303,13 @@ A click on a name copies `seta <name> "<default>"`.
   on its own a line in the safe-mode, first-start or example server configs.
   The proofs (file and line or offset) are in
   `js/cod2/dvars-proof.json`, which the page does not load.
+- CoD2rev is a reverse-engineered CoD2 dedicated server with CoD2x support. Its
+  registrations count as its own source: a dvar only it has is listed with the
+  source "CoD2rev server", and where it differs from the game, it is noted. Its
+  flags never count as proof for the game; the config checker treats a dvar only
+  CoD2rev has as unknown.
 - `tools/build-cod2-dvars.py` builds both files from a CoD2 install, the CoD2x
-  source and the zPAM source.
+  source, the zPAM source and (optional) the CoD2rev server source.
 
 ### rcon
 
@@ -363,6 +386,7 @@ js/cod4/killfeed-icons.js
 js/cod4/minimap/        minimap data: maps.js and icons.js, and one script per map
                         with its texture, loaded when that map is picked
 js/cod2/game.js         CoD2 and its tabs
+js/cod2/ui.js           the copy buttons of the CoD2 tabs
 js/cod2/dvars.js        the dvars tab
 js/cod2/dvars-data.js   the dvar list (dvars-proof.json: its proofs, not loaded)
 js/cod2/rcon.js         the rcon tab
@@ -380,6 +404,8 @@ js/cod2/server-data.js  what each zPAM pam_mode sets, zPAM's example values
 js/cod2/maps.js         the maps tab
 js/cod2/maps-data.js    the stock maps and what zPAM changes on them
 js/cod2/tactics.js      the tactics board of the maps tab
+js/cod2/grenades-data.js
+                        each nation's grenades and HUD icons, for the board
 js/cod2/maps/           one script per map with its overhead images for the board,
                         loaded when the board opens that map
 assets/cod4/            icons/cod4.ico and cod4.png (browser tab and game switcher,
@@ -400,7 +426,7 @@ tools/                  build-cod4-dvars.py rebuilds js/cod4/dvars-data.js from
 To rebuild the CoD2 data (Python 3.10+, run from the project root):
 
 ```
-python tools/build-cod2-dvars.py  --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3>
+python tools/build-cod2-dvars.py  --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3> --cod2rev <cod2rev-server>
 python tools/build-cod2-rcon.py   --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3>
 python tools/build-cod2-names.py  --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3>
 python tools/build-cod2-config.py --cod2 <CoD2> --cod2x <CoD2x>

@@ -21,7 +21,6 @@
 	var el = window.UI.el;
 	var setHint = function () {};
 
-	var COPIED_RESET_MS = 1500;
 	var DEBOUNCE_MS = 150;
 	var SET_COMMANDS = { set: true, seta: true, sets: true, setu: true };
 
@@ -65,6 +64,7 @@
 	].join("\n");
 
 	var dvars = {};
+	var cod2revOnly = {};       // dvars only the CoD2rev server has
 	var dvarNames = [];
 	var commands = {};
 	var keyNames = {};
@@ -295,6 +295,12 @@
 			return;
 		}
 		var d = dvars[name.toLowerCase()];
+		if (!d && cod2revOnly[name.toLowerCase()])
+		{
+			add(lineNo, "unknown", cod2revOnly[name.toLowerCase()].n + " only exists on the CoD2rev server (a reverse-engineered " +
+				"dedicated server), not in CoD2 1.3, CoD2x or zPAM.");
+			return;
+		}
 		if (!d)
 		{
 			var close = suggestion(name);
@@ -624,27 +630,6 @@
 		input.scrollIntoView({ block: "nearest" });
 	}
 
-	function copyButton(button, getText)
-	{
-		button.addEventListener("click", function ()
-		{
-			window.UI.copyText(getText()).then(function ()
-			{
-				window.clearTimeout(button.resetTimer);
-				button.textContent = "Copied";
-				button.classList.add("is-copied");
-				button.resetTimer = window.setTimeout(function ()
-				{
-					button.textContent = "Copy";
-					button.classList.remove("is-copied");
-				}, COPIED_RESET_MS);
-			}, function ()
-			{
-				setHint("Could not copy — select the text and copy manually.", true);
-			});
-		});
-	}
-
 	function download()
 	{
 		var blob = new Blob([cleaned()], { type: "text/plain" });
@@ -667,6 +652,12 @@
 		}
 		window.COD2_DVARS.forEach(function (d)
 		{
+			// Dvars only the CoD2rev server registers do not exist in the game.
+			if (d.s.length === 1 && d.s[0] === "cod2rev")
+			{
+				cod2revOnly[d.n.toLowerCase()] = d;
+				return;
+			}
 			dvars[d.n.toLowerCase()] = d;
 			dvarNames.push(d.n);
 		});
@@ -739,7 +730,7 @@
 			input.focus();
 		});
 
-		copyButton(document.getElementById("k2-copy"), cleaned);
+		window.COD2_UI.copyButton(document.getElementById("k2-copy"), cleaned, function (text, isError) { setHint(text, isError); });
 		document.getElementById("k2-download").addEventListener("click", download);
 
 		update();

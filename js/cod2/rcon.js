@@ -9,10 +9,8 @@
 	"use strict";
 
 	var el = window.UI.el;
-	var copyText = window.UI.copyText;
 	var setHint = function () {};
 
-	var COPIED_RESET_MS = 1500;
 	var PREFIX = "/rcon ";
 
 	var data = window.COD2_RCON;
@@ -29,44 +27,8 @@
 	// Everything the filters show or hide: { node, source, category, haystack }.
 	var entries = [];
 
-	// The button confirms on itself, so feedback stays where the eye already is.
-	function makeCopyButton(command)
-	{
-		var button = document.createElement("button");
-		button.type = "button";
-		button.className = "btn btn-sm rc-copy";
-		button.textContent = "Copy";
-		button.setAttribute("data-command", command);
-		button.setAttribute("aria-label", "Copy " + command);
-		return button;
-	}
-
-	function onCopyClick(event)
-	{
-		var button = event.target.closest ? event.target.closest(".rc-copy") : null;
-		if (button === null)
-		{
-			return;
-		}
-
-		var command = button.getAttribute("data-command");
-
-		copyText(command).then(function ()
-		{
-			window.clearTimeout(button.resetTimer);
-			button.textContent = "Copied";
-			button.classList.add("is-copied");
-
-			button.resetTimer = window.setTimeout(function ()
-			{
-				button.textContent = "Copy";
-				button.classList.remove("is-copied");
-			}, COPIED_RESET_MS);
-		}, function ()
-		{
-			setHint("Could not copy — select the command and copy manually.", true);
-		});
-	}
+	// The copy buttons (js/cod2/ui.js) confirm on themselves.
+	var makeCopyButton = window.COD2_UI.commandButton;
 
 	function track(node, source, category, text)
 	{
@@ -362,7 +324,7 @@
 		}
 
 		sourceBoxes = [].slice.call(document.querySelectorAll("#panel-cod2-rcon [data-source]"));
-		document.getElementById("panel-cod2-rcon").addEventListener("click", onCopyClick);
+		window.COD2_UI.delegateCopy(document.getElementById("panel-cod2-rcon"), setHint);
 		searchBox.addEventListener("input", applyFilter);
 		searchBox.addEventListener("search", applyFilter);
 		categoryBox.addEventListener("change", applyFilter);

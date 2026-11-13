@@ -2639,10 +2639,46 @@ html.t2-open
 	gap: 4px;
 }
 
+.t2-sides
+{
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
 .t2-team
 {
-	flex: 1 1 auto;
-	border-left: 4px solid var(--team) !important;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1px;
+	border-left: 6px solid var(--team) !important;
+	text-align: left;
+}
+
+.t2-team-role
+{
+	color: var(--t2-muted);
+	font-size: 11px;
+	font-weight: 400;
+}
+
+.t2-team.is-active .t2-team-role
+{
+	color: inherit;
+}
+
+.t2-nade
+{
+	margin: 0;
+	color: var(--t2-muted);
+	font-size: 12px;
+}
+
+.t2-nade[hidden],
+.t2-row[hidden]
+{
+	display: none;
 }
 
 .t2-num
@@ -4061,13 +4097,6 @@ a.btn
 .dm-open
 {
 	margin-bottom: 14px;
-}
-
-.dm-placeholder
-{
-	margin: 0;
-	color: var(--muted);
-	font-size: 13px;
 }
 
 .dm-list

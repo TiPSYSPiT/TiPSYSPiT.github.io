@@ -3,8 +3,10 @@
  * do not edit by hand.
  *
  * images: file names in assets/cod2/maps/; zpam: what zPAM changes (gametypes it adds,
- * fix: the version it switches to, killtriggers it can remove, replaceRussian); proof: where it
- * comes from (not shown).
+ * fix: the version it switches to, killtriggers it can remove, replaceRussian); allies/axis:
+ * the nations; attackers/defenders: the S&D roles ("allies" or "axis"); world: the world
+ * rectangle [minX, minY, maxX, maxY] each overhead image covers; proof: where it comes
+ * from (not shown).
  */
 window.COD2_MAPS = [
 	{
@@ -21,9 +23,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:1",
 			"iw_15.iwd:maps/mp/mp_farmhouse.gsc",
 			"iw_09.iwd:images/loadscreen_mp_farmhouse.iwi",
-			"cod2-demo/maps3d/mp_farmhouse/topdown.webp"
+			"cod2-demo/maps3d/mp_farmhouse/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_farmhouse)"
 		],
 		"allies": "american",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -33,6 +39,14 @@ window.COD2_MAPS = [
 			"gametypesProof": "zpam/source/mp/CoD2maps.arena:1",
 			"killtriggers": 9,
 			"scriptProof": "zpam/source/maps/mp/mp_farmhouse.gsc"
+		},
+		"world": {
+			"topdown": [
+				-4775,
+				-3776,
+				2184,
+				3183
+			]
 		},
 		"images": {
 			"loadscreen": "mp_farmhouse-loadscreen.webp",
@@ -55,9 +69,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:7",
 			"iw_15.iwd:maps/mp/mp_brecourt.gsc",
 			"iw_09.iwd:images/loadscreen_mp_brecourt.iwi",
-			"cod2-demo/maps3d/mp_brecourt/topdown.webp"
+			"cod2-demo/maps3d/mp_brecourt/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_brecourt)"
 		],
 		"allies": "american",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -67,6 +85,14 @@ window.COD2_MAPS = [
 			"gametypesProof": "zpam/source/mp/CoD2maps.arena:7",
 			"killtriggers": 4,
 			"scriptProof": "zpam/source/maps/mp/mp_brecourt.gsc"
+		},
+		"world": {
+			"topdown": [
+				-4601,
+				-5234,
+				4714,
+				4082
+			]
 		},
 		"images": {
 			"loadscreen": "mp_brecourt-loadscreen.webp",
@@ -90,9 +116,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:maps/mp/mp_burgundy.gsc",
 			"iw_09.iwd:images/loadscreen_mp_burgundy.iwi",
 			"cod2-demo/maps3d/mp_burgundy/topdown.webp",
-			"zpam/source/maps/mp/mp_burgundy.radar, zpam/source/images/radar_mp_burgundy.iwi"
+			"zpam/source/maps/mp/mp_burgundy.radar, zpam/source/images/radar_mp_burgundy.iwi",
+			"cod2-demo/assets/maps/backgrounds.js (mp_burgundy)"
 		],
 		"allies": "american",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -104,6 +134,20 @@ window.COD2_MAPS = [
 			"fixProof": "zpam/source/maps/mp/gametypes/global/pam.gsc:110",
 			"killtriggers": 8,
 			"scriptProof": "zpam/source/maps/mp/mp_burgundy.gsc"
+		},
+		"world": {
+			"topdown": [
+				-1977,
+				-1592,
+				3665,
+				4050
+			],
+			"radar": [
+				-1679.17,
+				-916.67,
+				2487.5,
+				3250.0
+			]
 		},
 		"radarRotation": 0,
 		"images": {
@@ -129,9 +173,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:maps/mp/mp_trainstation.gsc",
 			"iw_09.iwd:images/loadscreen_mp_trainstation.iwi",
 			"cod2-demo/maps3d/mp_trainstation/topdown.webp",
-			"zpam/source/maps/mp/mp_trainstation.radar, zpam/source/images/radar_mp_trainstation.iwi"
+			"zpam/source/maps/mp/mp_trainstation.radar, zpam/source/images/radar_mp_trainstation.iwi",
+			"cod2-demo/assets/maps/backgrounds.js (mp_trainstation)"
 		],
 		"allies": "american",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -143,6 +191,20 @@ window.COD2_MAPS = [
 			"fixProof": "zpam/source/maps/mp/gametypes/global/pam.gsc:114",
 			"killtriggers": 13,
 			"scriptProof": "zpam/source/maps/mp/mp_trainstation.gsc"
+		},
+		"world": {
+			"topdown": [
+				2255,
+				-6976,
+				9231,
+				0
+			],
+			"radar": [
+				3070.41,
+				-6228.99,
+				8987.57,
+				-311.83
+			]
 		},
 		"radarRotation": -90,
 		"images": {
@@ -168,9 +230,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:maps/mp/mp_carentan.gsc",
 			"iw_09.iwd:images/loadscreen_mp_carentan.iwi",
 			"cod2-demo/maps3d/mp_carentan/topdown.webp",
-			"zpam/source/maps/mp/mp_carentan.radar, zpam/source/images/radar_mp_carentan.iwi"
+			"zpam/source/maps/mp/mp_carentan.radar, zpam/source/images/radar_mp_carentan.iwi",
+			"cod2-demo/assets/maps/backgrounds.js (mp_carentan)"
 		],
 		"allies": "american",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -182,6 +248,20 @@ window.COD2_MAPS = [
 			"fixProof": "zpam/source/maps/mp/gametypes/global/pam.gsc:113",
 			"killtriggers": 17,
 			"scriptProof": "zpam/source/maps/mp/mp_carentan.gsc"
+		},
+		"world": {
+			"topdown": [
+				-3067,
+				-2256,
+				4033,
+				4845
+			],
+			"radar": [
+				-2267.33,
+				-1456.0,
+				3233.22,
+				4044.55
+			]
 		},
 		"radarRotation": 0,
 		"images": {
@@ -206,9 +286,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:31",
 			"iw_07.iwd:maps/mp/mp_decoy.gsc",
 			"iw_09.iwd:images/loadscreen_mp_decoy.iwi",
-			"cod2-demo/maps3d/mp_decoy/topdown.webp"
+			"cod2-demo/maps3d/mp_decoy/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_decoy)"
 		],
 		"allies": "british",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -217,6 +301,14 @@ window.COD2_MAPS = [
 			],
 			"gametypesProof": "zpam/source/mp/CoD2maps.arena:31",
 			"scriptProof": "zpam/source/maps/mp/mp_decoy.gsc"
+		},
+		"world": {
+			"topdown": [
+				4742,
+				-16322,
+				10820,
+				-10244
+			]
 		},
 		"images": {
 			"loadscreen": "mp_decoy-loadscreen.webp",
@@ -239,9 +331,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:37",
 			"iw_15.iwd:maps/mp/mp_leningrad.gsc",
 			"iw_09.iwd:images/loadscreen_mp_leningrad.iwi",
-			"cod2-demo/maps3d/mp_leningrad/topdown.webp"
+			"cod2-demo/maps3d/mp_leningrad/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_leningrad)"
 		],
 		"allies": "russian",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -252,6 +348,14 @@ window.COD2_MAPS = [
 			"killtriggers": 6,
 			"replaceRussian": true,
 			"scriptProof": "zpam/source/maps/mp/mp_leningrad.gsc"
+		},
+		"world": {
+			"topdown": [
+				-2494,
+				-2186,
+				2112,
+				2420
+			]
 		},
 		"images": {
 			"loadscreen": "mp_leningrad-loadscreen.webp",
@@ -275,9 +379,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:maps/mp/mp_matmata.gsc",
 			"iw_09.iwd:images/loadscreen_mp_matmata.iwi",
 			"cod2-demo/maps3d/mp_matmata/topdown.webp",
-			"zpam/source/maps/mp/mp_matmata.radar, zpam/source/images/radar_mp_matmata.iwi"
+			"zpam/source/maps/mp/mp_matmata.radar, zpam/source/images/radar_mp_matmata.iwi",
+			"cod2-demo/assets/maps/backgrounds.js (mp_matmata)"
 		],
 		"allies": "british",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -289,6 +397,20 @@ window.COD2_MAPS = [
 			"fixProof": "zpam/source/maps/mp/gametypes/global/pam.gsc:112",
 			"killtriggers": 7,
 			"scriptProof": "zpam/source/maps/mp/mp_matmata.gsc"
+		},
+		"world": {
+			"topdown": [
+				980,
+				3118,
+				7275,
+				9413
+			],
+			"radar": [
+				1779.81,
+				3917.84,
+				6474.65,
+				8612.68
+			]
 		},
 		"radarRotation": -90,
 		"images": {
@@ -313,9 +435,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:49",
 			"iw_15.iwd:maps/mp/mp_downtown.gsc",
 			"iw_09.iwd:images/loadscreen_mp_downtown.iwi",
-			"cod2-demo/maps3d/mp_downtown/topdown.webp"
+			"cod2-demo/maps3d/mp_downtown/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_downtown)"
 		],
 		"allies": "russian",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -326,6 +452,14 @@ window.COD2_MAPS = [
 			"killtriggers": 2,
 			"replaceRussian": true,
 			"scriptProof": "zpam/source/maps/mp/mp_downtown.gsc"
+		},
+		"world": {
+			"topdown": [
+				-1302,
+				-4400,
+				4994,
+				1896
+			]
 		},
 		"images": {
 			"loadscreen": "mp_downtown-loadscreen.webp",
@@ -348,9 +482,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:55",
 			"iw_15.iwd:maps/mp/mp_harbor.gsc",
 			"iw_15.iwd:images/loadscreen_mp_harbor.iwi",
-			"cod2-demo/maps3d/mp_harbor/topdown.webp"
+			"cod2-demo/maps3d/mp_harbor/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_harbor)"
 		],
 		"allies": "russian",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -360,6 +498,14 @@ window.COD2_MAPS = [
 			"gametypesProof": "zpam/source/mp/CoD2maps.arena:55",
 			"replaceRussian": true,
 			"scriptProof": "zpam/source/maps/mp/mp_harbor.gsc"
+		},
+		"world": {
+			"topdown": [
+				-12611,
+				-11248,
+				-5036,
+				-3674
+			]
 		},
 		"images": {
 			"loadscreen": "mp_harbor-loadscreen.webp",
@@ -383,9 +529,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:maps/mp/mp_dawnville.gsc",
 			"iw_09.iwd:images/loadscreen_mp_dawnville.iwi",
 			"cod2-demo/maps3d/mp_dawnville/topdown.webp",
-			"zpam/source/maps/mp/mp_dawnville.radar, zpam/source/images/radar_mp_dawnville.iwi"
+			"zpam/source/maps/mp/mp_dawnville.radar, zpam/source/images/radar_mp_dawnville.iwi",
+			"cod2-demo/assets/maps/backgrounds.js (mp_dawnville)"
 		],
 		"allies": "american",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -397,6 +547,20 @@ window.COD2_MAPS = [
 			"fixProof": "zpam/source/maps/mp/gametypes/global/pam.gsc:111",
 			"killtriggers": 10,
 			"scriptProof": "zpam/source/maps/mp/mp_dawnville.gsc"
+		},
+		"world": {
+			"topdown": [
+				-2678,
+				-19419,
+				3776,
+				-12965
+			],
+			"radar": [
+				-1877.71,
+				-18925.05,
+				3053.25,
+				-13994.08
+			]
 		},
 		"radarRotation": 0,
 		"images": {
@@ -421,9 +585,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:67",
 			"iw_15.iwd:maps/mp/mp_railyard.gsc",
 			"iw_09.iwd:images/loadscreen_mp_railyard.iwi",
-			"cod2-demo/maps3d/mp_railyard/topdown.webp"
+			"cod2-demo/maps3d/mp_railyard/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_railyard)"
 		],
 		"allies": "russian",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -434,6 +602,14 @@ window.COD2_MAPS = [
 			"killtriggers": 8,
 			"replaceRussian": true,
 			"scriptProof": "zpam/source/maps/mp/mp_railyard.gsc"
+		},
+		"world": {
+			"topdown": [
+				-4195,
+				-2272,
+				2187,
+				4110
+			]
 		},
 		"images": {
 			"loadscreen": "mp_railyard-loadscreen.webp",
@@ -457,9 +633,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:maps/mp/mp_toujane.gsc",
 			"iw_09.iwd:images/loadscreen_mp_toujane.iwi",
 			"cod2-demo/maps3d/mp_toujane/topdown.webp",
-			"zpam/source/maps/mp/mp_toujane.radar, zpam/source/images/radar_mp_toujane.iwi"
+			"zpam/source/maps/mp/mp_toujane.radar, zpam/source/images/radar_mp_toujane.iwi",
+			"cod2-demo/assets/maps/backgrounds.js (mp_toujane)"
 		],
 		"allies": "british",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -471,6 +651,20 @@ window.COD2_MAPS = [
 			"fixProof": "zpam/source/maps/mp/gametypes/global/pam.gsc:109",
 			"killtriggers": 9,
 			"scriptProof": "zpam/source/maps/mp/mp_toujane.gsc"
+		},
+		"world": {
+			"topdown": [
+				-1520,
+				-1225,
+				4524,
+				4819
+			],
+			"radar": [
+				-720.0,
+				-626.67,
+				3724.44,
+				3817.78
+			]
 		},
 		"radarRotation": -90,
 		"images": {
@@ -495,9 +689,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:79",
 			"iw_15.iwd:maps/mp/mp_breakout.gsc",
 			"iw_09.iwd:images/loadscreen_mp_breakout.iwi",
-			"cod2-demo/maps3d/mp_breakout/topdown.webp"
+			"cod2-demo/maps3d/mp_breakout/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_breakout)"
 		],
 		"allies": "british",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -507,6 +705,14 @@ window.COD2_MAPS = [
 			"gametypesProof": "zpam/source/mp/CoD2maps.arena:79",
 			"killtriggers": 9,
 			"scriptProof": "zpam/source/maps/mp/mp_breakout.gsc"
+		},
+		"world": {
+			"topdown": [
+				2071,
+				1790,
+				8212,
+				7930
+			]
 		},
 		"images": {
 			"loadscreen": "mp_breakout-loadscreen.webp",
@@ -529,9 +735,13 @@ window.COD2_MAPS = [
 			"iw_15.iwd:mp/CoD2maps.arena:85",
 			"iw_15.iwd:maps/mp/mp_rhine.gsc",
 			"iw_15.iwd:images/loadscreen_mp_rhine.iwi",
-			"cod2-demo/maps3d/mp_rhine/topdown.webp"
+			"cod2-demo/maps3d/mp_rhine/topdown.webp",
+			"cod2-demo/assets/maps/backgrounds.js (mp_rhine)"
 		],
 		"allies": "american",
+		"axis": "german",
+		"attackers": "allies",
+		"defenders": "axis",
 		"zpam": {
 			"gametypes": [
 				"htf",
@@ -540,6 +750,14 @@ window.COD2_MAPS = [
 			],
 			"gametypesProof": "zpam/source/mp/CoD2maps.arena:85",
 			"scriptProof": "zpam/source/maps/mp/mp_rhine.gsc"
+		},
+		"world": {
+			"topdown": [
+				1640,
+				12256,
+				8914,
+				19530
+			]
 		},
 		"images": {
 			"loadscreen": "mp_rhine-loadscreen.webp",

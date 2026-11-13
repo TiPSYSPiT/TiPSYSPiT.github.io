@@ -8,6 +8,13 @@
  * size the board has. The images come from js/cod2/maps/<map>.js as data URLs,
  * so the canvas stays exportable on file:// too.
  *
+ * The two sides are the game's: Allies (the map's nation: American, British or
+ * Russian) and Axis (German), in the scoreboard colors of
+ * window.COD2_NAMES.teams; who attacks in S&D comes from the map script
+ * (map.attackers). Grenades carry the thrower's side and show that nation's
+ * HUD icon (window.COD2_GRENADES); a frag shows its real 256-unit radius and the
+ * scale bar game units, both from the world rectangle of the image (map.world).
+ *
  * window.COD2_TACTICS.open(map, view, onClose): map from window.COD2_MAPS,
  * view "topdown" or "radar". state(): a copy of the phases, for checks.
  */
@@ -17,13 +24,14 @@ window.COD2_TACTICS = (function ()
 
 	var el = window.UI.el;
 
-	var TEAM = { attack: "#ff8a2a", defence: "#3fa3ff" };
-	var TEAM_NAME = { attack: "Attack", defence: "Defence" };
+	var SIDES = ["allies", "axis"];
+	var FALLBACK = { allies: [64, 191, 64], axis: [153, 153, 153] };
 	var WIDTH_UNIT = 0.0022;          // line width 1 = 0.22% of the image
 	var PLAYER_R = 0.022;
 	var SMOKE_R = 0.05;
-	var FRAG_R = 0.045;
-	var FLASH_R = 0.03;
+	var FRAG_R = 0.045;               // when the image has no world rectangle
+	var ICON_R = 0.016;               // a grenade's HUD icon
+	var CONE_SPREAD = 80;             // degrees: cg_fov's default
 	var LASER_MS = 1500;
 	var PLAY_MS = 2000;
 	var HISTORY_MAX = 100;
@@ -38,11 +46,10 @@ window.COD2_TACTICS = (function ()
 		{ id: "ellipse", key: "o", label: "Circle / ellipse", icon: '<ellipse cx="10" cy="10" rx="7" ry="5.5" fill="none"/>' },
 		{ id: "area", key: "d", label: "Filled area", icon: '<path d="M4 6l6-3 7 5-3 8-9-1z" fill="currentColor" fill-opacity=".35"/>' },
 		{ id: "text", key: "t", label: "Text", icon: '<path d="M4 5h12M10 5v11" fill="none"/>' },
-		{ id: "player", key: "m", label: "Player (M again: other team, 1–5: number)", icon: '<circle cx="10" cy="10" r="6.5" fill="none"/><path d="M9 7.5l1.5-1v7" fill="none"/>' },
-		{ id: "smoke", key: "s", label: "Smoke (drag from the thrower for a throw path)", icon: '<circle cx="8" cy="11" r="4.5" fill="currentColor" fill-opacity=".45"/><circle cx="12.5" cy="8.5" r="4.5" fill="currentColor" fill-opacity=".45"/>' },
-		{ id: "frag", key: "g", label: "Frag grenade (drag for a throw path)", icon: '<circle cx="10" cy="10" r="2.5" fill="currentColor"/><circle cx="10" cy="10" r="7" fill="none" stroke-dasharray="2.5 2"/>' },
-		{ id: "flash", key: "b", label: "Flash grenade (drag for a throw path)", icon: '<path d="M10 2v4M10 14v4M2 10h4M14 10h4M4.5 4.5l2.8 2.8M12.7 12.7l2.8 2.8M15.5 4.5l-2.8 2.8M7.3 12.7l-2.8 2.8" fill="none"/>' },
-		{ id: "cone", key: "c", label: "View cone (drag to aim)", icon: '<path d="M4 15L16 5M4 15L17 12" fill="none"/><path d="M4 15L16 5Q18 9 17 12z" fill="currentColor" fill-opacity=".3"/>' },
+		{ id: "player", key: "m", label: "Player (M again: other side, 1–5: number)", icon: '<circle cx="10" cy="10" r="6.5" fill="none"/><path d="M9 7.5l1.5-1v7" fill="none"/>' },
+		{ id: "smoke", key: "s", label: "Smoke grenade (drag from the thrower for a throw path; M: side)", icon: '<circle cx="8" cy="11" r="4.5" fill="currentColor" fill-opacity=".45"/><circle cx="12.5" cy="8.5" r="4.5" fill="currentColor" fill-opacity=".45"/>' },
+		{ id: "frag", key: "g", label: "Frag grenade, 256-unit radius (drag for a throw path; M: side)", icon: '<circle cx="10" cy="10" r="2.5" fill="currentColor"/><circle cx="10" cy="10" r="7" fill="none" stroke-dasharray="2.5 2"/>' },
+		{ id: "cone", key: "c", label: "View cone, 80° like cg_fov (drag to aim)", icon: '<path d="M4 15L16 5M4 15L17 12" fill="none"/><path d="M4 15L16 5Q18 9 17 12z" fill="currentColor" fill-opacity=".3"/>' },
 		{ id: "laser", key: "x", label: "Laser pointer (fades, nothing is kept)", icon: '<circle cx="14" cy="6" r="2.5" fill="currentColor"/><path d="M3 17l9-9" fill="none" stroke-dasharray="2 2"/>' },
 		{ id: "eraser", key: "e", label: "Eraser", icon: '<path d="M7 16l-3.5-3.5 8-8 6 6-6 6H17" fill="none"/>' }
 	];
@@ -59,7 +66,9 @@ window.COD2_TACTICS = (function ()
 	var future = [];
 	var selected = null;        // index into the current phase's objects
 	var tool = "arrow";
-	var opts = { color: TEAM.attack, width: 4, opacity: 1, dashed: false, team: "attack", number: 1, onion: false, cursor: false };
+	var opts = { color: "#ffffff", width: 4, opacity: 1, dashed: false, team: "allies", numbers: { allies: 1, axis: 1 },
+		onion: false, cursor: false, scale: true };
+	var icons = {};             // grenade icon name -> Image (data URL, keeps the export canvas clean)
 
 	var size = 0;               // the drawing's size on screen, CSS pixels
 	var drag = null;            // what the pointer is doing
@@ -90,10 +99,11 @@ window.COD2_TACTICS = (function ()
 		selected = null;
 	}
 
-	// Call before every change; undo goes back to this point.
-	function remember()
+	// Call before every change (or with a snapshot taken earlier, once the change
+	// happens); undo goes back to this point.
+	function remember(before)
 	{
-		history.push(snapshot());
+		history.push(before || snapshot());
 		if (history.length > HISTORY_MAX)
 		{
 			history.shift();
@@ -121,6 +131,119 @@ window.COD2_TACTICS = (function ()
 		history.push(snapshot());
 		restore(future.pop());
 		refresh();
+	}
+
+	/* ---------- sides, grenades, scale ---------- */
+
+	function hex(rgb)
+	{
+		return "#" + rgb.map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join("");
+	}
+
+	// The nation of a side on this map: { id, name, rgb } from the scoreboard data.
+	function nation(side)
+	{
+		var teams = window.COD2_NAMES && window.COD2_NAMES.teams;
+		if (side === "axis")
+		{
+			return teams && teams.axis.id === map.axis ? teams.axis : { id: map.axis, name: map.axis, rgb: FALLBACK.axis };
+		}
+		var found = teams ? teams.allies.filter(function (t) { return t.id === map.allies; })[0] : null;
+		return found || { id: map.allies, name: map.allies, rgb: FALLBACK.allies };
+	}
+
+	function sideColor(side)
+	{
+		return hex(nation(side).rgb);
+	}
+
+	// "Allies – British", as the game names the side and its nation.
+	function sideName(side)
+	{
+		var text = window.COD2_NAMES && window.COD2_NAMES.chat ? window.COD2_NAMES.chat.text : {};
+		return (text[side] || (side === "axis" ? "Axis" : "Allies")) + " – " + nation(side).name;
+	}
+
+	// The side's role in S&D on this map.
+	function role(side)
+	{
+		return map.attackers === side ? "attack" : "defence";
+	}
+
+	function grenade(kind, side)
+	{
+		var data = window.COD2_GRENADES;
+		return data && data[kind] ? data[kind][nation(side).id] || null : null;
+	}
+
+	function iconImage(name)
+	{
+		var data = window.COD2_GRENADES;
+		if (!icons[name] && data && data.icons[name])
+		{
+			icons[name] = new Image();
+			icons[name].onload = function () { renderMain(); };
+			icons[name].src = data.icons[name];
+		}
+		return icons[name] && icons[name].complete && icons[name].naturalWidth ? icons[name] : null;
+	}
+
+	// Game units across the image (its world rectangle's width), 0 if unknown.
+	function worldWidth()
+	{
+		var rect = map && map.world ? map.world[view] : null;
+		return rect ? rect[2] - rect[0] : 0;
+	}
+
+	// A frag's radius in map units: explosionRadius (256) over the image's width in units.
+	function fragR(o)
+	{
+		var w = worldWidth();
+		var g = grenade("frag", o.team || "allies");
+		return w ? (g ? g.radius : 256) / w : FRAG_R;
+	}
+
+	function scaleLength(w)
+	{
+		var target = w * 0.2;
+		var step = Math.pow(10, Math.floor(Math.log(target) / Math.LN10));
+		return [5, 2, 1].map(function (f) { return f * step; }).filter(function (v) { return v <= target; })[0] || step;
+	}
+
+	// A scale bar in game units, bottom left.
+	function drawScale(ctx, S)
+	{
+		var w = worldWidth();
+		if (!opts.scale || !w)
+		{
+			return;
+		}
+		var units = scaleLength(w);
+		var len = units / w * S;
+		var fs = Math.max(11, S * 0.02);
+		var pad = fs * 0.5;
+		var bar = Math.max(4, S * 0.006);
+		var x = S * 0.03 + pad;
+		var y = S * 0.97 - pad;
+		var label = units + " units";
+		ctx.save();
+		ctx.font = "700 " + fs + "px sans-serif";
+		var tw = Math.max(len, ctx.measureText(label).width);
+		ctx.fillStyle = "rgba(0,0,0,0.6)";
+		ctx.fillRect(x - pad, y - bar - fs * 1.3 - pad, tw + pad * 2, bar + fs * 1.3 + pad * 2);
+		for (var i = 0; i < 4; i++)
+		{
+			ctx.fillStyle = i % 2 ? "#111" : "#fff";
+			ctx.fillRect(x + len * i / 4, y - bar, len / 4, bar);
+		}
+		ctx.strokeStyle = "#fff";
+		ctx.lineWidth = 1;
+		ctx.strokeRect(x, y - bar, len, bar);
+		ctx.fillStyle = "#fff";
+		ctx.textBaseline = "alphabetic";
+		ctx.textAlign = "left";
+		ctx.fillText(label, x, y - bar - fs * 0.35);
+		ctx.restore();
 	}
 
 	/* ---------- geometry ---------- */
@@ -232,8 +355,7 @@ window.COD2_TACTICS = (function ()
 				return Math.max(0, dist(p, o.p) - PLAYER_R);
 			case "smoke":
 			case "frag":
-			case "flash":
-				var r = o.type === "smoke" ? SMOKE_R : o.type === "frag" ? 0.015 : FLASH_R;
+				var r = o.type === "smoke" ? SMOKE_R : ICON_R;
 				var d = Math.max(0, dist(p, o.p) - r);
 				return o.from ? Math.min(d, segDist(p, o.from, o.p)) : d;
 			case "cone":
@@ -286,7 +408,6 @@ window.COD2_TACTICS = (function ()
 				return [{ key: "tip", p: [o.p[0] + Math.cos(o.dir) * o.len, o.p[1] + Math.sin(o.dir) * o.len] }, { key: "spread", p: pts[2], bend: true }];
 			case "smoke":
 			case "frag":
-			case "flash":
 				return o.from ? [{ key: "from", p: o.from }] : [];
 		}
 		return [];
@@ -415,49 +536,45 @@ window.COD2_TACTICS = (function ()
 				ctx.fill();
 			});
 		}
-		else if (o.type === "frag")
+		else
 		{
+			// The real damage radius, filled lightly.
 			ctx.strokeStyle = o.color;
 			ctx.lineWidth = Math.max(2, S * 0.0035);
 			ctx.setLineDash([S * 0.01, S * 0.007]);
 			ctx.beginPath();
-			ctx.arc(x, y, FRAG_R * S, 0, Math.PI * 2);
+			ctx.arc(x, y, fragR(o) * S, 0, Math.PI * 2);
 			ctx.stroke();
 			ctx.setLineDash([]);
 			ctx.fillStyle = o.color;
 			ctx.globalAlpha *= 0.15;
 			ctx.fill();
 			ctx.globalAlpha /= 0.15;
-			ctx.fillStyle = "#2c3a22";
-			ctx.strokeStyle = "#fff";
-			ctx.lineWidth = Math.max(1.5, S * 0.0025);
-			ctx.beginPath();
-			ctx.arc(x, y, S * 0.011, 0, Math.PI * 2);
-			ctx.fill();
-			ctx.stroke();
 		}
-		else
+		drawGrenadeIcon(ctx, o, x, y, S);
+	}
+
+	// The thrower's nation's HUD icon on a disc in the side's color.
+	function drawGrenadeIcon(ctx, o, x, y, S)
+	{
+		var g = grenade(o.type, o.team || "allies");
+		var icon = g ? iconImage(g.icon) : null;
+		var r = ICON_R * S * (o.type === "smoke" ? 0.85 : 1);
+		ctx.save();
+		ctx.globalAlpha = Math.max(ctx.globalAlpha, 0.9);
+		ctx.fillStyle = "rgba(20,22,18,0.85)";
+		ctx.strokeStyle = sideColor(o.team || "allies");
+		ctx.lineWidth = Math.max(1.5, S * 0.003);
+		ctx.beginPath();
+		ctx.arc(x, y, r, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.stroke();
+		if (icon)
 		{
-			var R = FLASH_R * S;
-			ctx.strokeStyle = "#fffbe0";
-			ctx.lineWidth = Math.max(2, S * 0.004);
-			ctx.lineCap = "round";
-			for (var i = 0; i < 8; i++)
-			{
-				var a = i * Math.PI / 4;
-				ctx.beginPath();
-				ctx.moveTo(x + Math.cos(a) * R * 0.35, y + Math.sin(a) * R * 0.35);
-				ctx.lineTo(x + Math.cos(a) * R, y + Math.sin(a) * R);
-				ctx.stroke();
-			}
-			var g2 = ctx.createRadialGradient(x, y, 0, x, y, R * 0.5);
-			g2.addColorStop(0, "#ffffff");
-			g2.addColorStop(1, "rgba(255,240,150,0.2)");
-			ctx.fillStyle = g2;
-			ctx.beginPath();
-			ctx.arc(x, y, R * 0.5, 0, Math.PI * 2);
-			ctx.fill();
+			var s = r * 1.6;
+			ctx.drawImage(icon, x - s / 2, y - s / 2, s, s);
 		}
+		ctx.restore();
 	}
 
 	function drawPlayer(ctx, o, S)
@@ -465,7 +582,7 @@ window.COD2_TACTICS = (function ()
 		var x = o.p[0] * S;
 		var y = o.p[1] * S;
 		var r = PLAYER_R * S;
-		ctx.fillStyle = TEAM[o.team];
+		ctx.fillStyle = sideColor(o.team);
 		ctx.strokeStyle = "#fff";
 		ctx.lineWidth = Math.max(2, r * 0.16);
 		ctx.shadowColor = "rgba(0,0,0,0.6)";
@@ -475,10 +592,22 @@ window.COD2_TACTICS = (function ()
 		ctx.fill();
 		ctx.shadowBlur = 0;
 		ctx.stroke();
+		// A thin dark edge outside the white ring, for the light Axis grey on sand.
+		ctx.save();
+		ctx.strokeStyle = "rgba(0,0,0,0.7)";
+		ctx.lineWidth = Math.max(1, r * 0.07);
+		ctx.beginPath();
+		ctx.arc(x, y, r + Math.max(2, r * 0.16) / 2 + ctx.lineWidth / 2, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.restore();
 		ctx.fillStyle = "#fff";
 		ctx.font = "800 " + Math.round(r * 1.25) + "px sans-serif";
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
+		// A dark edge keeps the number readable on the light Axis grey.
+		ctx.lineWidth = Math.max(1.5, r * 0.14);
+		ctx.strokeStyle = "rgba(0,0,0,0.55)";
+		ctx.strokeText(String(o.n), x, y + r * 0.06);
 		ctx.fillText(String(o.n), x, y + r * 0.06);
 	}
 
@@ -542,7 +671,6 @@ window.COD2_TACTICS = (function ()
 				break;
 			case "smoke":
 			case "frag":
-			case "flash":
 				drawGrenade(ctx, o, S);
 				break;
 			case "cone":
@@ -596,7 +724,9 @@ window.COD2_TACTICS = (function ()
 		{
 			return;
 		}
-		drawPhase(prepare(board.main), current, size, opts.onion);
+		var ctx = prepare(board.main);
+		drawPhase(ctx, current, size, opts.onion);
+		drawScale(ctx, size);
 	}
 
 	function renderOverlay()
@@ -691,7 +821,7 @@ window.COD2_TACTICS = (function ()
 		{
 			pts = pts.concat(conePoints(o));
 		}
-		var r = o.type === "player" ? PLAYER_R : o.type === "smoke" ? SMOKE_R : o.type === "frag" ? FRAG_R : o.type === "flash" ? FLASH_R : 0;
+		var r = o.type === "player" ? PLAYER_R : o.type === "smoke" ? SMOKE_R : o.type === "frag" ? fragR(o) : 0;
 		var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
 		pts.forEach(function (q)
 		{
@@ -751,13 +881,14 @@ window.COD2_TACTICS = (function ()
 		switch (tool)
 		{
 			case "select":
+				// The undo step is only taken once something really changes (see changed()),
+				// so a click that only selects keeps the redo steps.
 				if (selected !== null && list[selected])
 				{
 					var hit = handles(list[selected]).filter(function (h) { return dist(h.p, p) * size <= 12; })[0];
 					if (hit)
 					{
-						remember();
-						drag = { kind: "handle", key: hit.key };
+						drag = { kind: "handle", key: hit.key, before: snapshot(), changed: false };
 						break;
 					}
 				}
@@ -765,8 +896,7 @@ window.COD2_TACTICS = (function ()
 				selected = index === -1 ? null : index;
 				if (index !== -1)
 				{
-					remember();
-					drag = { kind: "move", last: p, moved: false };
+					drag = { kind: "move", last: p, before: snapshot(), changed: false };
 				}
 				break;
 			case "arrow":
@@ -782,20 +912,22 @@ window.COD2_TACTICS = (function ()
 				drag = { kind: "draw" };
 				break;
 			case "cone":
-				draft = withStyle({ type: "cone", p: p, dir: -Math.PI / 2, spread: Math.PI / 3, len: 0.12 });
+				draft = withStyle({ type: "cone", p: p, dir: -Math.PI / 2, spread: CONE_SPREAD * Math.PI / 180, len: 0.12 });
 				drag = { kind: "draw", start: p };
 				break;
 			case "smoke":
 			case "frag":
-			case "flash":
-				draft = withStyle({ type: tool, p: p, from: null });
+				// The thrower's side: its nation's grenade and color.
+				draft = withStyle({ type: tool, p: p, from: null, team: opts.team });
+				draft.color = sideColor(opts.team);
 				drag = { kind: "draw", start: p };
 				break;
 			case "player":
 				remember();
-				list.push({ type: "player", p: p, team: opts.team, n: opts.number, opacity: 1, width: 0, color: TEAM[opts.team] });
+				var n = opts.numbers[opts.team];
+				list.push({ type: "player", p: p, team: opts.team, n: n, opacity: 1, width: 0, color: sideColor(opts.team) });
 				selected = null;
-				opts.number = opts.number % 5 + 1;
+				opts.numbers[opts.team] = n % 5 + 1;
 				drag = { kind: "place", index: list.length - 1 };
 				break;
 			case "text":
@@ -806,12 +938,21 @@ window.COD2_TACTICS = (function ()
 				drag = { kind: "laser" };
 				break;
 			case "eraser":
-				remember();
-				drag = { kind: "erase", erased: false };
+				drag = { kind: "erase", before: snapshot(), changed: false };
 				erase(p);
 				break;
 		}
 		refresh();
+	}
+
+	// The first real change of a drag takes the undo step from before the drag.
+	function changed()
+	{
+		if (!drag.changed)
+		{
+			drag.changed = true;
+			remember(drag.before);
+		}
 	}
 
 	function erase(p)
@@ -819,8 +960,8 @@ window.COD2_TACTICS = (function ()
 		var index = hitTest(p);
 		if (index !== -1)
 		{
+			changed();
 			objects().splice(index, 1);
-			drag.erased = true;
 			selected = null;
 		}
 	}
@@ -841,13 +982,18 @@ window.COD2_TACTICS = (function ()
 		switch (drag.kind)
 		{
 			case "handle":
+				changed();
 				setHandle(list[selected], drag.key, p);
 				renderMain();
 				break;
 			case "move":
+				if (p[0] === drag.last[0] && p[1] === drag.last[1])
+				{
+					break;
+				}
+				changed();
 				moveObject(list[selected], p[0] - drag.last[0], p[1] - drag.last[1]);
 				drag.last = p;
-				drag.moved = true;
 				renderMain();
 				break;
 			case "place":
@@ -905,10 +1051,6 @@ window.COD2_TACTICS = (function ()
 		var p = toMap(event);
 		var d = drag;
 		drag = null;
-		if (d.kind === "move" && !d.moved || d.kind === "erase" && !d.erased)
-		{
-			history.pop();      // nothing changed: no undo step
-		}
 		if (d.kind === "draw" && draft)
 		{
 			var keep = true;
@@ -1162,10 +1304,6 @@ window.COD2_TACTICS = (function ()
 		{
 			selected = null;
 		}
-		if (id === "player")
-		{
-			opts.color = TEAM[opts.team];
-		}
 		board.overlay.dataset.tool = id;
 		refresh();
 	}
@@ -1186,15 +1324,27 @@ window.COD2_TACTICS = (function ()
 		board.width.value = String(opts.width);
 		board.opacity.value = String(Math.round(opts.opacity * 100));
 		board.dashed.checked = opts.dashed;
-		board.playerBox.hidden = tool !== "player";
+		// The side box: for players and grenades.
+		board.playerBox.hidden = ["player", "smoke", "frag"].indexOf(tool) === -1;
+		board.numbers.hidden = tool !== "player";
 		[].forEach.call(board.teams.children, function (b)
 		{
 			b.classList.toggle("is-active", b.getAttribute("data-team") === opts.team);
+			b.setAttribute("aria-pressed", String(b.getAttribute("data-team") === opts.team));
 		});
 		[].forEach.call(board.numbers.children, function (b)
 		{
-			b.classList.toggle("is-active", Number(b.textContent) === opts.number);
+			b.classList.toggle("is-active", Number(b.textContent) === opts.numbers[opts.team]);
 		});
+		var g = tool === "smoke" || tool === "frag" ? grenade(tool, opts.team) : null;
+		board.nade.hidden = !g;
+		if (g)
+		{
+			board.nade.textContent = g.name + (tool === "frag" ? " · " + g.radius + " units radius" +
+				(worldWidth() ? "" : " (not to scale on this image)") : "");
+		}
+		board.scaleBtn.setAttribute("aria-pressed", String(opts.scale));
+		board.scaleBtn.disabled = !worldWidth();
 		board.undo.disabled = !history.length;
 		board.redo.disabled = !future.length;
 		board.cursorBtn.setAttribute("aria-pressed", String(opts.cursor));
@@ -1234,6 +1384,35 @@ window.COD2_TACTICS = (function ()
 		return b;
 	}
 
+	// Per map: the side buttons ("Allies – British", its S&D role) and the color
+	// presets (the two sides' colors, white, the game's ^1–^6).
+	function setupSides()
+	{
+		[].forEach.call(board.teams.children, function (b)
+		{
+			var side = b.getAttribute("data-team");
+			b.style.setProperty("--team", sideColor(side));
+			b.querySelector(".t2-team-name").textContent = sideName(side);
+			b.querySelector(".t2-team-role").textContent = role(side) === "attack" ? "attacks in S&D" : "defends in S&D";
+		});
+		[].slice.call(board.swatches.querySelectorAll(".t2-swatch")).forEach(function (b) { b.remove(); });
+		var codColors = (window.COD2_NAMES ? window.COD2_NAMES.colors : []).filter(function (c) { return /[1-6]/.test(c.code); });
+		var presets = SIDES.map(function (side) { return { color: sideColor(side), title: sideName(side) }; })
+			.concat([{ color: "#ffffff", title: "White" }])
+			.concat(codColors.map(function (c) { return { color: hex(c.rgb), title: "^" + c.code }; }));
+		presets.forEach(function (preset)
+		{
+			var b = el("button", "t2-swatch");
+			b.type = "button";
+			b.style.backgroundColor = preset.color;
+			b.setAttribute("data-color", preset.color);
+			b.title = preset.title;
+			b.setAttribute("aria-label", "Color " + preset.title);
+			b.addEventListener("click", function () { applyStyle("color", preset.color); });
+			board.swatches.insertBefore(b, board.custom);
+		});
+	}
+
 	/* ---------- export ---------- */
 
 	function exportPhase(index)
@@ -1247,6 +1426,7 @@ window.COD2_TACTICS = (function ()
 		ctx.fillRect(0, 0, w, w);
 		ctx.drawImage(image, 0, 0, w, w);
 		drawPhase(ctx, index, w, false);
+		drawScale(ctx, w);
 		var name = map.id + "_tactics_phase" + (index + 1) + ".png";
 		canvas.toBlob(function (blob)
 		{
@@ -1300,6 +1480,15 @@ window.COD2_TACTICS = (function ()
 		else if (board.root.requestFullscreen)
 		{
 			board.root.requestFullscreen().catch(function () {});
+		}
+	}
+
+	function toggleScale()
+	{
+		if (worldWidth())
+		{
+			opts.scale = !opts.scale;
+			refresh();
 		}
 	}
 
@@ -1396,7 +1585,7 @@ window.COD2_TACTICS = (function ()
 		}
 		if (tool === "player" && /^[1-5]$/.test(k))
 		{
-			opts.number = Number(k);
+			opts.numbers[opts.team] = Number(k);
 			renderToolbar();
 			return;
 		}
@@ -1404,10 +1593,10 @@ window.COD2_TACTICS = (function ()
 		if (k === "h") { toggleClean(); return; }
 		if (k === "n") { opts.onion = !opts.onion; refresh(); return; }
 		if (k === "i") { opts.cursor = !opts.cursor; refresh(); return; }
-		if (k === "m" && tool === "player")
+		if (k === "u") { toggleScale(); return; }
+		if (k === "m" && ["player", "smoke", "frag"].indexOf(tool) !== -1)
 		{
-			opts.team = opts.team === "attack" ? "defence" : "attack";
-			opts.color = TEAM[opts.team];
+			opts.team = opts.team === "allies" ? "axis" : "allies";
 			renderToolbar();
 			return;
 		}
@@ -1460,9 +1649,11 @@ window.COD2_TACTICS = (function ()
 		var onion = button("", "Onion", "Show the phase before faded (N)", function () { opts.onion = !opts.onion; refresh(); });
 		var play = button("", "Play", "Step through the phases (Space)", togglePlay);
 		var cursorBtn = button("", "Cursor", "Highlight the cursor (I)", function () { opts.cursor = !opts.cursor; refresh(); });
+		var scaleBtn = button("", "Scale", "Scale bar in game units, also in the PNG (U)", toggleScale);
 		actions.appendChild(onion);
 		actions.appendChild(play);
 		actions.appendChild(cursorBtn);
+		actions.appendChild(scaleBtn);
 		actions.appendChild(button("", "PNG", "Export this phase as PNG", function () { exportPhase(current); }));
 		actions.appendChild(button("", "All PNGs", "Export every phase as its own PNG", exportAll));
 		var full = button("", "Fullscreen", "Fullscreen (F)", toggleFullscreen);
@@ -1493,15 +1684,17 @@ window.COD2_TACTICS = (function ()
 		});
 		tools.appendChild(toolGrid);
 
+		// The side of players and grenades; labels and colors are set per map (sideButtons).
 		var playerBox = el("div", "t2-options t2-player");
-		var teams = el("div", "t2-row");
-		["attack", "defence"].forEach(function (team)
+		var teams = el("div", "t2-sides");
+		SIDES.forEach(function (side)
 		{
-			var b = el("button", "btn btn-sm t2-team", TEAM_NAME[team]);
+			var b = el("button", "btn btn-sm t2-team");
 			b.type = "button";
-			b.setAttribute("data-team", team);
-			b.style.setProperty("--team", TEAM[team]);
-			b.addEventListener("click", function () { opts.team = team; opts.color = TEAM[team]; renderToolbar(); });
+			b.setAttribute("data-team", side);
+			b.appendChild(el("span", "t2-team-name"));
+			b.appendChild(el("span", "t2-team-role"));
+			b.addEventListener("click", function () { opts.team = side; renderToolbar(); });
 			teams.appendChild(b);
 		});
 		var numbers = el("div", "t2-row");
@@ -1510,30 +1703,17 @@ window.COD2_TACTICS = (function ()
 			var b = el("button", "btn btn-sm t2-num", String(n));
 			b.type = "button";
 			b.setAttribute("aria-label", "Player number " + n);
-			b.addEventListener("click", function () { opts.number = n; renderToolbar(); });
+			b.addEventListener("click", function () { opts.numbers[opts.team] = n; renderToolbar(); });
 			numbers.appendChild(b);
 		});
+		var nade = el("p", "t2-nade");
 		playerBox.appendChild(teams);
 		playerBox.appendChild(numbers);
+		playerBox.appendChild(nade);
 		tools.appendChild(playerBox);
 
 		var styleBox = el("div", "t2-options");
 		var swatches = el("div", "t2-swatches");
-		var codColors = (window.COD2_NAMES ? window.COD2_NAMES.colors : []).filter(function (c) { return /[1-6]/.test(c.code); });
-		[TEAM.attack, TEAM.defence, "#ffffff"].concat(codColors.map(function (c)
-		{
-			return "#" + c.rgb.map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join("");
-		})).forEach(function (color)
-		{
-			var b = el("button", "t2-swatch");
-			b.type = "button";
-			b.style.backgroundColor = color;
-			b.setAttribute("data-color", color);
-			b.title = color === TEAM.attack ? "Attack" : color === TEAM.defence ? "Defence" : color;
-			b.setAttribute("aria-label", "Color " + b.title);
-			b.addEventListener("click", function () { applyStyle("color", color); });
-			swatches.appendChild(b);
-		});
 		var custom = el("input", "t2-custom");
 		custom.type = "color";
 		custom.title = "Own color";
@@ -1584,7 +1764,7 @@ window.COD2_TACTICS = (function ()
 		}));
 		tools.appendChild(edit);
 		tools.appendChild(el("p", "t2-help", "Drag to draw. Select (V) moves, resizes and bends; Delete removes. " +
-			"← → phases, F fullscreen, H hide bars."));
+			"← → phases, U scale, F fullscreen, H hide bars."));
 		main.appendChild(tools);
 
 		// The map with its two canvases.
@@ -1650,7 +1830,8 @@ window.COD2_TACTICS = (function ()
 		document.body.appendChild(root);
 		board = {
 			root: root, title: title, views: views, phaseList: phaseList, rename: rename, left: left, right: right, del: del,
-			onion: onion, play: play, cursorBtn: cursorBtn, tools: toolGrid, playerBox: playerBox, teams: teams, numbers: numbers,
+			onion: onion, play: play, cursorBtn: cursorBtn, scaleBtn: scaleBtn, tools: toolGrid, playerBox: playerBox, teams: teams,
+			numbers: numbers, nade: nade,
 			swatches: swatches, custom: custom, width: width, opacity: opacity, dashed: dashed, undo: undoBtn, redo: redoBtn,
 			stage: stage, mapBox: mapBox, img: img, main: mainCanvas, overlay: overlay, text: text,
 			confirm: confirm, confirmText: confirmText, confirmYes: confirmYes
@@ -1736,7 +1917,10 @@ window.COD2_TACTICS = (function ()
 		draft = null;
 		drag = null;
 		laser = [];
-		opts.number = 1;
+		opts.numbers = { allies: 1, axis: 1 };
+		opts.team = map.attackers === "axis" ? "axis" : "allies";
+		opts.color = "#ffffff";     // reads on every map; the side colors are presets
+		setupSides();
 		board.root.hidden = false;
 		board.root.classList.remove("is-clean");
 		document.documentElement.classList.add("t2-open");

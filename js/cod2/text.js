@@ -16,7 +16,6 @@ window.COD2_TEXT = (function ()
 	var data = window.COD2_NAMES;
 	var PAD = 10;
 	var RANDOM_CODES = ["1", "2", "3", "4", "5", "6", "7"];
-	var COPIED_RESET_MS = 1500;
 
 	var atlas = null;
 	var tinted = {};
@@ -338,28 +337,6 @@ window.COD2_TEXT = (function ()
 		return data.teams.allies[0];
 	}
 
-	// A copy button that confirms on itself; getText() gives what to copy.
-	function copyButton(button, getText, setHint)
-	{
-		button.addEventListener("click", function ()
-		{
-			window.UI.copyText(getText()).then(function ()
-			{
-				window.clearTimeout(button.resetTimer);
-				button.textContent = "Copied";
-				button.classList.add("is-copied");
-				button.resetTimer = window.setTimeout(function ()
-				{
-					button.textContent = "Copy";
-					button.classList.remove("is-copied");
-				}, COPIED_RESET_MS);
-			}, function ()
-			{
-				setHint("Could not copy — select the text and copy manually.", true);
-			});
-		});
-	}
-
 	return {
 		isDigit: isDigit,
 		segments: segments,
@@ -374,6 +351,6 @@ window.COD2_TEXT = (function ()
 		makePalette: makePalette,
 		paintSwatches: paintSwatches,
 		makeAlliesPicker: makeAlliesPicker,
-		copyButton: copyButton
+		copyButton: window.COD2_UI.copyButton     // js/cod2/ui.js
 	};
 })();

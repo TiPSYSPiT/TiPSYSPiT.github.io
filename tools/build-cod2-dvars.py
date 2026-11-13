@@ -1,12 +1,18 @@
 """Builds the CoD2 dvar list for the "dvars" tab of the CoD2 section.
 
     python tools/build-cod2-dvars.py --cod2 C:\\Games\\CoD2 --cod2x C:\\path\\to\\CoD2x --zpam C:\\path\\to\\zpam3
+        [--cod2rev C:\\path\\to\\cod2x-server]
 
 Python 3.10+, standard library only. Writes js/cod2/dvars-data.js (or --out):
 window.COD2_DVARS, one entry per dvar; js/cod2/dvars-proof.json (or
 --proof-out): where each dvar was found; and prints a summary.
 
-Only these three folders are read; no CoD4 data. A dvar is listed only with
+--cod2rev adds the CoD2rev server (a reverse-engineered CoD2 dedicated server
+with CoD2x support): its own dvars, and the source tag on the others. It is a
+reconstruction, so its type, default, range and flags count only for dvars no
+other source registers; where its values differ they are a note.
+
+Only these folders are read; no CoD4 data. A dvar is listed only with
 proof from them: a registration, a config line, a script or menu that uses
 it, or its name as a whole string in a CoD2 binary.
 
@@ -62,7 +68,8 @@ DVAR_CHEAT = 0x80
 FLAG_NAMES = OrderedDict([
     ("DVAR_NOFLAG", 0x0), ("DVAR_ARCHIVE", 0x1), ("DVAR_USERINFO", 0x2), ("DVAR_SERVERINFO", 0x4),
     ("DVAR_SYSTEMINFO", 0x8), ("DVAR_NOWRITE", 0x10), ("DVAR_LATCH", 0x20), ("DVAR_ROM", 0x40),
-    ("DVAR_CHEAT", 0x80), ("DVAR_CONFIG", 0x100), ("DVAR_SAVED", 0x200), ("DVAR_SCRIPTINFO", 0x400),
+    ("DVAR_CHEAT", 0x80), ("DVAR_CONFIG", 0x100), ("DVAR_CODINFO", 0x100), ("DVAR_SAVED", 0x200),
+    ("DVAR_SCRIPTINFO", 0x400),
     ("DVAR_CHANGEABLE_RESET", 0x1000), ("DVAR_RENDERER", 0x2000), ("DVAR_EXTERNAL", 0x4000),
     ("DVAR_AUTOEXEC", 0x8000),
 ])
@@ -279,7 +286,8 @@ def c_str(tok, pe):
     m = re.fullmatch(r'"((?:[^"\\]|\\.)*)"', tok)
     if m:
         return m.group(1).encode().decode("unicode_escape")
-    m = re.fullmatch(r"&?(?:byte|unk|asc|a[A-Za-z0-9_]*?|off|dword)_([0-9A-Fa-f]{5,8})", tok)
+    # A string the decompile names by its address; word_ too ("dm" of g_gametype is word_5AD190).
+    m = re.fullmatch(r"&?(?:byte|unk|asc|a[A-Za-z0-9_]*?|off|dword|word)_([0-9A-Fa-f]{5,8})", tok)
     if m:
         return pe.cstr(int(m.group(1), 16))
     return None
@@ -762,7 +770,9 @@ def cod2x_value(tok, defines):
     return None
 
 
-def cod2x_source(store, root):
+def cod2x_source(store, root, source="cod2x"):
+    """Dvar_Register* calls in <root>/src; source "cod2x", or "cod2rev" for the CoD2rev server
+    (the same calls, without CoD2x's menus)."""
     src = os.path.join(root, "src")
     files = [p for p in glob.glob(os.path.join(src, "**", "*.*"), recursive=True)
              if p.endswith((".cpp", ".h", ".c")) and os.sep + "other" + os.sep not in p]
@@ -790,7 +800,7 @@ def cod2x_source(store, root):
             name = a[0][1:-1]
             kind = m.group(1).lower()
             flags, cheat = cod2x_flags(a[-1], defines)
-            rec = {"reg": "cod2x", "type": kind, "flags": flags, "cheat": cheat}
+            rec = {"reg": source, "type": kind, "flags": flags, "cheat": cheat}
             if kind in ("bool", "string") and len(a) == 3:
                 rec["default"] = cod2x_value(a[1], defines)
             elif kind in ("int", "float") and len(a) == 5:
@@ -810,8 +820,10 @@ def cod2x_source(store, root):
             cm = re.search(r"//\s*(.+)$", tail)
             if cm:
                 rec["comment"] = cm.group(1).strip()
-            store.add("cod2x", name, proof=("registration", rel(p), "line %d" % line_of(t, m.start())), **rec)
+            store.add(source, name, proof=("registration", rel(p), "line %d" % line_of(t, m.start())), **rec)
             count += 1
+    if source != "cod2x":
+        return count
     menu = os.path.join(src, "embedded", "iw_CoD2x_01", "ui_mp")
     for p in glob.glob(os.path.join(menu, "*.menu")):
         scan_text(store, "cod2x", open(p, encoding="latin-1").read(), "menu", rel(p))
@@ -1030,6 +1042,8 @@ def reg_ref(e, source):
     regs = [p for p in e.get("proof", []) if p[0] == "registration"]
     if source == "stock":
         regs = [p for p in regs if p[1].startswith("cod2/")] + [p for p in regs if p[1].startswith(DECOMPILE)]
+    elif source == "cod2rev":
+        regs = [p for p in regs if p[1].startswith("cod2x-server/")]
     else:
         regs = [p for p in regs if p[1].startswith("cod2x/") and not p[1].startswith(DECOMPILE)]
     if not regs:
@@ -1065,6 +1079,11 @@ def protection(e, flags, cheat, x_prot, z_prot):
     if x_cheat:
         return result("CoD2x", "Registered with the cheat flag (0x80) by CoD2x. Only works with sv_cheats 1.",
                       reg_ref(e, "cod2x"))
+    rv = src.get("cod2rev", {})
+    if stock_flags is None and x.get("flags") is None and x.get("cheat") is None and rv.get("flags") is not None \
+            and rv["flags"] & DVAR_CHEAT:
+        return result("CoD2rev", "Registered with the cheat flag (0x80) by the CoD2rev server. Only works with "
+                                 "sv_cheats 1.", reg_ref(e, "cod2rev"))
     for kind, data, ref in x_prot.get(key, []):
         if kind == "limit":
             what = ("keeps it at %d" % data["fixed"]) if "fixed" in data else \
@@ -1079,10 +1098,10 @@ def protection(e, flags, cheat, x_prot, z_prot):
                                      "check it again: the player can change it afterwards." % joins[0][1], joins[0][2])
     if flags is not None and flags & 0x40:
         return result("Read-only", "Registered read-only (DVAR_ROM): only the game itself sets it.",
-                      reg_ref(e, "stock") or reg_ref(e, "cod2x"))
+                      reg_ref(e, "stock") or reg_ref(e, "cod2x") or reg_ref(e, "cod2rev"))
     if flags is not None and flags & 0x10:
         return result("Write-protected", "Registered with DVAR_NOWRITE: only the server or the game itself "
-                                         "may set it.", reg_ref(e, "stock") or reg_ref(e, "cod2x"))
+                                         "may set it.", reg_ref(e, "stock") or reg_ref(e, "cod2x") or reg_ref(e, "cod2rev"))
     rules = [p for p in z_prot.get(key, []) if p[0] == "rules"]
     if rules:
         return result("zPAM rules", "zPAM registers it as not customizable (\"C\"): it is always reset to "
@@ -1190,6 +1209,8 @@ def cheat_of(flags):
 def build(args):
     ROOTS[:] = [(os.path.abspath(args.cod2), "cod2"), (os.path.abspath(args.cod2x), "cod2x"),
                 (os.path.abspath(args.zpam), "cod2-zpam3")]
+    if args.cod2rev:
+        ROOTS.append((os.path.abspath(args.cod2rev), "cod2x-server"))
     store = Store()
     cod2 = args.cod2
     other = os.path.join(args.cod2x, "src", "other")
@@ -1202,6 +1223,8 @@ def build(args):
     report["stock iwd names (menu/gsc/cfg)"] = stock_iwds(store, os.path.join(cod2, "main"))
     report["cod2x registrations"] = cod2x_source(store, args.cod2x)
     report["zpam registrations"] = zpam_source(store, args.zpam)
+    if args.cod2rev:
+        report["cod2rev registrations"] = cod2x_source(store, args.cod2rev, "cod2rev")
     x_prot = cod2x_protections(args.cod2x)
     z_prot = zpam_protections(args.zpam)
     docs = OrderedDict([("CoD2x README", readme_descriptions(os.path.join(args.cod2x, "README.md"))),
@@ -1235,7 +1258,7 @@ def build(args):
     entries = []
     proof_map = OrderedDict()
     unproven = []
-    stats = OrderedDict((k, 0) for k in ("stock", "cod2x", "zpam"))
+    stats = OrderedDict((k, 0) for k in ("stock", "cod2x", "zpam", "cod2rev"))
     cheat_true = cheat_unknown = 0
     kinds = OrderedDict()
     cheat_from = OrderedDict([("registration", 0)])
@@ -1251,11 +1274,15 @@ def build(args):
         src = e["src"]
         for s in src:
             stats[s] += 1
-        # Main values: the engine's registration first, then CoD2x's, then zPAM's.
+        # Main values: the engine's registration first, then CoD2x's, then zPAM's; the
+        # CoD2rev server's (a reconstruction) only when no other source registers it.
         order = [s for s in ("stock", "cod2x", "zpam") if s in src and src[s].get("reg")]
+        if not order and src.get("cod2rev", {}).get("reg"):
+            order = ["cod2rev"]
         main = src[order[0]] if order else {}
         alt = {}
-        for s in order[1:]:
+        notes = order[1:] + (["cod2rev"] if order and order[0] != "cod2rev" and src.get("cod2rev", {}).get("reg") else [])
+        for s in notes:
             other_vals = {k: src[s].get(k) for k in ("default", "min", "max") if src[s].get(k) is not None}
             if other_vals and any(other_vals.get(k) != main.get(k) for k in other_vals):
                 alt[s] = other_vals
@@ -1301,7 +1328,7 @@ def build(args):
 
         item = OrderedDict()
         item["n"] = e["name"]
-        item["s"] = [s for s in ("stock", "cod2x", "zpam") if s in src]
+        item["s"] = [s for s in ("stock", "cod2x", "zpam", "cod2rev") if s in src]
         item["t"] = main.get("type")
         item["d"] = default
         item["dn"] = default_from
@@ -1354,6 +1381,7 @@ def main():
     ap.add_argument("--cod2", required=True, help="CoD2 1.3 install (CoD2MP_s.exe, gfx_d3d_mp_x86_s.dll, main/)")
     ap.add_argument("--cod2x", required=True, help="CoD2x source checkout")
     ap.add_argument("--zpam", required=True, help="zPAM (zpam3) source checkout")
+    ap.add_argument("--cod2rev", help="CoD2rev server source (cod2x-server), optional")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "js", "cod2",
                                                   "dvars-data.js"))
     ap.add_argument("--proof-out", help="where the proofs go (default: dvars-proof.json next to --out)")
@@ -1364,7 +1392,8 @@ def main():
     body = json.dumps(entries, ensure_ascii=False, separators=(",", ":"))
     body = body.replace("},{", "},\n{")
     with open(args.out, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("/*\n * CoD2 dvars: stock 1.3, CoD2x and zPAM. Generated by tools/build-cod2-dvars.py;\n"
+        fh.write("/*\n * CoD2 dvars: stock 1.3, CoD2x, zPAM and the CoD2rev server. Generated by\n"
+                 " * tools/build-cod2-dvars.py;\n"
                  " * do not edit by hand.\n *\n"
                  " * n name, s sources, t type, d default (dn: where the default comes from),\n"
                  " * mn / mx min / max (\"inf\" / \"-inf\" where the engine sets no limit),\n"
@@ -1381,8 +1410,9 @@ def main():
     proof_doc = OrderedDict()
     proof_doc["about"] = ("Where each dvar of dvars-data.js was found, by tools/build-cod2-dvars.py: "
                           "[kind, file, place], strongest first, at most %d. kind: %s. Files are relative to "
-                          "the CoD2 install (cod2/), the CoD2x source (cod2x/) and the zPAM source "
-                          "(cod2-zpam3/)." % (MAX_PROOFS, ", ".join(PROOF_ORDER)))
+                          "the CoD2 install (cod2/), the CoD2x source (cod2x/), the zPAM source "
+                          "(cod2-zpam3/) and the CoD2rev server source (cod2x-server/)."
+                          % (MAX_PROOFS, ", ".join(PROOF_ORDER)))
     proof_doc["dvars"] = proofs
     with open(proof_out, "w", encoding="utf-8", newline="\n") as fh:
         body = json.dumps(proof_doc, ensure_ascii=False, indent=None, separators=(",", ":"))

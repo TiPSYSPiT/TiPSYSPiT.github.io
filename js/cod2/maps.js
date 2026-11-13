@@ -11,9 +11,8 @@
 	var el = window.UI.el;
 	var setHint = function () {};
 
-	var COPIED_RESET_MS = 1500;
 	var IMAGES = "assets/cod2/maps/";
-	var TEAMS = { american: "American", british: "British", russian: "Russian" };
+	var NATIONS = { american: "American", british: "British", russian: "Russian", german: "German" };
 
 	var maps = [];
 	var gametypeNames = {};
@@ -25,37 +24,7 @@
 	var dialog = null;
 	var cards = [];
 
-	function copyButton(command, label)
-	{
-		var button = el("button", "btn btn-sm rc-copy", "Copy");
-		button.type = "button";
-		button.setAttribute("data-command", command);
-		button.setAttribute("aria-label", "Copy " + (label || command));
-		return button;
-	}
-
-	function onCopyClick(event)
-	{
-		var button = event.target.closest ? event.target.closest(".rc-copy[data-command]") : null;
-		if (button === null)
-		{
-			return;
-		}
-		window.UI.copyText(button.getAttribute("data-command")).then(function ()
-		{
-			window.clearTimeout(button.resetTimer);
-			button.textContent = "Copied";
-			button.classList.add("is-copied");
-			button.resetTimer = window.setTimeout(function ()
-			{
-				button.textContent = "Copy";
-				button.classList.remove("is-copied");
-			}, COPIED_RESET_MS);
-		}, function ()
-		{
-			setHint("Could not copy — select the text and copy manually.", true);
-		});
-	}
+	var copyButton = window.COD2_UI.commandButton;
 
 	function badges(map)
 	{
@@ -152,8 +121,16 @@
 
 		var info = el("div", "m2-info");
 		var facts = el("dl", "rc-tokens m2-facts");
-		[["Map", map.id], ["Gametypes", map.gametypes.map(function (g) { return gametypeNames[g] || g; }).join(", ")],
-			["Allies", TEAMS[map.allies] || map.allies]].forEach(function (f)
+		// The sides as the map script sets them (game["allies"], ["axis"], ["attackers"]).
+		var side = function (s) { return s === "axis" ? "Axis" : "Allies"; };
+		var rows = [["Map", map.id], ["Gametypes", map.gametypes.map(function (g) { return gametypeNames[g] || g; }).join(", ")],
+			["Allies", NATIONS[map.allies] || map.allies], ["Axis", NATIONS[map.axis] || map.axis]];
+		if (map.attackers && map.gametypes.indexOf("sd") !== -1)
+		{
+			rows.push([gametypeNames.sd || "Search and Destroy", side(map.attackers) + " attack (plant the bomb), " +
+				side(map.defenders) + " defend"]);
+		}
+		rows.forEach(function (f)
 		{
 			facts.appendChild(el("dt", null, f[0]));
 			facts.appendChild(el("dd", null, f[1]));
@@ -327,7 +304,7 @@
 
 		maps.forEach(function (m) { grid.appendChild(makeCard(m)); });
 
-		document.getElementById("panel-cod2-maps").addEventListener("click", onCopyClick);
+		window.COD2_UI.delegateCopy(document.getElementById("panel-cod2-maps"), setHint);
 		dialog.addEventListener("click", function (event)
 		{
 			if (event.target === dialog)

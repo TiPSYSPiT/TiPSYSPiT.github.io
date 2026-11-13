@@ -16,7 +16,15 @@ zPAM                source/mp/CoD2maps.arena: the gametypes zPAM offers per map;
                      the _fix versions it switches to; maps/mp/<map>.radar and
                      source/images/radar_<map>.iwi: its radar image (DXT3).
 cod2-demo           maps3d/<map>/topdown.webp: the map rendered from above by the
-                     CoD2 demo viewer's export, from the game's own map files.
+                     CoD2 demo viewer's export, from the game's own map files;
+                     assets/maps/backgrounds.js: the world rectangle [minX, minY,
+                     maxX, maxY] each top-down and radar image covers (the scale
+                     of the tactics board).
+
+Grenades (js/cod2/grenades-data.js): weapons/mp/frag_grenade_<nation>_mp and
+smoke_grenade_<nation>_mp (displayName, hudIcon, explosionRadius, fuseTime),
+the hudIcon material's image (images/<name>.iwi) and its English name from
+localized_english_*.iwd localizedstrings/weapon.str.
 
 The loadscreen is a square texture the game stretches to 4:3, so it is
 written at 4:3 here too. The radar image keeps the orientation of the top-down
@@ -89,6 +97,77 @@ class Iwds:
 		return None, None
 
 
+def weapon_file(data):
+	r"""A weapons/mp/ file: WEAPONFILE\key\value\..."""
+	t = data.decode("latin-1").split("\\")
+	return dict(zip(t[1::2], t[2::2]))
+
+
+def png_url(im):
+	buf = io.BytesIO()
+	im.save(buf, "PNG", optimize=True)
+	return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
+def localized(cod2, file):
+	"""REFERENCE -> (English text, iwd, line) of localizedstrings/<file> in the English iwds."""
+	out = {}
+	for p in sorted(glob.glob(os.path.join(cod2, "main", "localized_english_iw*.iwd"))):
+		z = zipfile.ZipFile(p)
+		try:
+			text = z.read("localizedstrings/" + file).decode("latin-1")
+		except KeyError:
+			continue
+		for m in re.finditer(r'REFERENCE\s+(\S+)\s*\n\s*LANG_ENGLISH\s+"([^"]*)"', text):
+			out[m.group(1)] = (m.group(2), os.path.basename(p), text.count("\n", 0, m.start()) + 1)
+	return out
+
+
+def grenades(iwds, cod2):
+	"""Frag and smoke grenade of each nation: English name, HUD icon, radius, fuse."""
+	strings = localized(cod2, "weapon.str")
+	out = {"icons": {}}
+	for kind in ("frag", "smoke"):
+		out[kind] = {}
+		for nation in ("american", "british", "russian", "german"):
+			member = "weapons/mp/%s_grenade_%s_mp" % (kind, nation)
+			data, iwd = iwds.find(member)
+			if data is None:
+				raise SystemExit("no " + member)
+			w = weapon_file(data)
+			ref = w["displayName"].split("WEAPON_", 1)[1]
+			if ref not in strings:
+				raise SystemExit("no English name for " + w["displayName"])
+			name, str_iwd, str_line = strings[ref]
+			material = w["hudIcon"]
+			mat, mat_iwd = iwds.find("materials/" + material)
+			if mat is None:
+				raise SystemExit("no material " + material)
+			words = [x.decode() for x in re.findall(rb"[ -~]{3,}", mat)]
+			image = words[words.index("colorMap") - 1]
+			iwi, iwi_iwd = iwds.find("images/%s.iwi" % image)
+			out[kind][nation] = {
+				"name": name,
+				"icon": image,
+				"radius": float(w.get("explosionRadius", 0)),
+				"fuse": float(w.get("fuseTime", 0)),
+				"proof": ["%s:%s" % (iwd, member), "%s:localizedstrings/weapon.str:%d" % (str_iwd, str_line),
+					"%s:materials/%s" % (mat_iwd, material), "%s:images/%s.iwi" % (iwi_iwd, image)]
+			}
+			if image not in out["icons"]:
+				out["icons"][image] = png_url(iwi_image(iwi).convert("RGBA"))
+	return out
+
+
+def backgrounds(cod2demo):
+	"""cod2-demo's world rectangles of the top-down and radar images, per map."""
+	text = open(os.path.join(cod2demo, "assets", "maps", "backgrounds.js"), encoding="utf-8").read()
+	key = "Object.assign(C2.maps.BACKGROUNDS,"
+	rest = text[text.index(key) + len(key):]
+	obj, _ = json.JSONDecoder().raw_decode(rest.lstrip())
+	return obj
+
+
 def save_webp(im, path):
 	im.save(path, "WEBP", quality=QUALITY, method=6)
 	return os.path.getsize(path)
@@ -103,6 +182,7 @@ def main():
 	ap.add_argument("--out", default=os.path.join(root, "js", "cod2", "maps-data.js"))
 	ap.add_argument("--images", default=os.path.join(root, "assets", "cod2", "maps"))
 	ap.add_argument("--scripts", default=os.path.join(root, "js", "cod2", "maps"))
+	ap.add_argument("--grenades", default=os.path.join(root, "js", "cod2", "grenades-data.js"))
 	args = ap.parse_args()
 	os.makedirs(args.images, exist_ok=True)
 	os.makedirs(args.scripts, exist_ok=True)
@@ -119,6 +199,7 @@ def main():
 		if m:
 			fixes[m.group(1)] = (m.group(2), "zpam/source/maps/mp/gametypes/global/pam.gsc:%d" % (i + 1))
 
+	world = backgrounds(args.cod2demo)
 	maps = []
 	total = 0
 	for fields, line in stock:
@@ -130,12 +211,13 @@ def main():
 			"proof": ["%s:mp/CoD2maps.arena:%d" % (iwd, line)]
 		}
 
-		# The allies side the map script picks.
+		# The sides the map script picks: the allies and axis nation and who attacks in S&D.
 		gsc, gsc_iwd = iwds.find("maps/mp/%s.gsc" % mid)
-		m = re.search(r'game\["allies"\]\s*=\s*"(\w+)"', gsc.decode("latin-1")) if gsc else None
-		if not m:
-			raise SystemExit("no allies side for " + mid)
-		entry["allies"] = m.group(1)
+		sides = dict(re.findall(r'game\["(allies|axis|attackers|defenders)"\]\s*=\s*"(\w+)"', gsc.decode("latin-1") if gsc else ""))
+		if not all(k in sides for k in ("allies", "axis", "attackers", "defenders")):
+			raise SystemExit("no sides for " + mid)
+		for k in ("allies", "axis", "attackers", "defenders"):
+			entry[k] = sides[k]
 		entry["proof"].append("%s:maps/mp/%s.gsc" % (gsc_iwd, mid))
 
 		# zPAM.
@@ -183,6 +265,8 @@ def main():
 			im.thumbnail((BOARD, BOARD), Image.LANCZOS)
 			board["topdown"] = data_url(im)
 			entry["proof"].append("cod2-demo/maps3d/%s/topdown.webp" % mid)
+			if "topdown" in world.get(mid, {}):
+				entry.setdefault("world", {})["topdown"] = world[mid]["topdown"]["rect"]
 
 		radar_file = os.path.join(args.zpam, "source", "maps", "mp", mid + ".radar")
 		if os.path.isfile(radar_file):
@@ -205,7 +289,11 @@ def main():
 				board["radar"] = data_url(im)
 				entry["radarRotation"] = rotation
 				entry["proof"].append("zpam/source/maps/mp/%s.radar, zpam/source/images/%s.iwi" % (mid, image))
+				if "radar" in world.get(mid, {}):
+					entry.setdefault("world", {})["radar"] = world[mid]["radar"]["rect"]
 		entry["images"] = images
+		if "world" in entry:
+			entry["proof"].append("cod2-demo/assets/maps/backgrounds.js (%s)" % mid)
 		if board:
 			# One script per map, loaded by the tactics board when it opens that map.
 			script = os.path.join(args.scripts, mid + ".js")
@@ -222,12 +310,29 @@ def main():
 	with open(args.out, "w", encoding="utf-8", newline="\n") as fh:
 		fh.write("/*\n * CoD2 stock multiplayer maps for the maps tab. Generated by tools/build-cod2-maps.py;\n"
 			" * do not edit by hand.\n *\n * images: file names in assets/cod2/maps/; zpam: what zPAM changes (gametypes it adds,\n"
-			" * fix: the version it switches to, killtriggers it can remove, replaceRussian); proof: where it\n * comes from (not shown).\n */\n")
+			" * fix: the version it switches to, killtriggers it can remove, replaceRussian); allies/axis:\n"
+			" * the nations; attackers/defenders: the S&D roles (\"allies\" or \"axis\"); world: the world\n"
+			" * rectangle [minX, minY, maxX, maxY] each overhead image covers; proof: where it comes\n"
+			" * from (not shown).\n */\n")
 		fh.write("window.COD2_MAPS = ")
 		json.dump(maps, fh, ensure_ascii=False, indent="\t")
 		fh.write(";\n")
 
+	nades = grenades(iwds, args.cod2)
+	with open(args.grenades, "w", encoding="utf-8", newline="\n") as fh:
+		fh.write("/*\n * CoD2 grenades of each nation for the tactics board. Generated by tools/build-cod2-maps.py;\n"
+			" * do not edit by hand. frag/smoke[nation]: English name, icon (key of icons: the HUD icon\n"
+			" * as a PNG data URL), radius (explosionRadius, units), fuse (fuseTime, s), proof (not shown).\n */\n")
+		fh.write("window.COD2_GRENADES = ")
+		json.dump(nades, fh, ensure_ascii=False, indent="\t")
+		fh.write(";\n")
+	total += os.path.getsize(args.grenades)
+
 	print("maps: %d (%s)" % (len(maps), ", ".join(m["id"] for m in maps)))
+	print("sides: %s" % ", ".join("%s %s/%s attack %s" % (m["id"], m["allies"], m["axis"], m["attackers"]) for m in maps))
+	print("world rects: %d maps (%d radar)" % (sum(1 for m in maps if "world" in m), sum(1 for m in maps if "radar" in m.get("world", {}))))
+	for k in ("frag", "smoke"):
+		print("%s: %s" % (k, ", ".join("%s=%s (%s, r %g)" % (n, v["name"], v["icon"], v["radius"]) for n, v in nades[k].items())))
 	print("top-down: %d, radar: %d" % (sum(1 for m in maps if "topdown" in m["images"]), sum(1 for m in maps if "radar" in m["images"])))
 	print("images: %.1f MB in %s" % (total / 1048576.0, os.path.normpath(args.images)))
 

@@ -14,7 +14,6 @@
 	var el = window.UI.el;
 	var setHint = function () {};
 
-	var COPIED_RESET_MS = 1500;
 	var PLACEHOLDER = "CHANGE_ME";
 	var START_LINE = "+set dedicated 2 +set net_port 28960 +exec server.cfg";
 
@@ -44,7 +43,7 @@
 		] },
 		{ id: "cod2x", title: "CoD2x", fields: [
 			{ n: "sv_cracked", label: "Accept invalid CD keys", desc: "Lets players with an invalid CD key join." },
-			{ n: "sv_hideServerIp", label: "Hide server IP", desc: "Hides the IP on the scoreboard, for streams." }
+			{ n: "sv_hideServerIp", label: "Hide server IP", desc: "Hides the IP on the scoreboard, for streams. Only the CoD2x 1.4.6.9 test build has it; other versions ignore it." }
 		] },
 		{ id: "logging", title: "Logging", fields: [
 			{ n: "logfile", label: "Console log", choices: [["0", "off"], ["1", "buffered"], ["2", "continuous"]],
@@ -114,6 +113,65 @@
 	function quote(value)
 	{
 		return "\"" + String(value).replace(/"/g, "") + "\"";
+	}
+
+	// A serverinfo dvar (flag 0x4) goes through Info_SetValueForKey, which drops
+	// " ; and \ from the value (CoD2 1.3, Call_of_Duty_2_Multiplayer_MAC_1.3.c:94049).
+	function isServerInfo(name)
+	{
+		var d = dvar(name);
+		return !!(d && d.f & 4);
+	}
+
+	var INFO_BAD = /[;\\]/;
+
+	// A number field's value for the config: a number, within the dvar's range.
+	// Anything else falls back to the last good value.
+	function numberValue(field)
+	{
+		var v = window.Decimal.parse(field.value);
+		if (v === null)
+		{
+			return field.lastGood;
+		}
+		var lim = field.limits;
+		if (lim.integer)
+		{
+			v = Math.trunc(v);     // the game reads int dvars with atoi
+		}
+		if (lim.min !== null && v < lim.min)
+		{
+			v = lim.min;
+		}
+		if (lim.max !== null && v > lim.max)
+		{
+			v = lim.max;
+		}
+		return String(v);
+	}
+
+	// What is wrong with a number field's text, or "".
+	function numberProblem(field)
+	{
+		var v = window.Decimal.parse(field.value);
+		var lim = field.limits;
+		if (v === null)
+		{
+			return field.value.trim() === "" ? "is empty" : "\u201c" + field.value.trim() + "\u201d is not a number";
+		}
+		if (lim.integer && v !== Math.round(v))
+		{
+			return "takes whole numbers only";
+		}
+		if (lim.min !== null && v < lim.min)
+		{
+			return "is below its minimum " + lim.min;
+		}
+		if (lim.max !== null && v > lim.max)
+		{
+			return "is above its maximum " + lim.max;
+		}
+		return "";
 	}
 
 	/* ---------- pam_mode ---------- */
@@ -356,7 +414,31 @@
 			var mx = bound(d.mx);
 			var stepper = window.Decimal.attach(field, { min: mn === null ? undefined : mn, max: mx === null ? undefined : mx,
 				step: 1, integer: d.t === "int", buttons: true, label: spec.label });
-			field.addEventListener("input", update);
+			field.limits = { min: mn === null || !isFinite(mn) ? null : mn, max: mx === null || !isFinite(mx) ? null : mx, integer: d.t === "int" };
+			field.lastGood = window.Decimal.parse(start) === null ? String(d.d !== undefined ? d.d : 0) : start;
+			field.addEventListener("input", function ()
+			{
+				field.classList.toggle("is-invalid", numberProblem(field) !== "");
+				if (window.Decimal.parse(field.value) !== null)
+				{
+					field.lastGood = numberValue(field);
+				}
+				update();
+			});
+			// Leaving the field puts the value the config gets into it: clamped to the
+			// range, or the last good one for something that is not a number.
+			field.addEventListener("blur", function ()
+			{
+				var fixed = numberValue(field);
+				if (fixed !== field.value.trim())
+				{
+					field.value = fixed;
+					window.Decimal.sync(field);
+				}
+				field.lastGood = fixed;
+				field.classList.remove("is-invalid");
+				update();
+			});
 			row.appendChild(stepper);
 			var range = rangeText(d);
 			if (range)
@@ -591,10 +673,20 @@
 
 	/* ---------- output ---------- */
 
+	// The value a field puts into the config.
 	function value(name)
 	{
 		var box = fieldBoxes[name] || pubFields[name];
-		return box ? box.value.trim() : "";
+		if (!box)
+		{
+			return "";
+		}
+		if (box.limits)
+		{
+			return numberValue(box);
+		}
+		var text = box.value.trim();
+		return isServerInfo(name) ? text.split(INFO_BAD).join("") : text;
 	}
 
 	function line(name, val, comment)
@@ -612,7 +704,7 @@
 		return text + " ";
 	}
 
-	function build(warnings)
+	function build()
 	{
 		var gt = currentGametype();
 		var mode = rulesFor(gt) ? pamMode() : "";
@@ -721,6 +813,22 @@
 			{
 				list.push(name + ": \" would end the value, so it is left out.");
 			}
+			if (name !== "rcon_password" && isServerInfo(name) && INFO_BAD.test(box.value))
+			{
+				list.push(name + ": ; and \\ are left out; the game drops them from server info values anyway.");
+			}
+			if (box.limits && numberProblem(box) !== "")
+			{
+				list.push(name + " " + numberProblem(box) + "; the config gets " + numberValue(box) + ".");
+			}
+		});
+		Object.keys(pubFields).forEach(function (name)
+		{
+			var box = pubFields[name];
+			if (box.limits && numberProblem(box) !== "")
+			{
+				list.push(name + " " + numberProblem(box) + "; the config gets " + numberValue(box) + ".");
+			}
 		});
 
 		var mode = rulesFor(currentGametype()) ? pamMode() : "";
@@ -769,7 +877,7 @@
 		warnBox.textContent = "";
 		warnings.forEach(function (text) { warnBox.appendChild(el("li", null, text)); });
 		warnBox.hidden = warnings.length === 0;
-		output.textContent = build(warnings);
+		output.textContent = build();
 	}
 
 	/* ---------- setup ---------- */
@@ -802,27 +910,6 @@
 		row.appendChild(input);
 		row.appendChild(el("p", "kf-opt-desc", desc));
 		return { row: row, input: input };
-	}
-
-	function copyButton(button, getText)
-	{
-		button.addEventListener("click", function ()
-		{
-			window.UI.copyText(getText()).then(function ()
-			{
-				window.clearTimeout(button.resetTimer);
-				button.textContent = "Copied";
-				button.classList.add("is-copied");
-				button.resetTimer = window.setTimeout(function ()
-				{
-					button.textContent = "Copy";
-					button.classList.remove("is-copied");
-				}, COPIED_RESET_MS);
-			}, function ()
-			{
-				setHint("Could not copy — select the text and copy manually.", true);
-			});
-		});
 	}
 
 	function download()
@@ -1016,7 +1103,8 @@
 		fillAddMaps();
 		renderRotation();
 
-		copyButton(document.getElementById("s2-copy"), function () { return output.textContent; });
+		window.COD2_UI.copyButton(document.getElementById("s2-copy"), function () { return output.textContent; },
+			function (text, isError) { setHint(text, isError); });
 		document.getElementById("s2-download").addEventListener("click", download);
 		update();
 	}
