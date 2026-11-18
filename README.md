@@ -230,32 +230,51 @@ A form that writes a `server.cfg` for a zPAM server, with comments.
 
 ### maps
 
-The 15 stock maps as cards: loading screen, name, internal name to copy,
-gametypes (the ones zPAM adds marked). Search and a gametype filter.
+The 15 stock maps as cards: loading screen, name and internal name, with a
+search by name, internal name or zPAM version.
 
 - The detail view has the large loading screen, the allies and axis nations,
   who attacks in Search and Destroy (on every stock map the allies), the
   `/rcon map` command (and the zPAM `_fix` version's), the map from above (a
   top-down render, and zPAM's radar where it has one) and what zPAM changes:
-  the `_fix` version it switches to, the gametypes it adds, the kill triggers
-  it can remove, British instead of Russians.
+  the `_fix` version it switches to, the kill triggers it can remove, British
+  instead of Russians.
 - **Tactics** in the detail view opens a drawing board on the map from above,
-  for presenting a tactic: arrows (straight, bent, dashed), pen, line,
-  rectangle, ellipse, filled area, text, players numbered 1–5 per side, smoke
-  and frag grenades with throw paths, view cones (80°, `cg_fov`'s default), a
-  laser pointer and an eraser; colors, width, opacity, undo / redo.
-  - The sides are the game's: "Allies – British" (the map's nation) and
-    "Axis – German", in the scoreboard colors, with who attacks in S&D. A
-    grenade shows the HUD icon of the thrower's nation (M2 Frag Grenade, MK1
-    Frag Grenade, RGD-33 Stick Grenade, Stielhandgranate; CoD2 has no flash
-    or stun grenade).
-  - A frag's ring is its real 256-unit damage radius, and a scale bar shows game
-    units; both come from the world area each image covers.
-  - Phases (add, copy, rename, reorder, delete, ← →, onion skin, play),
-    fullscreen, hidden toolbars and a cursor highlight for screen sharing.
-    Every phase exports as PNG (`mp_toujane_tactics_phase1.png`), with the
-    scale bar if it is shown. Nothing is saved: the drawing is gone when the
-    board closes. Mouse, pen and touch (`js/cod2/tactics.js`).
+  for presenting a tactic.
+  - Two drawing layers, one per side, as the game names them: "Allies –
+    British" (the map's nation) and "Axis – German". The Allies toolbar is on
+    the left, the Axis toolbar on the right; a tool from a toolbar draws on
+    that side's layer, in the side's scoreboard color. Each layer has its own
+    phases, undo / redo, eraser and Clear (asked in the page), and can be shown
+    alone or with the other. The active side, tool and phase are shown at the
+    top; the cursor takes the side's color.
+  - Tools, grouped: select / move; arrow (straight, bent, dashed), pen, line,
+    rectangle, ellipse, filled area, text; players 1–5, view cones (80°,
+    `cg_fov`'s default); smoke and frag grenades with throw paths; eraser and
+    laser pointer. Width, opacity and dashes in each toolbar's style menu.
+  - Fixed, not editable: the S&D spawns of both sides (a triangle per spawn,
+    pointing the way it faces, in a zone per group) and the bomb sites A and B
+    with their plant area, each switchable, with a legend that says which
+    nation attacks and which defends.
+  - A grenade shows the HUD icon of its side's nation (M2 Frag Grenade, MK1
+    Frag Grenade, RGD-33 Stick Grenade, Stielhandgranate; CoD2 has no flash or
+    stun grenade). A frag's ring is its real 256-unit damage radius, and a
+    scale bar shows game units; both come from the world area each image
+    covers.
+  - Phases per side (add, copy, rename, reorder, delete, ← →, onion skin); Play
+    steps both shown layers together. Fullscreen, hidden bars and a cursor
+    highlight for screen sharing; a short "how to use" card on the first open.
+  - PNG: the current view (shown layers, spawns, sites, legend, scale), e.g.
+    `mp_toujane_tactics_phase1.png`, or `..._allies_phase1.png` with one layer
+    shown; All PNGs: every step of Play. Nothing is saved: the drawing is gone
+    when the board closes. Mouse, pen and touch; on a phone the toolbars are
+    icon columns, Allies left and Axis right (`js/cod2/tactics.js`).
+- `tools/build-cod2-tactics.py` builds `js/cod2/tactics-data.js` from the map
+  files: the S&D spawns (`mp_sd_spawn_attacker` / `_defender`: position and
+  facing) and bomb sites (`bombzone` with `script_label` A / B: position and
+  trigger area) of each stock map's `.d3dbsp`, and the sides from its script.
+  It checks every point against the images and the radar areas against zPAM's
+  `.radar` files (CoD2x `radar.cpp`).
 - `tools/build-cod2-maps.py` (needs Pillow) builds `js/cod2/maps-data.js` and
   the images in `assets/cod2/maps/`: the loading screens from the game's
   `.iwi` files, zPAM's radar images, and the top-down renders of the CoD2 demo
@@ -404,6 +423,7 @@ js/cod2/server-data.js  what each zPAM pam_mode sets, zPAM's example values
 js/cod2/maps.js         the maps tab
 js/cod2/maps-data.js    the stock maps and what zPAM changes on them
 js/cod2/tactics.js      the tactics board of the maps tab
+js/cod2/tactics-data.js the S&D spawns and bomb sites of each map, for the board
 js/cod2/grenades-data.js
                         each nation's grenades and HUD icons, for the board
 js/cod2/maps/           one script per map with its overhead images for the board,
@@ -418,8 +438,9 @@ tools/                  build-cod4-dvars.py rebuilds js/cod4/dvars-data.js from
                         Pillow). For CoD2, from CoD2, CoD2x and zPAM:
                         build-cod2-dvars.py, build-cod2-rcon.py,
                         build-cod2-names.py, build-cod2-config.py,
-                        build-cod2-server.py and build-cod2-maps.py (needs
-                        Pillow and the cod2-demo map export) rebuild the
+                        build-cod2-server.py, build-cod2-maps.py (needs
+                        Pillow and the cod2-demo map export) and
+                        build-cod2-tactics.py rebuild the
                         js/cod2/*-data.js files and assets/cod2/maps/
 ```
 
@@ -432,6 +453,7 @@ python tools/build-cod2-names.py  --cod2 <CoD2> --cod2x <CoD2x> --zpam <zpam3>
 python tools/build-cod2-config.py --cod2 <CoD2> --cod2x <CoD2x>
 python tools/build-cod2-server.py --zpam <zpam3>
 python tools/build-cod2-maps.py   --cod2 <CoD2> --zpam <zpam3> --cod2demo <cod2-demo>
+python tools/build-cod2-tactics.py --cod2 <CoD2> --zpam <zpam3> --cod2demo <cod2-demo>
 ```
 
 `js/cod4/killfeed-icons.js` is built by `embed-icons.pl`, which is kept outside this

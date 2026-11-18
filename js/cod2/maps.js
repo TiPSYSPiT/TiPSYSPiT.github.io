@@ -1,48 +1,26 @@
 /*
  * CoD2 maps: the 15 stock multiplayer maps as cards, with a detail view. The
  * data is window.COD2_MAPS (js/cod2/maps-data.js, built with its images in
- * assets/cod2/maps/ by tools/build-cod2-maps.py); gametype names come from
- * window.COD2_RCON.
+ * assets/cod2/maps/ by tools/build-cod2-maps.py); the name of Search and
+ * Destroy comes from window.COD2_RCON.
  */
 (function ()
 {
 	"use strict";
 
 	var el = window.UI.el;
-	var setHint = function () {};
 
 	var IMAGES = "assets/cod2/maps/";
 	var NATIONS = { american: "American", british: "British", russian: "Russian", german: "German" };
 
 	var maps = [];
-	var gametypeNames = {};
+	var sdName = "Search and Destroy";
 	var grid = null;
 	var searchBox = null;
-	var gametypeBox = null;
 	var countBox = null;
 	var emptyBox = null;
 	var dialog = null;
 	var cards = [];
-
-	var copyButton = window.COD2_UI.commandButton;
-
-	function badges(map)
-	{
-		var box = el("div", "m2-badges");
-		map.gametypes.forEach(function (g)
-		{
-			var badge = el("span", "d2-src", g);
-			badge.title = gametypeNames[g] || g;
-			box.appendChild(badge);
-		});
-		(map.zpam.gametypes || []).forEach(function (g)
-		{
-			var badge = el("span", "d2-src m2-zpam", g);
-			badge.title = (gametypeNames[g] || g) + " (zPAM)";
-			box.appendChild(badge);
-		});
-		return box;
-	}
 
 	// What zPAM does with the map, as sentences.
 	function zpamNotes(map)
@@ -52,10 +30,6 @@
 		if (z.fix)
 		{
 			notes.push("zPAM has its own version, " + z.fix + " (in zpam_maps_v7.iwd). A new zPAM server switches to it and warns while the old one runs.");
-		}
-		if (z.gametypes && z.gametypes.length)
-		{
-			notes.push("zPAM adds " + z.gametypes.map(function (g) { return gametypeNames[g] || g; }).join(", ") + ".");
 		}
 		if (z.killtriggers)
 		{
@@ -91,11 +65,7 @@
 
 		var body = el("div", "m2-body");
 		body.appendChild(el("h3", "m2-name", map.name));
-		var idRow = el("div", "m2-id");
-		idRow.appendChild(el("code", "rc-code", map.id));
-		idRow.appendChild(copyButton(map.id));
-		body.appendChild(idRow);
-		body.appendChild(badges(map));
+		body.appendChild(el("code", "rc-code m2-id", map.id));
 		var more = el("button", "btn btn-sm m2-more", "Details");
 		more.type = "button";
 		more.addEventListener("click", function () { showDetail(map); });
@@ -123,13 +93,8 @@
 		var facts = el("dl", "rc-tokens m2-facts");
 		// The sides as the map script sets them (game["allies"], ["axis"], ["attackers"]).
 		var side = function (s) { return s === "axis" ? "Axis" : "Allies"; };
-		var rows = [["Map", map.id], ["Gametypes", map.gametypes.map(function (g) { return gametypeNames[g] || g; }).join(", ")],
-			["Allies", NATIONS[map.allies] || map.allies], ["Axis", NATIONS[map.axis] || map.axis]];
-		if (map.attackers && map.gametypes.indexOf("sd") !== -1)
-		{
-			rows.push([gametypeNames.sd || "Search and Destroy", side(map.attackers) + " attack (plant the bomb), " +
-				side(map.defenders) + " defend"]);
-		}
+		var rows = [["Map", map.id], ["Allies", NATIONS[map.allies] || map.allies], ["Axis", NATIONS[map.axis] || map.axis],
+			[sdName, side(map.attackers) + " attack (plant the bomb), " + side(map.defenders) + " defend"]];
 		rows.forEach(function (f)
 		{
 			facts.appendChild(el("dt", null, f[0]));
@@ -150,7 +115,6 @@
 			text.appendChild(el("code", "rc-code", c[0]));
 			text.appendChild(el("p", "rc-desc", c[1]));
 			row.appendChild(text);
-			row.appendChild(copyButton(c[0]));
 			commands.appendChild(row);
 		});
 		info.appendChild(commands);
@@ -256,12 +220,10 @@
 	function applyFilter()
 	{
 		var query = searchBox.value.trim().toLowerCase();
-		var gt = gametypeBox.value;
 		var shown = 0;
 		cards.forEach(function (c)
 		{
-			var all = c.map.gametypes.concat(c.map.zpam.gametypes || []);
-			var match = (query === "" || c.haystack.indexOf(query) !== -1) && (gt === "" || all.indexOf(gt) !== -1);
+			var match = query === "" || c.haystack.indexOf(query) !== -1;
 			c.node.hidden = !match;
 			if (match)
 			{
@@ -270,7 +232,7 @@
 		});
 		countBox.textContent = shown === cards.length ? cards.length + " maps" : shown + " of " + cards.length + " maps";
 		emptyBox.hidden = shown !== 0;
-		emptyBox.textContent = "No map matches these filters.";
+		emptyBox.textContent = "No map matches this filter.";
 	}
 
 	function init()
@@ -281,30 +243,20 @@
 			return;
 		}
 		maps = window.COD2_MAPS;
-		(window.COD2_RCON ? window.COD2_RCON.gametypes : []).forEach(function (g) { gametypeNames[g.id] = g.name; });
+		(window.COD2_RCON ? window.COD2_RCON.gametypes : []).forEach(function (g)
+		{
+			if (g.id === "sd")
+			{
+				sdName = g.name;
+			}
+		});
 		searchBox = document.getElementById("m2-search");
-		gametypeBox = document.getElementById("m2-gametype");
 		countBox = document.getElementById("m2-count");
 		emptyBox = document.getElementById("m2-empty");
 		dialog = document.getElementById("m2-dialog");
-		setHint = window.UI.hint(document.getElementById("m2-hint"));
-
-		var seen = {};
-		maps.forEach(function (m)
-		{
-			m.gametypes.forEach(function (g) { seen[g] = seen[g] || "stock"; });
-			(m.zpam.gametypes || []).forEach(function (g) { seen[g] = seen[g] || "zpam"; });
-		});
-		Object.keys(seen).sort(function (a, b) { return (seen[a] === "zpam") - (seen[b] === "zpam") || a.localeCompare(b); }).forEach(function (g)
-		{
-			var option = el("option", null, (gametypeNames[g] || g) + (seen[g] === "zpam" ? " (zPAM)" : ""));
-			option.value = g;
-			gametypeBox.appendChild(option);
-		});
 
 		maps.forEach(function (m) { grid.appendChild(makeCard(m)); });
 
-		window.COD2_UI.delegateCopy(document.getElementById("panel-cod2-maps"), setHint);
 		dialog.addEventListener("click", function (event)
 		{
 			if (event.target === dialog)
@@ -315,7 +267,6 @@
 		dialog.querySelector(".m2-close").addEventListener("click", closeDetail);
 		searchBox.addEventListener("input", applyFilter);
 		searchBox.addEventListener("search", applyFilter);
-		gametypeBox.addEventListener("change", applyFilter);
 		applyFilter();
 	}
 

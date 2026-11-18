@@ -2300,27 +2300,7 @@ a:hover
 
 .m2-id
 {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-}
-
-.m2-badges
-{
-	display: flex;
-	flex-wrap: wrap;
-	gap: 4px;
-}
-
-.m2-badges .d2-src
-{
-	margin-right: 0;
-}
-
-.m2-zpam
-{
-	border-style: dashed;
+	color: var(--muted);
 }
 
 .m2-more
@@ -2451,7 +2431,8 @@ a:hover
 
 /* ---------- CoD2 tactics board ---------- */
 
-/* Over everything, dark whatever the theme, so it looks the same on a shared screen. */
+/* Over everything, dark whatever the theme, so it looks the same on a shared screen.
+   Allies toolbar left, the map, Axis toolbar right; phases of both sides below. */
 .t2-board
 {
 	--t2-bg: #141513;
@@ -2459,6 +2440,7 @@ a:hover
 	--t2-line: #33342f;
 	--t2-text: #ecebe6;
 	--t2-muted: #9a9a91;
+	--t2-bar-w: 124px;
 	position: fixed;
 	inset: 0;
 	z-index: 1000;
@@ -2469,9 +2451,10 @@ a:hover
 	font-size: 13px;
 }
 
-.t2-board[hidden]
+.t2-board[hidden],
+.t2-board [hidden]
 {
-	display: none;
+	display: none !important;
 }
 
 html.t2-open
@@ -2481,6 +2464,7 @@ html.t2-open
 
 .t2-board .btn
 {
+	min-height: 36px;
 	border-color: var(--t2-line);
 	background-color: var(--t2-panel);
 	color: var(--t2-text);
@@ -2501,15 +2485,24 @@ html.t2-open
 .t2-board .btn.is-active
 {
 	border-color: var(--t2-text);
-	background-color: #2c2d29;
+	background-color: #34352f;
 }
+
+.t2-board .btn-primary
+{
+	border-color: #ffd84a;
+	background-color: #ffd84a;
+	color: #111;
+}
+
+/* ----- top bar ----- */
 
 .t2-top
 {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 8px 16px;
+	gap: 8px 14px;
 	padding: 8px 12px;
 	border-bottom: 1px solid var(--t2-line);
 	background-color: var(--t2-panel);
@@ -2519,6 +2512,16 @@ html.t2-open
 {
 	font-size: 15px;
 	font-weight: 600;
+	white-space: nowrap;
+}
+
+.t2-status
+{
+	padding: 4px 10px;
+	border-left: 5px solid var(--side, #888);
+	border-radius: var(--radius-sm);
+	background-color: #2a2b27;
+	white-space: nowrap;
 }
 
 .t2-group
@@ -2526,37 +2529,32 @@ html.t2-open
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 6px;
-}
-
-.t2-phase-list
-{
-	display: flex;
-	flex-wrap: wrap;
 	gap: 4px;
 }
 
-.t2-phase-list[hidden],
-.t2-rename[hidden]
+.t2-seg
 {
-	display: none;
+	display: inline-flex;
 }
 
-.t2-phase.is-active
+.t2-seg .btn
 {
-	border-color: var(--t2-text);
+	border-radius: 0;
 }
 
-.t2-rename
+.t2-seg .btn:first-child
 {
-	width: 14ch;
-	height: 28px;
-	padding: 0 8px;
-	border: 1px solid var(--t2-muted);
-	border-radius: var(--radius-sm);
-	background-color: var(--t2-bg);
-	color: inherit;
-	font: inherit;
+	border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.t2-seg .btn:last-child
+{
+	border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.t2-seg .btn + .btn
+{
+	margin-left: -1px;
 }
 
 .t2-actions
@@ -2564,43 +2562,139 @@ html.t2-open
 	margin-left: auto;
 }
 
-.t2-close
+.t2-help-btn
 {
-	border-color: var(--t2-muted) !important;
+	min-width: 36px;
+	font-weight: 700;
 }
+
+/* ----- the two toolbars ----- */
 
 .t2-main
 {
+	position: relative;
 	display: flex;
 	flex: 1 1 auto;
 	min-height: 0;
 }
 
-.t2-tools
+.t2-bar
 {
 	display: flex;
-	flex: 0 0 210px;
+	flex: 0 0 var(--t2-bar-w);
 	flex-direction: column;
-	gap: 12px;
-	padding: 12px;
+	gap: 4px;
+	width: var(--t2-bar-w);
+	padding: 8px;
+	overflow-x: hidden;
 	overflow-y: auto;
+	scrollbar-width: thin;
 	border-right: 1px solid var(--t2-line);
 	background-color: var(--t2-panel);
+	opacity: 0.72;
+	transition: opacity 0.15s ease;
 }
 
-.t2-tool-grid
+.t2-bar-axis
+{
+	border-right: 0;
+	border-left: 1px solid var(--t2-line);
+}
+
+.t2-bar:hover,
+.t2-bar.is-active
+{
+	opacity: 1;
+}
+
+.t2-bar.is-active
+{
+	box-shadow: inset 0 0 0 2px var(--side);
+}
+
+.t2-bar.is-hidden .t2-tool-grid
+{
+	opacity: 0.45;
+}
+
+.t2-bar-head
+{
+	display: flex;
+	gap: 4px;
+	margin-bottom: 4px;
+}
+
+.t2-bar-name
+{
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	align-items: flex-start;
+	min-width: 0;
+	padding: 6px 8px;
+	border: 1px solid var(--t2-line);
+	border-left: 5px solid var(--side);
+	border-radius: var(--radius-sm);
+	background: none;
+	color: var(--t2-text);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.t2-bar.is-active .t2-bar-name
+{
+	border-color: var(--side);
+	background-color: var(--side);
+	color: var(--side-ink);
+}
+
+.t2-bar-side
+{
+	font-weight: 700;
+	line-height: 1.25;
+}
+
+.t2-bar-role
+{
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	opacity: 0.85;
+}
+
+.t2-group-label
+{
+	margin-top: 4px;
+	color: var(--t2-muted);
+	font-size: 10px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.t2-tool-grid,
+.t2-bar-foot
 {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 6px;
+	grid-template-columns: repeat(2, 44px);
+	gap: 4px;
 }
 
-.t2-tool
+.t2-bar-foot
+{
+	margin-top: 8px;
+}
+
+.t2-tool,
+.t2-board .t2-icon-btn
 {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	height: 40px;
+	width: 44px;
+	min-height: 44px;
+	height: 44px;
+	padding: 0;
 	border: 1px solid var(--t2-line);
 	border-radius: var(--radius-sm);
 	background-color: var(--t2-bg);
@@ -2616,107 +2710,56 @@ html.t2-open
 
 .t2-tool.is-active
 {
-	border-color: #ffd84a;
-	color: #ffd84a;
+	border-color: #fff;
+	background-color: var(--side);
+	color: var(--side-ink);
 }
 
-.t2-options
+.t2-board .t2-eye
 {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+	width: 36px;
+	height: auto;
+	min-height: 36px;
 }
 
-.t2-options[hidden]
-{
-	display: none;
-}
-
-.t2-row
-{
-	display: flex;
-	flex-wrap: wrap;
-	gap: 4px;
-}
-
-.t2-sides
-{
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-
-.t2-team
-{
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: 1px;
-	border-left: 6px solid var(--team) !important;
-	text-align: left;
-}
-
-.t2-team-role
+.t2-board .t2-eye[aria-pressed="false"]
 {
 	color: var(--t2-muted);
-	font-size: 11px;
-	font-weight: 400;
-}
-
-.t2-team.is-active .t2-team-role
-{
-	color: inherit;
 }
 
 .t2-nade
 {
-	margin: 0;
+	margin: 6px 0 0;
 	color: var(--t2-muted);
-	font-size: 12px;
+	font-size: 11px;
+	line-height: 1.35;
 }
 
-.t2-nade[hidden],
-.t2-row[hidden]
+/* The style flyout of a toolbar, opening towards the map. */
+.t2-flyout
 {
-	display: none;
-}
-
-.t2-num
-{
-	flex: 1 1 0;
-	padding-inline: 0;
-}
-
-.t2-swatches
-{
+	position: absolute;
+	top: 8px;
+	z-index: 3;
 	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
+	flex-direction: column;
+	gap: 8px;
+	width: 220px;
+	padding: 12px;
+	border: 1px solid var(--t2-muted);
+	border-radius: var(--radius-sm);
+	background-color: var(--t2-panel);
+	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
-.t2-swatch
+.t2-flyout-allies
 {
-	width: 26px;
-	height: 26px;
-	border: 2px solid var(--t2-line);
-	border-radius: 50%;
-	cursor: pointer;
+	left: calc(var(--t2-bar-w) + 6px);
 }
 
-.t2-swatch.is-active
+.t2-flyout-axis
 {
-	border-color: #fff;
-	box-shadow: 0 0 0 2px #000;
-}
-
-.t2-custom
-{
-	width: 26px;
-	height: 26px;
-	padding: 0;
-	border: 0;
-	background: none;
-	cursor: pointer;
+	right: calc(var(--t2-bar-w) + 6px);
 }
 
 .t2-field
@@ -2730,17 +2773,29 @@ html.t2-open
 
 .t2-range
 {
-	width: 110px;
+	width: 120px;
 	accent-color: #ffd84a;
 }
 
-.t2-help
+.t2-flyout-label
 {
-	margin: 0;
 	color: var(--t2-muted);
-	font-size: 12px;
-	line-height: 1.5;
 }
+
+.t2-numbers
+{
+	display: flex;
+	gap: 4px;
+}
+
+.t2-board .t2-num
+{
+	flex: 1 1 0;
+	min-width: 0;
+	padding-inline: 0;
+}
+
+/* ----- the map ----- */
 
 .t2-stage
 {
@@ -2779,12 +2834,6 @@ html.t2-open
 .t2-overlay
 {
 	touch-action: none;
-	cursor: crosshair;
-}
-
-.t2-overlay[data-tool="select"]
-{
-	cursor: default;
 }
 
 .t2-text
@@ -2800,16 +2849,12 @@ html.t2-open
 	outline: none;
 }
 
-.t2-text[hidden]
-{
-	display: none;
-}
-
 .t2-confirm
 {
 	position: absolute;
 	top: 12px;
 	left: 50%;
+	z-index: 4;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -2823,15 +2868,126 @@ html.t2-open
 	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
-.t2-confirm[hidden]
-{
-	display: none;
-}
-
 .t2-board .t2-danger
 {
 	border-color: var(--red);
 	color: var(--red);
+}
+
+/* The "how to use" card. */
+.t2-help
+{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 5;
+	width: min(440px, calc(100% - 24px));
+	max-height: calc(100% - 24px);
+	padding: 16px 18px;
+	overflow-y: auto;
+	border: 1px solid var(--t2-muted);
+	border-radius: var(--radius);
+	background-color: var(--t2-panel);
+	transform: translate(-50%, -50%);
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.t2-help h3
+{
+	margin: 0 0 8px;
+	font-size: 16px;
+}
+
+.t2-help ul
+{
+	margin: 0 0 14px;
+	padding-left: 18px;
+	line-height: 1.5;
+}
+
+.t2-help li + li
+{
+	margin-top: 4px;
+}
+
+/* ----- phases, one row per side ----- */
+
+.t2-phases
+{
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 6px 12px;
+	border-top: 1px solid var(--t2-line);
+	background-color: var(--t2-panel);
+}
+
+.t2-phase-row
+{
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	padding-left: 8px;
+	border-left: 5px solid var(--side);
+	opacity: 0.65;
+}
+
+.t2-phase-row.is-active
+{
+	opacity: 1;
+}
+
+.t2-phase-row.is-hidden .t2-phase-list
+{
+	text-decoration: line-through;
+}
+
+.t2-phase-side
+{
+	flex: 0 0 auto;
+	width: 52px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--t2-text);
+	font: inherit;
+	font-weight: 700;
+	text-align: left;
+	cursor: pointer;
+}
+
+.t2-phase-list,
+.t2-phase-actions
+{
+	display: flex;
+	flex: 0 1 auto;
+	gap: 4px;
+	min-width: 0;
+	overflow-x: auto;
+}
+
+.t2-phase-actions
+{
+	flex: 0 0 auto;
+	margin-left: auto;
+}
+
+.t2-phase.is-current
+{
+	border-color: var(--side) !important;
+	box-shadow: inset 0 -3px 0 var(--side);
+}
+
+.t2-rename
+{
+	width: 160px;
+	padding: 4px 8px;
+	border: 1px solid var(--t2-muted);
+	border-radius: var(--radius-sm);
+	background-color: var(--t2-bg);
+	color: var(--t2-text);
+	font: inherit;
 }
 
 .t2-show
@@ -2850,7 +3006,9 @@ html.t2-open
 
 /* Presentation: only the map. */
 .t2-board.is-clean .t2-top,
-.t2-board.is-clean .t2-tools
+.t2-board.is-clean .t2-bar,
+.t2-board.is-clean .t2-phases,
+.t2-board.is-clean .t2-flyout
 {
 	display: none;
 }
@@ -2860,15 +3018,21 @@ html.t2-open
 	display: block;
 }
 
-/* On a phone the top bar is one row that scrolls sideways, and the tools go under the map. */
+/* Narrow screens: icon-only toolbars, still Allies left and Axis right; the top
+   bar and the phase rows scroll sideways. */
 @media (max-width: 760px)
 {
+	.t2-board
+	{
+		--t2-bar-w: 54px;
+	}
+
 	.t2-top
 	{
 		flex-wrap: nowrap;
-		overflow-x: auto;
 		gap: 8px;
 		padding: 6px 8px;
+		overflow-x: auto;
 	}
 
 	.t2-top > *
@@ -2877,39 +3041,91 @@ html.t2-open
 		flex-wrap: nowrap;
 	}
 
-	.t2-phase-list
+	.t2-actions
 	{
-		flex-wrap: nowrap;
+		margin-left: 0;
 	}
 
-	.t2-main
+	.t2-bar
 	{
-		flex-direction: column-reverse;
+		padding: 4px;
 	}
 
-	.t2-tools
+	.t2-tool-grid,
+	.t2-bar-foot
 	{
-		flex: 0 0 auto;
-		flex-direction: row;
-		flex-wrap: wrap;
-		max-height: 32vh;
-		border-top: 1px solid var(--t2-line);
-		border-right: 0;
+		grid-template-columns: 44px;
 	}
 
-	.t2-tool-grid
-	{
-		grid-template-columns: repeat(8, 40px);
-	}
-
-	.t2-help
+	.t2-group-label,
+	.t2-nade,
+	.t2-bar-side,
+	.t2-bar-role
 	{
 		display: none;
 	}
 
-	.t2-actions
+	.t2-bar-head
 	{
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.t2-bar-name
+	{
+		align-items: center;
+		padding: 6px 2px;
+		border-left-width: 1px;
+		border-top: 5px solid var(--side);
+	}
+
+	.t2-bar-name::after
+	{
+		content: attr(data-short);
+		font-size: 10px;
+		font-weight: 700;
+	}
+
+	.t2-board .t2-eye
+	{
+		width: 44px;
+	}
+
+	.t2-flyout
+	{
+		width: min(220px, calc(100vw - 2 * var(--t2-bar-w) - 24px));
+	}
+
+	.t2-range
+	{
+		width: 90px;
+	}
+
+	.t2-phases
+	{
+		padding: 4px 8px;
+	}
+
+	.t2-phase-row
+	{
+		flex-wrap: wrap;
+	}
+
+	.t2-phase-list
+	{
+		flex: 1 1 0;
+	}
+
+	/* The phase buttons on their own line under the active side's phases. */
+	.t2-phase-actions
+	{
+		flex: 1 0 100%;
 		margin-left: 0;
+	}
+
+	.t2-phase-side
+	{
+		width: auto;
 	}
 }
 

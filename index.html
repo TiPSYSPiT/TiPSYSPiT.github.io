@@ -44,6 +44,7 @@
 	<script src="js/cod2/maps-data.js" defer></script>
 	<script src="js/cod2/maps.js" defer></script>
 	<script src="js/cod2/grenades-data.js" defer></script>
+	<script src="js/cod2/tactics-data.js" defer></script>
 	<script src="js/cod2/tactics.js" defer></script>
 </head>
 
@@ -764,8 +765,8 @@
 
 		<section class="panel" id="panel-cod2-maps" role="tabpanel" aria-labelledby="tab-cod2-maps" tabindex="0"
 			hidden>
-			<p class="lede">The 15 stock multiplayer maps of CoD2 with their internal names, gametypes and loading
-				screens. Open a map for the view from above, the rcon command and what zPAM changes.</p>
+			<p class="lede">The 15 stock multiplayer maps of CoD2 with their internal names and loading screens.
+				Open a map for the view from above, the rcon command and what zPAM changes.</p>
 
 			<div class="dv-bar">
 				<label class="visually-hidden" for="m2-search">Filter maps</label>
@@ -773,16 +774,6 @@
 					spellcheck="false" autocomplete="off">
 				<span class="dv-count" id="m2-count" aria-live="polite"></span>
 			</div>
-
-			<div class="d2-filters" role="group" aria-label="Filters">
-				<label class="d2-check" for="m2-gametype"><span class="d2-filter-label dv-first">Gametype</span>
-					<select class="dv-select" id="m2-gametype">
-						<option value="">any</option>
-					</select>
-				</label>
-			</div>
-
-			<p class="hint" id="m2-hint" role="status"></p>
 
 			<p class="dv-empty" id="m2-empty" hidden></p>
 
