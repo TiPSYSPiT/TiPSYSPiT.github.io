@@ -239,36 +239,41 @@ search by name, internal name or zPAM version.
   top-down render, and zPAM's radar where it has one) and what zPAM changes:
   the `_fix` version it switches to, the kill triggers it can remove, British
   instead of Russians.
-- **Tactics** in the detail view opens a drawing board on the map from above,
-  for presenting a tactic.
-  - Two drawing layers, one per side, as the game names them: "Allies –
-    British" (the map's nation) and "Axis – German". The Allies toolbar is on
-    the left, the Axis toolbar on the right; a tool from a toolbar draws on
-    that side's layer, in the side's scoreboard color. Each layer has its own
-    phases, undo / redo, eraser and Clear (asked in the page), and can be shown
-    alone or with the other. The active side, tool and phase are shown at the
-    top; the cursor takes the side's color.
-  - Tools, grouped: select / move; arrow (straight, bent, dashed), pen, line,
-    rectangle, ellipse, filled area, text; players 1–5, view cones (80°,
-    `cg_fov`'s default); smoke and frag grenades with throw paths; eraser and
-    laser pointer. Width, opacity and dashes in each toolbar's style menu.
-  - Fixed, not editable: the S&D spawns of both sides (a triangle per spawn,
+- **Tactics** in the detail view opens a board for planning and presenting an
+  S&D round, e.g. while screen sharing in a voice chat.
+  - Each side has a rail at its edge, Allies left and Axis right, with its
+    players 1–5 and its tools. Drag a player onto the map; click a player for
+    Route, Smoke, Frag or Look: routes, throws and view cones (80°, `cg_fov`'s
+    default) start at the player and move with it. Right-click (long-press on
+    touch) opens a radial menu with every tool at the pointer. Players, route
+    ends and grenades snap to spawn points and bomb sites (Alt: no snap).
+  - **Start from** builds a plan from the map's spawns and sites: A execute,
+    B execute, B split (with the defense's default and rotation), default
+    defense, or blank.
+  - Fixed under the drawing: the S&D spawns of both sides (a triangle per spawn,
     pointing the way it faces, in a zone per group) and the bomb sites A and B
     with their plant area, each switchable, with a legend that says which
     nation attacks and which defends.
+  - Each side is its own layer, in its scoreboard color, with its own phases,
+    undo / redo, eraser, Clear (asked in the page) and visibility. The timeline
+    has a track per side: click a phase, drag it to reorder, double-click to
+    rename, + adds a phase with the players where they are; Play steps both
+    sides together and the players glide from phase to phase; onion skin shows
+    the phase before.
+  - **Present** hides everything but the map, a small step bar (← → or the
+    buttons) and a laser pointer; fullscreen with F. Wheel / pinch zooms, drag
+    the empty map or Space-drag pans, double-click or 0 resets.
   - A grenade shows the HUD icon of its side's nation (M2 Frag Grenade, MK1
     Frag Grenade, RGD-33 Stick Grenade, Stielhandgranate; CoD2 has no flash or
     stun grenade). A frag's ring is its real 256-unit damage radius, and a
-    scale bar shows game units; both come from the world area each image
-    covers.
-  - Phases per side (add, copy, rename, reorder, delete, ← →, onion skin); Play
-    steps both shown layers together. Fullscreen, hidden bars and a cursor
-    highlight for screen sharing; a short "how to use" card on the first open.
-  - PNG: the current view (shown layers, spawns, sites, legend, scale), e.g.
-    `mp_toujane_tactics_phase1.png`, or `..._allies_phase1.png` with one layer
-    shown; All PNGs: every step of Play. Nothing is saved: the drawing is gone
-    when the board closes. Mouse, pen and touch; on a phone the toolbars are
-    icon columns, Allies left and Axis right (`js/cod2/tactics.js`).
+    scale bar shows game units.
+  - Keyboard: 1–9 tools, Shift+1–5 a player at the pointer, Tab switches the
+    side, ? lists all keys. A short hint on the first open of each page load.
+  - PNG: the current view (shown sides, spawns, sites, legend, scale), e.g.
+    `mp_toujane_tactics_phase1.png`, or every step of Play. Nothing is saved:
+    the drawing is gone when the board closes. Mouse, pen and touch; on a phone
+    the map is on top with the Allies panel left and the Axis panel right below
+    it (`js/cod2/tactics.js`).
 - `tools/build-cod2-tactics.py` builds `js/cod2/tactics-data.js` from the map
   files: the S&D spawns (`mp_sd_spawn_attacker` / `_defender`: position and
   facing) and bomb sites (`bombzone` with `script_label` A / B: position and
