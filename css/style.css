@@ -1022,6 +1022,988 @@ a:hover
 	line-height: 1.5;
 }
 
+/* ---------- filmtweaks ---------- */
+
+/* Phones and narrow windows: the preview on top, the settings below it. Wide
+   windows: the settings on the left, the preview beside them, kept in view
+   while the settings scroll. */
+.ft-layout
+{
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 12px;
+	align-items: start;
+}
+
+.ft-view,
+.ft-side
+{
+	min-width: 0;
+}
+
+.ft-view > .kf-out:first-child,
+.ft-side > :first-child
+{
+	margin-top: 0;
+}
+
+@media (min-width: 1100px)
+{
+	.ft-layout
+	{
+		grid-template-columns: minmax(380px, 440px) minmax(0, 1fr);
+		grid-template-areas: "side view";
+		gap: 16px;
+	}
+
+	.ft-view
+	{
+		grid-area: view;
+	}
+
+	.ft-side
+	{
+		grid-area: side;
+	}
+}
+
+@media (min-width: 1100px) and (min-height: 700px)
+{
+	.ft-view
+	{
+		position: sticky;
+		top: 12px;
+	}
+}
+
+/* On a phone only the picture itself stays at the top while the settings
+   scroll under it; with all five maps it would fill the screen, so not then. */
+@media (max-width: 1099px) and (min-height: 600px)
+{
+	.ft-view
+	{
+		display: contents;
+	}
+
+	.ft-preview
+	{
+		position: sticky;
+		top: 0;
+		z-index: 5;
+		margin-top: 0;
+		box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.35);
+	}
+
+	.ft-is-grid .ft-preview
+	{
+		position: static;
+		box-shadow: none;
+	}
+
+	.ft-scene
+	{
+		margin-top: 0;
+	}
+}
+
+.ft-preview-head
+{
+	flex-wrap: wrap;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+/* Map, before / after, all maps: one pressed at a time. */
+.ft-seg
+{
+	display: inline-flex;
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+}
+
+.ft-seg-btn,
+.ft-map
+{
+	padding: 3px 10px;
+	border: 0;
+	border-radius: 4px;
+	background: none;
+	color: var(--muted);
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.5;
+	white-space: nowrap;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.ft-seg-btn:hover,
+.ft-map:hover
+{
+	color: var(--text);
+}
+
+.ft-seg-btn[aria-pressed="true"],
+.ft-map[aria-pressed="true"]
+{
+	background-color: var(--field);
+	color: var(--text);
+	box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.ft-maps
+{
+	display: flex;
+	gap: 4px;
+	padding: 6px 8px;
+	border-bottom: 1px solid var(--border);
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.ft-is-grid .ft-maps
+{
+	display: none;
+}
+
+/* The picture is the game's, so its surroundings stay dark in both themes. */
+.ft-stage
+{
+	position: relative;
+	background-color: #161616;
+	touch-action: pan-y;
+}
+
+.ft-stage[hidden]
+{
+	display: none;
+}
+
+.ft-stage.is-split
+{
+	cursor: ew-resize;
+	user-select: none;
+}
+
+.ft-canvas
+{
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1280 / 688;
+}
+
+.ft-labels
+{
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	left: 8px;
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	pointer-events: none;
+}
+
+.ft-labels[hidden]
+{
+	display: none;
+}
+
+.ft-label
+{
+	padding: 2px 8px;
+	border-radius: 4px;
+	background-color: rgba(0, 0, 0, 0.62);
+	color: #f2f2ee;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.ft-split
+{
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	margin-left: -1px;
+	background-color: rgba(255, 255, 255, 0.9);
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.ft-split[hidden]
+{
+	display: none;
+}
+
+.ft-split:focus-visible
+{
+	outline: 2px solid #ffffff;
+	outline-offset: 2px;
+}
+
+.ft-split-knob
+{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 28px;
+	height: 28px;
+	margin: -14px 0 0 -14px;
+	border: 2px solid #ffffff;
+	border-radius: 50%;
+	background-color: rgba(0, 0, 0, 0.55);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ft-split-knob::before
+{
+	content: "\2039\00a0\203a";
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	color: #ffffff;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 24px;
+	text-align: center;
+}
+
+.ft-status
+{
+	right: 12px;
+	bottom: 12px;
+}
+
+/* Five maps without a hole: three in the first row and two wider ones in the
+   second; where the preview is narrow, the first map across and two by two
+   below it. The numbers of all five run across underneath. */
+.ft-preview
+{
+	container-type: inline-size;
+}
+
+.ft-grid
+{
+	display: grid;
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	gap: 6px;
+	padding: 6px;
+	background-color: #161616;
+}
+
+.ft-grid[hidden]
+{
+	display: none;
+}
+
+.ft-tile
+{
+	position: relative;
+	display: block;
+	grid-column: span 2;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background-color: #222222;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.ft-tile:nth-child(n + 4)
+{
+	grid-column: span 3;
+}
+
+@container (max-width: 520px)
+{
+	.ft-tile,
+	.ft-tile:nth-child(n + 4)
+	{
+		grid-column: span 3;
+	}
+
+	.ft-tile:first-child
+	{
+		grid-column: 1 / -1;
+	}
+}
+
+.ft-tile:focus-visible
+{
+	outline: 2px solid #ffffff;
+	outline-offset: 1px;
+}
+
+.ft-tile-canvas
+{
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1280 / 688;
+}
+
+.ft-summary
+{
+	grid-column: 1 / -1;
+	padding: 6px 4px 2px;
+	color: #e6e6e1;
+	overflow-x: auto;
+}
+
+.ft-summary-table
+{
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 12px;
+	line-height: 1.5;
+	font-variant-numeric: tabular-nums;
+}
+
+.ft-summary-title
+{
+	padding: 0 0 4px;
+	color: #a9a9a2;
+	font-size: 11px;
+	text-align: left;
+}
+
+.ft-summary-table th,
+.ft-summary-table td
+{
+	padding: 1px 0 1px 8px;
+	text-align: right;
+	white-space: nowrap;
+}
+
+.ft-summary-table th:first-child
+{
+	padding-left: 0;
+	text-align: left;
+}
+
+.ft-summary-table thead th
+{
+	font-weight: 600;
+}
+
+.ft-summary-table tbody th
+{
+	color: #a9a9a2;
+	font-weight: 500;
+}
+
+.ft-summary-own td
+{
+	color: #a9a9a2;
+}
+
+.ft-tile-name
+{
+	position: absolute;
+	left: 6px;
+	bottom: 6px;
+	padding: 1px 7px;
+	border-radius: 4px;
+	background-color: rgba(0, 0, 0, 0.62);
+	color: #f2f2ee;
+	font-size: 12px;
+}
+
+.ft-scene-row
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 18px;
+	padding: 10px 16px;
+}
+
+.ft-scene-desc
+{
+	padding-top: 8px;
+}
+
+.ft-scene-desc > span
+{
+	display: block;
+}
+
+/* On / off switch: a track with a knob, then its text. */
+.ft-switch
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--text);
+	font-family: inherit;
+	font-size: 13px;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.ft-switch-track
+{
+	position: relative;
+	flex: 0 0 auto;
+	width: 34px;
+	height: 20px;
+	border: 1px solid var(--border-strong);
+	border-radius: 999px;
+	background-color: var(--field);
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.ft-switch-track::after
+{
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: var(--muted);
+	transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.ft-switch[aria-checked="true"] .ft-switch-track
+{
+	border-color: var(--accent);
+	background-color: var(--accent);
+}
+
+.ft-switch[aria-checked="true"] .ft-switch-track::after
+{
+	background-color: var(--accent-text);
+	transform: translateX(14px);
+}
+
+.ft-switch:focus-visible
+{
+	outline: 2px solid var(--focus);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+.ft-switch-text
+{
+	font-family: var(--mono);
+	white-space: nowrap;
+}
+
+.ft-scene .ft-switch-text
+{
+	font-family: inherit;
+}
+
+.ft-dvar
+{
+	margin-right: 2px;
+	color: var(--text);
+	font-family: var(--mono);
+	font-size: 12px;
+}
+
+.ft-live
+{
+	margin-top: -2px;
+}
+
+.ft-live[hidden]
+{
+	display: none;
+}
+
+/* R, G and B of a tint: on a line of their own under the label and swatch. */
+.ft-rgb
+{
+	display: flex;
+	flex: 1 1 100%;
+	flex-wrap: wrap;
+	gap: 6px 10px;
+}
+
+.ft-ch
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.ft-ch-label
+{
+	width: 10px;
+	color: var(--muted);
+	font-family: var(--mono);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.ft-num.kf-num
+{
+	width: 64px;
+}
+
+/* Three channels must fit the settings column on one line. */
+.ft-rgb .ft-num.kf-num
+{
+	flex: 0 0 50px;
+	width: 50px;
+}
+
+.ft-rgb .num-step
+{
+	flex-basis: 24px;
+	width: 24px;
+}
+
+/* On a phone that line is too short for three fields with their buttons
+   beside them: each channel becomes a column, the field over its - and +. */
+@media (max-width: 560px)
+{
+	.ft-rgb
+	{
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	.ft-ch
+	{
+		display: grid;
+		grid-template-columns: 10px minmax(0, 1fr);
+		align-items: start;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	.ft-ch-label
+	{
+		line-height: 30px;
+	}
+
+	.ft-rgb .num-stepper
+	{
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 4px;
+		min-width: 0;
+	}
+
+	.ft-rgb .ft-num.kf-num
+	{
+		grid-column: 1 / -1;
+		width: 100%;
+		min-width: 0;
+	}
+
+	.ft-rgb .num-step
+	{
+		width: auto;
+		height: 30px;
+	}
+}
+
+.ft-color
+{
+	width: 46px;
+}
+
+.mm-badge.ft-badge-promod
+{
+	color: var(--orange);
+	background-color: var(--orange-tint);
+}
+
+.ft-actions
+{
+	padding: 12px;
+}
+
+/* .sb-preset comes later in this file and is a flex row */
+.sb-preset.ft-preset
+{
+	display: grid;
+	grid-template-columns: 96px minmax(0, 1fr);
+	gap: 2px 10px;
+	align-items: center;
+}
+
+/* The preset on the shown map, drawn by the preview's own pass. */
+/* The thumbnail and its tooltip: the preset's values and a Copy button. The
+   tooltip sits beside the preset button, not in it, so its button is a
+   button of its own. */
+.ft-preset-item
+{
+	position: relative;
+}
+
+.ft-thumb
+{
+	position: relative;
+	display: block;
+	grid-row: span 2;
+}
+
+.ft-thumb-tip
+{
+	position: absolute;
+	left: 116px;
+	top: 4px;
+	z-index: 10;
+	display: none;
+	width: max-content;
+	max-width: min(280px, calc(100vw - 150px));
+	padding: 8px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface);
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+	color: var(--text);
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.45;
+	text-align: left;
+	white-space: normal;
+}
+
+/* Covers the gap to the thumbnail, so the pointer can cross it to Copy. */
+.ft-thumb-tip::before
+{
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 100%;
+	width: 12px;
+}
+
+@media (hover: hover)
+{
+	.ft-preset-item:has(.ft-thumb:hover) .ft-thumb-tip,
+	.ft-thumb-tip:hover
+	{
+		display: block;
+	}
+}
+
+.ft-preset-item.is-focus .ft-thumb-tip,
+.ft-preset-item.is-pinned .ft-thumb-tip
+{
+	display: block;
+}
+
+/* Holding a preset on a touch screen opens its tooltip; the browser's own
+   callout and text selection would get in the way. */
+.ft-preset
+{
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* The hidden switch that gives Safari its haptic tick (filmtweaks.js,
+   hapticTick): in the page, but never seen or reached. */
+.ft-haptic
+{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	opacity: 0;
+	pointer-events: none;
+}
+
+.ft-presets-touch
+{
+	display: none;
+	margin: 0 2px 2px;
+	color: var(--muted);
+	font-size: 12px;
+}
+
+@media (hover: none)
+{
+	.ft-presets-touch
+	{
+		display: block;
+	}
+}
+
+/* The pointer on another preset wins over the keyboard focus. */
+@media (hover: hover)
+{
+	.sb-preset-list:has(.ft-thumb:hover, .ft-thumb-tip:hover)
+		.ft-preset-item.is-focus:not(:has(.ft-thumb:hover, .ft-thumb-tip:hover)) .ft-thumb-tip
+	{
+		display: none;
+	}
+}
+
+.ft-tip-head
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 4px;
+}
+
+/* .btn comes later in this file and would set its own padding */
+.btn.ft-tip-copy
+{
+	padding: 1px 10px;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.ft-tip-title
+{
+	font-weight: 600;
+}
+
+.ft-tip-rows
+{
+	display: grid;
+	grid-template-columns: auto auto;
+	gap: 1px 12px;
+}
+
+.ft-tip-label
+{
+	color: var(--muted);
+}
+
+.ft-tip-value
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-family: var(--mono);
+	white-space: nowrap;
+}
+
+.ft-tip-swatch
+{
+	flex: 0 0 auto;
+	width: 10px;
+	height: 10px;
+	border: 1px solid var(--border-strong);
+	border-radius: 2px;
+}
+
+.ft-tip-note
+{
+	display: block;
+	margin-top: 5px;
+	color: var(--muted);
+	font-size: 11px;
+}
+
+.ft-preset-thumb
+{
+	display: block;
+	width: 96px;
+	height: auto;
+	aspect-ratio: 1280 / 688;
+	border-radius: 4px;
+	background-color: #222222;
+}
+
+.ft-presets-map
+{
+	margin-left: 8px;
+	color: var(--muted);
+	font-weight: 400;
+}
+
+.ft-preset-name
+{
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.ft-preset-desc
+{
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.ft-warn
+{
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 12px;
+}
+
+.ft-warn[hidden]
+{
+	display: none;
+}
+
+.ft-warn-line
+{
+	margin: 0;
+	padding: 9px 12px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.ft-warn-line.is-block
+{
+	border-color: var(--red);
+	background-color: var(--red-tint);
+	color: var(--text);
+}
+
+.ft-warn-line.is-info
+{
+	background-color: var(--surface);
+	color: var(--muted);
+}
+
+.ft-more-head
+{
+	padding: 10px 16px;
+	background-color: var(--field);
+	color: var(--text);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.ft-more-head:focus-visible
+{
+	outline: 2px solid var(--focus);
+	outline-offset: -2px;
+}
+
+.ft-more[open] > .ft-more-head
+{
+	border-bottom: 1px solid var(--border);
+}
+
+.ft-more-body
+{
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 12px 16px;
+}
+
+.ft-import-label
+{
+	margin: 0;
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.ft-import
+{
+	width: 100%;
+	min-height: 120px;
+	padding: 8px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background-color: var(--field);
+	color: inherit;
+	font-family: var(--mono);
+	font-size: 13px;
+	line-height: 1.5;
+	resize: vertical;
+}
+
+.ft-permap-row
+{
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 13px;
+}
+
+.ft-keys
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 14px;
+}
+
+.ft-keys[hidden]
+{
+	display: none;
+}
+
+.ft-key
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+}
+
+.ft-key .kf-key
+{
+	width: 64px;
+}
+
+/* The per-map binds: a block of their own inside Console commands. */
+.ft-permap
+{
+	border-top: 1px solid var(--border);
+}
+
+.ft-sub-head
+{
+	border-top: 0;
+}
+
+.ft-permap-body
+{
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 12px 16px 4px;
+}
+
+.ft-permap-body .ft-warn-line[hidden]
+{
+	display: none;
+}
+
+.ft-key .ft-key-name
+{
+	min-width: 72px;
+}
+
+.ft-permap-row
+{
+	flex-wrap: wrap;
+	gap: 6px 12px;
+}
+
+.ft-permap-state
+{
+	color: var(--muted);
+	font-size: 12px;
+}
+
 /* ---------- scoreboard generator ---------- */
 
 .sb-grid

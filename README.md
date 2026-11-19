@@ -128,6 +128,32 @@ Size the minimap and its icons and see the result on a real map.
   face.
 - The output is one `seta` line per dvar, with a copy button.
 
+### filmtweaks
+
+Set the film colours (`r_filmTweak*`, `r_filmUseTweaks`, `r_gamma`) and see them
+on Backlot, District, Crash, Crossfire and Strike.
+
+- The preview runs the game's own colour pass: the `postfx_color` pixel shader
+  from `code_post_gfx_mp.ff` with the constants `R_SetFilmInfo` and
+  `R_UpdateColorManipulation` build, then the render target's clamp and the
+  `r_gamma` ramp. In WebGL, or per pixel on a canvas without it.
+- Before / after shows your settings against the map's own film (its vision
+  file, what `r_filmUseTweaks 0` shows); All maps shows the five side by side,
+  with the shadows and the share cut at white of each underneath.
+  Promod server applies Promod's `r_desaturation 0` and `r_filmTweakInvert 0`;
+  Mark lost detail shows where colours are cut at white or near black.
+- Cheat protected and Promod tags on the dvars, a warning when Promod would
+  block a setting, presets (three examples that set every dvar, and six
+  suggestions, each with a thumbnail on the shown map), randomize and
+  fine-tune, importing pasted lines and a link that holds the settings.
+- Under Console commands, the per-map setup: one `bind` per map with its
+  brightness, contrast, tints, desaturation and `r_gamma`, ending in
+  `echo ^8[^9BACKLOT^8]^7` (the map's name in upper case); a key per map
+  (F1 to F5), with a warning when two maps share one. With All maps on, one
+  bind (`^8[^9ALL_MAPS^8]^7`) holds the same values for every map.
+- The map images in `assets/cod4/filmtweaks/` are renders from the CoD4 demo
+  viewer at each map's S&D attacker spawn, before any film pass.
+
 ### demos
 
 A link to the [CoD4 demo viewer](https://tipsyspit.github.io/cod4-demo/), a separate
@@ -402,7 +428,8 @@ js/shared/ui.js         small helpers every tool uses: copy to clipboard, the st
 js/shared/dvar-table.js the table of a dvars tab, set up by js/<game>/dvars.js
 js/cod4/game.js         CoD4 and its tabs
 js/cod4/                one script per tab: checkcfg.js, rcon.js, serverconfig.js,
-                        dvars.js, killfeed.js, scoreboard.js, minimap.js, faq.js
+                        dvars.js, killfeed.js, scoreboard.js, minimap.js,
+                        filmtweaks.js, faq.js
 js/cod4/dvars-data.js   the dvar list (dvars-proof.json: its proofs, not loaded)
 js/cod4/killfeed-icons.js
                         the killfeed icons as data URLs, so they can be measured
@@ -434,7 +461,9 @@ js/cod2/grenades-data.js
 js/cod2/maps/           one script per map with its overhead images for the board,
                         loaded when the board opens that map
 assets/cod4/            icons/cod4.ico and cod4.png (browser tab and game switcher,
-                        from the CoD4 demo viewer), scoreboard/preview-bg.png
+                        from the CoD4 demo viewer), scoreboard/preview-bg.png,
+                        filmtweaks/: one script per map with its base image for the
+                        filmtweaks preview, loaded when that tab opens
 assets/cod2/            icons/cod2.ico and cod2.png (from the CoD2 demo viewer),
                         maps/: loading screens, top-down renders and zPAM radars
 tools/                  build-cod4-dvars.py rebuilds js/cod4/dvars-data.js from

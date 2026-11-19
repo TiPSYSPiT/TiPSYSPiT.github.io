@@ -17,6 +17,7 @@ window.GAMES.push({
 		{ id: "tab-killfeed", panel: "panel-killfeed", label: "killfeed colors", slug: "killfeed-colors" },
 		{ id: "tab-sb", panel: "panel-sb", label: "scoreboard generator", slug: "scoreboard-generator" },
 		{ id: "tab-mm", panel: "panel-mm", label: "minimap generator", slug: "minimap-generator" },
+		{ id: "tab-ft", panel: "panel-ft", label: "filmtweaks", slug: "filmtweaks" },
 		{ id: "tab-demos", panel: "panel-demos", label: "demos", slug: "demos" },
 		{ id: "tab-faq", panel: "panel-faq", label: "FAQ", slug: "faq" }
 	]
