@@ -18,10 +18,15 @@
  * Written out, that is: contrast * ((1 - d) * rgb + d * lum) *
  * (dark + (light - dark) * lum) + brightness + 0.5 - 0.5 * contrast.
  *
- * The map images (assets/cod4/filmtweaks/<map>.js, window.FILMTWEAK_IMAGES) are
- * renders of the maps before any film pass, so the preview grades them once,
- * as the game does. They are plain scripts holding data URLs, so the preview
- * works from disk too and the pixels can be read back.
+ * The pictures are renders of the maps before any film pass (the CoD4 demo
+ * viewer's 3D maps), so the preview grades them once, as the game does. Each
+ * map has five spots (both spawns, A, B, mid): a 360 degree view of each
+ * (assets/cod4/filmtweaks/360/<map>_<spot>.js, window.FILMTWEAK_CUBES, drawn
+ * by filmtweaks-360.js) and its start view as a flat image
+ * (assets/cod4/filmtweaks/<map>_<spot>.js, window.FILMTWEAK_IMAGES) for the
+ * thumbnails, the grid, the numbers and browsers without WebGL. They are
+ * plain scripts holding data URLs, so the preview works from disk too and
+ * the pixels can be read back.
  */
 (function ()
 {
@@ -32,6 +37,7 @@
 	var setHint = function () {};
 
 	var IMAGE_DIR = "assets/cod4/filmtweaks/";
+	var CUBE_DIR = IMAGE_DIR + "360/";
 	var IMAGE_W = 1280;
 	var IMAGE_H = 688;
 	var TAB_LINK = "#cod4/filmtweaks";
@@ -54,6 +60,35 @@
 			invert: 0, light: [1.2, 0.942, 0.903], dark: [1.08003, 1.08, 1.13691] } }
 	];
 	var DEFAULT_MAP = "mp_crash";
+
+	// The places on each map: where the 360 degree views were taken. Spawns:
+	// the S&D spawn point nearest the spawns' middle; A, B and mid: where the
+	// players of a recorded match stood most often near the bomb site or the
+	// middle of the map. Eye height 60 units, as standing in the game.
+	var SPOTS = [
+		{ id: "att", name: "Attacker spawn", where: "attacker spawn" },
+		{ id: "a", name: "A", where: "bomb site A" },
+		{ id: "b", name: "B", where: "bomb site B" },
+		{ id: "mid", name: "Mid", where: "mid" },
+		{ id: "def", name: "Defender spawn", where: "defender spawn" }
+	];
+	var DEFAULT_SPOT = "att";
+
+	// The start view of each spot, [yaw, pitch] in degrees (the game's: yaw
+	// 0 looks along +x, 90 along +y): the most open direction from there,
+	// leaning towards the spot's target. The flat images show exactly this.
+	var START_VIEWS = {
+		mp_backlot: { att: [0, -2], a: [65, -2], b: [175, -2], mid: [260, -2], def: [255, -2] },
+		mp_citystreets: { att: [85, -2], a: [5, -2], b: [255, -2], mid: [250, -2], def: [265, -2] },
+		mp_crash: { att: [260, -2], a: [325, -2], b: [170, -2], mid: [135, -2], def: [45, -2] },
+		mp_crossfire: { att: [310, -2], a: [265, -2], b: [235, -2], mid: [155, -2], def: [160, -2] },
+		mp_strike: { att: [25, -2], a: [165, -2], b: [265, -2], mid: [230, -2], def: [260, -2] }
+	};
+	var FOV = 80;               // degrees across, as cg_fov 80
+	var TOUCH = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+	var FOV_MIN = 30;
+	var FOV_MAX = 100;
+	var KEEP_CUBES = 2;         // 360 degree views kept on the graphics card (one on a phone): ~130 MB each
 
 	// Defaults and limits are the ones iw3mp.exe registers (R_RegisterDvars);
 	// init() checks them against the dvars tab's data (js/cod4/dvars-data.js),
@@ -123,9 +158,8 @@
 	var CHANNELS = ["red", "green", "blue"];
 
 	// Presets, in the order of the list: six suggestions that set the film
-	// values and leave r_gamma alone, then three examples that set every
-	// dvar, r_gamma too. A preset goes to the shown map, or to every map with
-	// All maps on; the three switches always go to every map.
+	// values and leave r_gamma alone, then TiPSY's and four examples that set
+	// every dvar, r_gamma too. A preset goes to every map.
 	var PRESETS = [
 		{ name: "Stock", desc: "Tweaks off: every map with its own film colours.",
 			v: { useTweaks: 0, enable: 0, brightness: 0, contrast: 1.4, desat: 0.2, invert: 0,
@@ -146,15 +180,21 @@
 		{ name: "Warm", desc: "Golden light, a little less saturated.",
 			v: { useTweaks: 1, enable: 1, brightness: 0.16, contrast: 1.4, desat: 0.1, invert: 0,
 				light: [1.15, 1.05, 0.9], dark: [1.2, 1.05, 0.85] } },
-		{ name: "Example 1", desc: "Cool highlights, strong contrast, a little brighter.", example: true,
+		{ name: "TiPSY's", desc: "Cool highlights, strong contrast, a little brighter.", example: true,
 			v: { useTweaks: 1, enable: 1, brightness: 0.18, contrast: 1.8, desat: 0, invert: 0,
 				light: [0.55, 0.7, 0.8], dark: [1.55, 1.55, 2], gamma: 1.2 } },
-		{ name: "Example 2", desc: "Green highlights, the strongest contrast of the three.", example: true,
+		{ name: "Example 1", desc: "Green highlights, the strongest contrast.", example: true,
 			v: { useTweaks: 1, enable: 1, brightness: 0.18, contrast: 1.9, desat: 0, invert: 0,
 				light: [0.5, 0.7, 0.5], dark: [1.65, 1.65, 2], gamma: 1.1 } },
-		{ name: "Example 3", desc: "Bright and blue, with a low r_gamma.", example: true,
+		{ name: "Example 2", desc: "Bright and blue, with a low r_gamma.", example: true,
 			v: { useTweaks: 1, enable: 1, brightness: 0.3, contrast: 1.5, desat: 0, invert: 0,
-				light: [0.45, 0.55, 0.7], dark: [1.6, 1.66, 1.9], gamma: 0.7 } }
+				light: [0.45, 0.55, 0.7], dark: [1.6, 1.66, 1.9], gamma: 0.7 } },
+		{ name: "Example 3", desc: "Soft contrast, light blue shadows and highlights, a high r_gamma.", example: true,
+			v: { useTweaks: 1, enable: 1, brightness: 0, contrast: 1.2, desat: 0, invert: 0,
+				light: [0.8, 0.8, 1.2], dark: [1.8, 1.8, 2], gamma: 1.5 } },
+		{ name: "Example 4", desc: "Yellowish highlights, blue shadows, r_gamma 1.", example: true,
+			v: { useTweaks: 1, enable: 1, brightness: 0.255, contrast: 1.6, desat: 0, invert: 0,
+				light: [0.7, 0.7, 0.55], dark: [1.25, 1.35, 1.81], gamma: 1 } }
 	];
 
 	// The bind key of each map in the per-map setup, in map order.
@@ -163,14 +203,20 @@
 	/* ---------- state ---------- */
 
 	var values = {};
-	var view = { map: DEFAULT_MAP, mode: "single", promod: true, gamma: true, clip: false, split: 0.5 };
+	var view = { map: DEFAULT_MAP, spot: DEFAULT_SPOT, cam: { yaw: 0, pitch: 0, fov: FOV }, mode: "single", promod: true,
+		gamma: true, clip: false, split: 0.5 };
 	var perMap = null;          // map id -> its own values (PER_MAP_KEYS); set up in init()
 	// The per-map setup's "All maps" switch. Off: each map has its own values
 	// and its own bind. On: one set of values and one bind for every map;
 	// the per-map values stay as they are until it is off again.
-	var allMaps = false;
+	var allMaps = false;        // switched on in init(): All maps is on when the tab opens
 	var allKey = "F1";          // bind key of the one all-maps bind
+	var allName = "";           // console name of the all-maps bind ("" = the default, ALL_MAPS)
 	var keys = {};              // map id -> bind key of the per-map setup
+	var names = {};             // map id -> console name of its bind ("" = the default, e.g. BACKLOT)
+	// Whether a map was given values of its own (with All maps off). Until
+	// then, switching All maps off starts every map from the shared values.
+	var perMapOwn = false;
 
 	var fields = {};            // key -> input or [r, g, b] inputs
 	var swatches = {};          // tint key -> colour input
@@ -178,9 +224,13 @@
 	var dom = {};
 
 	var renderer = null;
-	var images = {};            // map id -> decoded Image
-	var loading = {};           // map id -> true while its script loads
-	var samples = {};           // map id -> Float32Array of a small copy, for the numbers
+	var images = {};            // image id (<map>_<spot>) -> decoded Image of the start view
+	var loading = {};           // image id -> true while its script loads
+	var samples = {};           // image id -> Float32Array of a small copy, for the numbers
+	var pano = null;            // the 360 degree views (filmtweaks-360.js), null without WebGL
+	var cubeLoading = {};       // image id -> true while its 360 degree view loads
+	var cubeFailed = {};        // image id -> true when it could not be shown
+	var cubeOrder = [];         // the 360 degree views on the graphics card, oldest first
 	var frame = 0;
 	var started = false;
 
@@ -248,6 +298,35 @@
 			}
 		}
 		return null;
+	}
+
+	function spotById(id)
+	{
+		for (var i = 0; i < SPOTS.length; i++)
+		{
+			if (SPOTS[i].id === id)
+			{
+				return SPOTS[i];
+			}
+		}
+		return null;
+	}
+
+	// The picture of a spot: its start view, and its 360 degree view.
+	function imageId(mapId, spot)
+	{
+		return mapId + "_" + spot;
+	}
+
+	function shownId()
+	{
+		return imageId(view.map, view.spot);
+	}
+
+	function startView(mapId, spot)
+	{
+		var v = START_VIEWS[mapId] && START_VIEWS[mapId][spot];
+		return v ? v : [0, 0];
 	}
 
 	/* ---------- the colour pass ---------- */
@@ -630,13 +709,14 @@
 		MAPS.forEach(function (map)
 		{
 			var cells = dom.summaryRows[map.id];
-			if (!samples[map.id])
+			var id = imageId(map.id, view.spot);
+			if (!samples[id])
 			{
 				cells.forEach(function (td) { td.textContent = "…"; });
 				return;
 			}
-			var after = measure(map.id, passFor(map.id, false));
-			var before = measure(map.id, passFor(map.id, true));
+			var after = measure(id, passFor(map.id, false));
+			var before = measure(id, passFor(map.id, true));
 			cells[0].textContent = after.shadows.toFixed(2);
 			cells[1].textContent = before.shadows.toFixed(2);
 			cells[2].textContent = Math.round(after.cut * 100) + "%";
@@ -645,15 +725,15 @@
 
 	function updateNote()
 	{
-		var id = view.map;
+		var id = shownId();
 		if (!samples[id])
 		{
 			dom.note.textContent = "";
 			return;
 		}
-		var before = measure(id, passFor(id, true));
-		var after = measure(id, passFor(id, false));
-		var name = mapById(id).name;
+		var before = measure(id, passFor(view.map, true));
+		var after = measure(id, passFor(view.map, false));
+		var name = mapById(view.map).name + ", " + spotById(view.spot).where + " (start view),";
 		dom.note.textContent = name + " with your settings: " + pct(after.cut) + " of the picture cut at white, " +
 			pct(after.black) + " near black. Shadows (darkest quarter) " + after.shadows.toFixed(2) +
 			", average " + after.mean.toFixed(2) + "; with the map's own film " + before.shadows.toFixed(2) +
@@ -671,13 +751,51 @@
 		}
 	}
 
+	// Whether the shown spot is drawn from its 360 degree view (else from
+	// its flat start view).
+	function cubeShown()
+	{
+		return pano !== null && view.mode !== "grid" && pano.has(shownId());
+	}
+
 	function updateStatus()
 	{
 		var waiting = view.mode === "grid"
-			? MAPS.some(function (m) { return !renderer || !renderer.has(m.id); })
-			: !renderer || !renderer.has(view.map);
-		dom.status.hidden = !waiting;
-		dom.status.textContent = renderer === null && started ? "The preview could not start." : "Loading the map…";
+			? MAPS.some(function (m) { return !renderer || !renderer.has(imageId(m.id, view.spot)); })
+			: !renderer || !renderer.has(shownId());
+		var cube = !waiting && view.mode !== "grid" && cubeLoading[shownId()] === true;
+		dom.status.hidden = !waiting && !cube;
+		dom.status.textContent = renderer === null && started ? "The preview could not start." :
+			(cube ? "Loading the 360° view…" : "Loading the map…");
+		var looking = cubeShown();
+		dom.stage.classList.toggle("is-pano", looking);
+		if (dom.spotHint)
+		{
+			dom.spotHint.textContent = pano === null ? "Start views only: this browser shows no 360° view (WebGL)." :
+				cubeFailed[shownId()] ? "The 360° view could not load; this is its start view." :
+				(TOUCH ? "Drag to look around, pinch to zoom." :
+				"Drag to look around · Ctrl + wheel to zoom · arrow keys, + and −");
+		}
+	}
+
+	// The 360 degree view at the canvas's own size on the screen, for a
+	// sharp picture; the flat start view at its own size.
+	function sizeCanvas(cube)
+	{
+		var w = IMAGE_W;
+		var h = IMAGE_H;
+		if (cube)
+		{
+			var dpr = Math.min(2, window.devicePixelRatio || 1);
+			w = Math.min(2560, Math.max(320, Math.round(dom.canvas.clientWidth * dpr)));
+			h = Math.round(w * IMAGE_H / IMAGE_W);
+		}
+		if (dom.canvas.width !== w || dom.canvas.height !== h)
+		{
+			dom.canvas.width = w;
+			dom.canvas.height = h;
+			dom.ctx.imageSmoothingQuality = "high";
+		}
 	}
 
 	function render()
@@ -689,48 +807,63 @@
 			return;
 		}
 		updateStatus();
+		var id = shownId();
 		if (view.mode === "grid")
 		{
 			MAPS.forEach(function (map)
 			{
 				var tile = dom.tiles[map.id];
-				if (!renderer.has(map.id))
+				var tileId = imageId(map.id, view.spot);
+				if (!renderer.has(tileId))
 				{
 					return;
 				}
-				tile.ctx.drawImage(renderer.draw(map.id, passFor(map.id, false), view.clip), 0, 0,
+				tile.ctx.drawImage(renderer.draw(tileId, passFor(map.id, false), view.clip), 0, 0,
 					tile.canvas.width, tile.canvas.height);
 			});
 			updateSummary();
 		}
-		else if (renderer.has(view.map))
+		else if (cubeShown())
 		{
+			// the view, then the film pass over it: before / after share the camera
+			sizeCanvas(true);
+			var parts = view.mode === "split"
+				? [{ pass: passFor(view.map, true), x0: 0, x1: view.split },
+					{ pass: passFor(view.map, false), x0: view.split, x1: 1 }]
+				: [{ pass: passFor(view.map, false), x0: 0, x1: 1 }];
+			dom.ctx.drawImage(pano.draw(id, view.cam, dom.canvas.width, dom.canvas.height, parts, view.clip), 0, 0,
+				dom.canvas.width, dom.canvas.height);
+		}
+		else if (renderer.has(id))
+		{
+			sizeCanvas(false);
 			var ctx = dom.ctx;
 			var W = dom.canvas.width;
 			var H = dom.canvas.height;
 			if (view.mode === "split")
 			{
-				ctx.drawImage(renderer.draw(view.map, passFor(view.map, true), view.clip), 0, 0, W, H);
+				ctx.drawImage(renderer.draw(id, passFor(view.map, true), view.clip), 0, 0, W, H);
 				var x = Math.round(W * view.split);
 				ctx.save();
 				ctx.beginPath();
 				ctx.rect(x, 0, W - x, H);
 				ctx.clip();
-				ctx.drawImage(renderer.draw(view.map, passFor(view.map, false), view.clip), 0, 0, W, H);
+				ctx.drawImage(renderer.draw(id, passFor(view.map, false), view.clip), 0, 0, W, H);
 				ctx.restore();
 			}
 			else
 			{
-				ctx.drawImage(renderer.draw(view.map, passFor(view.map, false), view.clip), 0, 0, W, H);
+				ctx.drawImage(renderer.draw(id, passFor(view.map, false), view.clip), 0, 0, W, H);
 			}
 		}
 		updateNote();
 		drawThumbs();
+		drawSpotThumbs();
 	}
 
 	/* ---------- map images ---------- */
 
-	// A <script> per map, not fetch(): that also works from disk.
+	// A <script> per spot, not fetch(): that also works from disk.
 	function loadImage(id, then)
 	{
 		if (images[id] || loading[id])
@@ -779,13 +912,15 @@
 		document.head.appendChild(script);
 	}
 
-	// The shown map first, then the others one after another.
-	function loadAll()
+	// The start views needed now, one after another: the shown spot, the
+	// other spots of the shown map (their buttons), then the shown spot on
+	// the other maps (the grid and its numbers).
+	function loadImages()
 	{
-		var order = [view.map].concat(MAPS.map(function (m) { return m.id; }).filter(function (id)
-		{
-			return id !== view.map;
-		}));
+		var order = [shownId()];
+		SPOTS.forEach(function (spot) { order.push(imageId(view.map, spot.id)); });
+		MAPS.forEach(function (map) { order.push(imageId(map.id, view.spot)); });
+		order = order.filter(function (id, i) { return order.indexOf(id) === i && !images[id]; });
 		var next = function ()
 		{
 			var id = order.shift();
@@ -797,6 +932,110 @@
 		next();
 	}
 
+	// The face size of the 360 degree views: 2048 as stored, 1024 where
+	// memory is short (phones) or the graphics card allows no more.
+	function smallDevice()
+	{
+		return Math.min(window.screen.width, window.screen.height) < 768 ||
+			(navigator.deviceMemory !== undefined && navigator.deviceMemory < 4);
+	}
+
+	function faceSize()
+	{
+		return Math.min(pano.maxFace, smallDevice() ? 1024 : 2048);
+	}
+
+	// The shown spot's 360 degree view, when it is drawn: loaded on demand,
+	// the last few kept.
+	function loadCube()
+	{
+		var id = shownId();
+		if (pano === null || view.mode === "grid" || pano.has(id) || cubeLoading[id] || cubeFailed[id])
+		{
+			if (pano !== null && pano.has(id))
+			{
+				cubeOrder = cubeOrder.filter(function (k) { return k !== id; }).concat([id]);
+			}
+			return;
+		}
+		cubeLoading[id] = true;
+		var finish = function (ok)
+		{
+			cubeLoading[id] = false;
+			if (!ok)
+			{
+				pano.drop(id);
+				cubeFailed[id] = true;
+			}
+			else
+			{
+				cubeOrder = cubeOrder.filter(function (k) { return k !== id; }).concat([id]);
+				// the oldest go, never the one shown (a view asked for earlier
+				// can arrive after the shown one)
+				while (cubeOrder.length > (smallDevice() ? 1 : KEEP_CUBES))
+				{
+					var shown = shownId();
+					var old = cubeOrder.filter(function (k) { return k !== shown; })[0];
+					if (old === undefined)
+					{
+						break;
+					}
+					cubeOrder = cubeOrder.filter(function (k) { return k !== old; });
+					pano.drop(old);
+				}
+			}
+			schedule();
+		};
+		var script = document.createElement("script");
+		script.src = CUBE_DIR + id + ".js";
+		script.onload = function ()
+		{
+			var urls = window.FILMTWEAK_CUBES && window.FILMTWEAK_CUBES[id];
+			script.parentNode.removeChild(script);
+			if (!urls || urls.length !== 6)
+			{
+				finish(false);
+				return;
+			}
+			delete window.FILMTWEAK_CUBES[id];          // (the data URLs are not needed once on the card)
+			var left = 6;
+			var bad = false;
+			var faces = urls.map(function (url)
+			{
+				var img = new Image();
+				img.onload = img.onerror = function (event)
+				{
+					bad = bad || event.type === "error";
+					if (--left === 0)
+					{
+						var ok = false;
+						if (!bad)
+						{
+							try
+							{
+								ok = pano.upload(id, faces, faceSize());
+							}
+							catch (err)
+							{
+								ok = false;
+							}
+						}
+						finish(ok);
+					}
+				};
+				img.src = url;
+				return img;
+			});
+		};
+		script.onerror = function ()
+		{
+			script.parentNode.removeChild(script);
+			finish(false);
+		};
+		document.head.appendChild(script);
+		schedule();
+	}
+
 	function start()
 	{
 		if (started)
@@ -805,7 +1044,18 @@
 		}
 		started = true;
 		renderer = makeGlRenderer() || makeCpuRenderer();
-		loadAll();
+		pano = window.FilmtweakPano ? window.FilmtweakPano.create(VERTEX_SHADER, FRAGMENT_SHADER) : null;
+		if (pano !== null && pano.maxFace < 1024)
+		{
+			pano = null;
+		}
+		if (pano !== null)
+		{
+			dom.stage.tabIndex = 0;
+			dom.stage.setAttribute("aria-label", "360° view: arrow keys turn, + and − zoom, Home resets the view");
+		}
+		loadImages();
+		loadCube();
 		schedule();
 	}
 
@@ -1085,6 +1335,10 @@
 				values[spec.key] = Array.isArray(next[spec.key]) ? next[spec.key].slice() : next[spec.key];
 			}
 		});
+		if (!allMaps)
+		{
+			perMapOwn = true;
+		}
 		storePerMap();
 		refreshFields();
 		update();
@@ -1148,8 +1402,24 @@
 				next[spec.key] = Array.isArray(v) ? v.map(function (x) { return clamp(spec, x); }) : clamp(spec, v);
 			}
 		});
+		// A preset is for every map, whichever map is shown and whether All
+		// maps is on: each map takes the preset's values; a value the preset
+		// leaves out (r_gamma, outside the examples) stays as the map had it.
+		if (perMap !== null)
+		{
+			MAPS.forEach(function (map)
+			{
+				PER_MAP_KEYS.forEach(function (key)
+				{
+					if (next.hasOwnProperty(key))
+					{
+						perMap[map.id][key] = Array.isArray(next[key]) ? next[key].slice() : next[key];
+					}
+				});
+			});
+		}
 		setValues(next);
-		var where = allMaps ? " on all maps" : " on " + mapById(view.map).name;
+		var where = " on all " + MAPS.length + " maps";
 		var problems = presetProblems(preset);
 		setHint(preset.name + " applied" + where + "." + (problems.length ? " Outside the game's limits and " +
 			"kept within them: " + problems.join(", ") + "." : ""), problems.length > 0);
@@ -1496,11 +1766,12 @@
 	function drawThumbs()
 	{
 		var map = mapById(view.map);
-		if (!dom.presetsBox.open || renderer === null || !renderer.has(map.id))
+		var id = shownId();
+		if (!dom.presetsBox.open || renderer === null || !renderer.has(id))
 		{
 			return;
 		}
-		var key = [map.id, values.gamma, view.promod, view.gamma].join("|");
+		var key = [id, values.gamma, view.promod, view.gamma].join("|");
 		if (key === thumbKey)
 		{
 			return;
@@ -1514,7 +1785,42 @@
 				settings.gamma = values.gamma;
 			}
 			var pass = passWith(settings, map, preset.v.useTweaks === 1);
-			preset.ctx.drawImage(renderer.draw(map.id, pass, false), 0, 0, THUMB_W, THUMB_H);
+			preset.ctx.drawImage(renderer.draw(id, pass, false), 0, 0, THUMB_W, THUMB_H);
+		});
+	}
+
+	// The spots' buttons: each start view with your settings.
+	var SPOT_W = 128;
+	var SPOT_H = 69;
+	var spotKey = "";
+
+	function drawSpotThumbs()
+	{
+		if (renderer === null || !dom.spotButtons)
+		{
+			return;
+		}
+		var pass = passFor(view.map, false);
+		var have = SPOTS.map(function (spot) { return renderer.has(imageId(view.map, spot.id)) ? 1 : 0; }).join("");
+		var key = [view.map, have, JSON.stringify(pass)].join("|");
+		if (key === spotKey)
+		{
+			return;
+		}
+		spotKey = key;
+		SPOTS.forEach(function (spot, i)
+		{
+			var id = imageId(view.map, spot.id);
+			var ctx = dom.spotButtons[i].ctx;
+			if (renderer.has(id))
+			{
+				ctx.drawImage(renderer.draw(id, pass, false), 0, 0, SPOT_W, SPOT_H);
+			}
+			else
+			{
+				ctx.fillStyle = "#222222";
+				ctx.fillRect(0, 0, SPOT_W, SPOT_H);
+			}
 		});
 	}
 
@@ -1598,14 +1904,35 @@
 		return String(text).replace(/["';\r\n\t]/g, "").replace(/ {2,}/g, " ").trim();
 	}
 
-	// What the console shows when a bind runs: the name in upper case,
-	// spaces as "_", in the colours ^8[^9NAME^8]^7. One function for every
-	// map (and the all-maps bind), so a new map needs nothing here.
+	// What the console shows when a bind runs: ^8[^9NAME^8]^7. The default
+	// name is the map's in upper case, spaces as "_" (one function for every
+	// map and the all-maps bind, so a new map needs nothing here); a name of
+	// your own is kept as written, cleaned by cleanName().
 	var ALL_MAPS_NAME = "All maps";
+
+	function defaultName(displayName)
+	{
+		return String(displayName).toUpperCase().replace(/\s+/g, "_");
+	}
+
+	// What a name in a bind may hold: letters, numbers, spaces, _ - . and the
+	// colour codes ^0 to ^9. Quotes, semicolons and line breaks would end
+	// the bind or its command, so they go with everything else.
+	function cleanName(text)
+	{
+		return String(text).replace(/[\r\n\t]/g, " ").replace(/[^A-Za-z0-9 _.\-^]/g, "")
+			.replace(/\^(?![0-9])/g, "").replace(/\s+/g, " ").trim().slice(0, 40);
+	}
+
+	// The name a bind shows: your own, else the default.
+	function nameOf(own, displayName)
+	{
+		return cleanName(own) || defaultName(displayName);
+	}
 
 	function bindLabel(name)
 	{
-		return "^8[^9" + String(name).toUpperCase().replace(/\s+/g, "_") + "^8]^7";
+		return "^8[^9" + name + "^8]^7";
 	}
 
 	function bindLine(settings, key, name)
@@ -1638,13 +1965,13 @@
 	{
 		if (allMaps)
 		{
-			dom.permapOutput.textContent = bindLine(values, allKey, ALL_MAPS_NAME);
+			dom.permapOutput.textContent = bindLine(values, allKey, nameOf(allName, ALL_MAPS_NAME));
 			dom.permapWarn.hidden = true;
 			return;
 		}
 		dom.permapOutput.textContent = MAPS.map(function (map)
 		{
-			return bindLine(settingsFor(map.id), keys[map.id], map.name);
+			return bindLine(settingsFor(map.id), keys[map.id], nameOf(names[map.id], map.name));
 		}).join(String.fromCharCode(10));
 		var dups = duplicateKeys();
 		var dupIds = {};
@@ -1779,7 +2106,7 @@
 
 	function stateText()
 	{
-		var parts = ["m=" + view.map.replace(/^mp_/, "")];
+		var parts = ["m=" + view.map.replace(/^mp_/, ""), "s=" + view.spot];
 		ROWS.forEach(function (spec)
 		{
 			var v = values[spec.key];
@@ -1809,6 +2136,7 @@
 		}
 		var next = {};
 		var map = null;
+		var spot = null;
 		text.split("&").forEach(function (pair)
 		{
 			var eq = pair.indexOf("=");
@@ -1821,6 +2149,11 @@
 			if (name === "m")
 			{
 				map = mapById("mp_" + raw.toLowerCase());
+				return;
+			}
+			if (name === "s")
+			{
+				spot = spotById(raw.toLowerCase());
 				return;
 			}
 			ROWS.forEach(function (spec)
@@ -1850,6 +2183,10 @@
 		if (map !== null)
 		{
 			selectMap(map.id);
+		}
+		if (spot !== null)
+		{
+			selectSpot(spot.id);
 		}
 		setValues(next);
 		return true;
@@ -1898,7 +2235,8 @@
 
 	// On: the shown map's values become the values of every map, and further
 	// changes go to all of them. Off: each map has its own values again, as
-	// they were before.
+	// they were before - or, while no map has values of its own yet (All maps
+	// is on when the tab opens), every map starts from the shared values.
 	function setAllMaps(on)
 	{
 		if (on && !allMaps)
@@ -1909,6 +2247,10 @@
 		else if (!on && allMaps)
 		{
 			allMaps = false;
+			if (!perMapOwn)
+			{
+				MAPS.forEach(function (map) { perMap[map.id] = copyKeys(values, PER_MAP_KEYS); });
+			}
 			loadPerMap(view.map);
 			refreshFields();
 		}
@@ -1960,26 +2302,99 @@
 		return { label: label, input: input };
 	}
 
+	// A name field: the name the console shows when the bind runs, the
+	// default in it to start with and back with its reset button. The bind
+	// line follows every key press; leaving the field shows the name as the
+	// bind writes it (cleaned, or the default when empty).
+	function makeNameField(displayName, get, set)
+	{
+		var def = defaultName(displayName);
+		var label = el("label", "ft-key ft-name");
+		label.appendChild(el("span", "ft-key-name", "Name"));
+		var input = el("input", "kf-key ft-name-input");
+		input.type = "text";
+		input.value = get() || def;
+		input.placeholder = def;
+		input.maxLength = 60;
+		input.spellcheck = false;
+		input.autocomplete = "off";
+		input.setAttribute("aria-label", "Console name of the " + displayName + " bind");
+		input.title = "Shown in the console when the bind runs, as ^8[^9NAME^8]^7: letters, numbers, " +
+			"spaces, _ - . and colour codes ^0 to ^9. Empty: " + def + ".";
+		input.addEventListener("input", function ()
+		{
+			set(input.value);
+			renderPerMapOutput();
+		});
+		input.addEventListener("blur", function ()
+		{
+			var typed = input.value.trim();
+			var clean = cleanName(input.value);
+			if (typed !== "" && clean !== typed)
+			{
+				setHint("A bind's name keeps letters, numbers, spaces, _ - . and colour codes ^0 to ^9: " +
+					(clean || def) + ".", true);
+			}
+			input.value = clean || def;
+			set(clean === def ? "" : clean);
+			renderPerMapOutput();
+		});
+		var reset = el("button", "btn btn-sm ft-name-reset", "↺");
+		reset.type = "button";
+		reset.title = "Back to " + def;
+		reset.setAttribute("aria-label", "Name of the " + displayName + " bind back to " + def);
+		reset.addEventListener("click", function ()
+		{
+			input.value = def;
+			set("");
+			renderPerMapOutput();
+		});
+		label.appendChild(input);
+		var wrap = el("span", "ft-name-wrap");
+		wrap.appendChild(label);
+		wrap.appendChild(reset);
+		return { wrap: wrap, input: input };
+	}
+
+	// Per map a row: its key and its name; the all-maps bind the same once.
 	function buildPerMap()
 	{
 		dom.keyFields = {};
+		dom.nameFields = {};
 		MAPS.forEach(function (map, i)
 		{
 			keys[map.id] = DEFAULT_KEYS[i];
+			names[map.id] = "";
+			var row = el("div", "ft-keyrow");
 			var field = makeKeyField(map.name, "Bind key for " + map.name,
 				function () { return keys[map.id]; }, function (key) { keys[map.id] = key; });
+			var name = makeNameField(map.name, function () { return names[map.id]; },
+				function (text) { names[map.id] = text; });
 			dom.keyFields[map.id] = field.input;
-			dom.permapKeys.appendChild(field.label);
+			dom.nameFields[map.id] = name.input;
+			row.appendChild(field.label);
+			row.appendChild(name.wrap);
+			dom.permapKeys.appendChild(row);
 		});
+		var allRow = el("div", "ft-keyrow");
 		var all = makeKeyField(ALL_MAPS_NAME, "Bind key for all maps",
 			function () { return allKey; }, function (key) { allKey = key; });
-		dom.allmapsKey.appendChild(all.label);
+		var allNameField = makeNameField(ALL_MAPS_NAME, function () { return allName; },
+			function (text) { allName = text; });
+		dom.nameFields.all = allNameField.input;
+		allRow.appendChild(all.label);
+		allRow.appendChild(allNameField.wrap);
+		dom.allmapsKey.appendChild(allRow);
 		dom.allmapsToggle.addEventListener("click", function ()
 		{
+			var fresh = allMaps && !perMapOwn;
 			setAllMaps(!allMaps);
-			setHint(allMaps ? "All maps: changes now go to every map, in one bind." :
+			setHint(allMaps ? "All maps: changes now go to every map, in one bind." : fresh ?
+				"One bind per map, each starting from these values." :
 				"One bind per map again, each with the values it had.");
 		});
+		// All maps is on when the tab opens
+		setAllMaps(true);
 	}
 
 	/* ---------- view ---------- */
@@ -2004,11 +2419,63 @@
 		{
 			b.setAttribute("aria-pressed", b.getAttribute("data-map") === id ? "true" : "false");
 		});
-		dom.presetsMap.textContent = "shown on " + mapById(id).name;
+		resetCam();
+		showSpotName();
 		if (started)
 		{
-			loadImage(id);
+			loadImages();
+			loadCube();
 		}
+		schedule();
+	}
+
+	function showSpotName()
+	{
+		dom.presetsMap.textContent = "for all " + MAPS.length + " maps, pictures from " + mapById(view.map).name +
+			", " + spotById(view.spot).where;
+		dom.canvas.setAttribute("aria-label", mapById(view.map).name + ", " + spotById(view.spot).where +
+			", with your film settings");
+	}
+
+	function selectSpot(id)
+	{
+		if (spotById(id) === null)
+		{
+			return;
+		}
+		view.spot = id;
+		dom.spotButtons.forEach(function (b)
+		{
+			b.setAttribute("aria-pressed", b.getAttribute("data-spot") === id ? "true" : "false");
+		});
+		resetCam();
+		showSpotName();
+		if (started)
+		{
+			loadImages();
+			loadCube();
+		}
+		schedule();
+	}
+
+	// The spot's start view, as its flat image shows it.
+	function resetCam()
+	{
+		var v = startView(view.map, view.spot);
+		view.cam = { yaw: v[0], pitch: v[1], fov: FOV };
+		schedule();
+	}
+
+	function turn(dYaw, dPitch)
+	{
+		view.cam.yaw = ((view.cam.yaw + dYaw) % 360 + 360) % 360;
+		view.cam.pitch = Math.max(-85, Math.min(85, view.cam.pitch + dPitch));
+		schedule();
+	}
+
+	function zoom(fov)
+	{
+		view.cam.fov = Math.max(FOV_MIN, Math.min(FOV_MAX, fov));
 		schedule();
 	}
 
@@ -2026,6 +2493,11 @@
 		dom.labels.hidden = mode !== "split";
 		dom.stage.classList.toggle("is-split", mode === "split");
 		placeSplit();
+		if (started)
+		{
+			loadImages();
+			loadCube();
+		}
 		schedule();
 	}
 
@@ -2043,34 +2515,132 @@
 		schedule();
 	}
 
-	function wireSplit()
+	// The picture: in a 360 degree view a drag turns the view (two fingers
+	// zoom), in before / after a drag at the divider moves it; on a flat
+	// start view a drag in before / after moves the divider anywhere.
+	function wireStage()
 	{
-		var dragging = false;
-		var at = function (event)
+		var mode = null;            // "split" or "look" while a pointer is down
+		var points = {};            // pointer id -> [x, y]
+		var pinch = 0;
+		var stage = dom.stage;
+		var splitAt = function (event)
 		{
 			var rect = dom.canvas.getBoundingClientRect();
 			setSplit((event.clientX - rect.left) / rect.width);
 		};
-		dom.stage.addEventListener("pointerdown", function (event)
+		var nearSplit = function (event)
 		{
-			if (view.mode !== "split" || event.button !== 0)
+			var rect = dom.canvas.getBoundingClientRect();
+			var reach = event.pointerType === "mouse" ? 14 : 26;
+			return Math.abs(event.clientX - (rect.left + view.split * rect.width)) <= reach;
+		};
+		stage.addEventListener("pointerdown", function (event)
+		{
+			if (event.pointerType === "mouse" && event.button !== 0)
 			{
 				return;
 			}
-			dragging = true;
-			dom.stage.setPointerCapture(event.pointerId);
-			at(event);
-		});
-		dom.stage.addEventListener("pointermove", function (event)
-		{
-			if (dragging)
+			var cube = cubeShown();
+			if (view.mode === "split" && (!cube || nearSplit(event)) && mode === null)
 			{
-				at(event);
+				mode = "split";
+				stage.setPointerCapture(event.pointerId);
+				splitAt(event);
+				return;
 			}
+			if (!cube || mode === "split")
+			{
+				return;
+			}
+			mode = "look";
+			points[event.pointerId] = [event.clientX, event.clientY];
+			stage.setPointerCapture(event.pointerId);
+			stage.classList.add("is-looking");
 		});
-		["pointerup", "pointercancel"].forEach(function (type)
+		stage.addEventListener("pointermove", function (event)
 		{
-			dom.stage.addEventListener(type, function () { dragging = false; });
+			if (mode === "split")
+			{
+				splitAt(event);
+				return;
+			}
+			var last = points[event.pointerId];
+			if (mode !== "look" || !last)
+			{
+				return;
+			}
+			points[event.pointerId] = [event.clientX, event.clientY];
+			var ids = Object.keys(points);
+			if (ids.length >= 2)
+			{
+				var p = points[ids[0]];
+				var q = points[ids[1]];
+				var d = Math.max(1, Math.hypot(p[0] - q[0], p[1] - q[1]));
+				if (pinch > 0)
+				{
+					zoom(view.cam.fov * pinch / d);
+				}
+				pinch = d;
+				return;
+			}
+			// the picture follows the pointer: a pixel is the fov over the width
+			var k = view.cam.fov / Math.max(1, dom.canvas.getBoundingClientRect().width);
+			turn((event.clientX - last[0]) * k, (event.clientY - last[1]) * k);
+		});
+		["pointerup", "pointercancel", "lostpointercapture"].forEach(function (type)
+		{
+			stage.addEventListener(type, function (event)
+			{
+				delete points[event.pointerId];
+				pinch = 0;
+				if (Object.keys(points).length === 0)
+				{
+					mode = null;
+					stage.classList.remove("is-looking");
+				}
+			});
+		});
+		// Ctrl + wheel (and a touchpad's pinch, which sends it) zooms; the
+		// plain wheel keeps scrolling the page
+		stage.addEventListener("wheel", function (event)
+		{
+			if (!cubeShown() || !(event.ctrlKey || event.metaKey))
+			{
+				return;
+			}
+			event.preventDefault();
+			zoom(view.cam.fov * Math.exp(event.deltaY * 0.002));
+		}, { passive: false });
+		stage.addEventListener("keydown", function (event)
+		{
+			if (event.target !== stage || !cubeShown())
+			{
+				return;
+			}
+			var step = event.shiftKey ? 15 : 5;
+			var keyTurns = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
+			if (keyTurns[event.key])
+			{
+				turn(keyTurns[event.key][0], keyTurns[event.key][1]);
+			}
+			else if (event.key === "+" || event.key === "=")
+			{
+				zoom(view.cam.fov / 1.15);
+			}
+			else if (event.key === "-" || event.key === "_")
+			{
+				zoom(view.cam.fov * 1.15);
+			}
+			else if (event.key === "Home" || event.key === "0")
+			{
+				resetCam();
+			}
+			else
+			{
+				return;
+			}
+			event.preventDefault();
 		});
 		dom.splitBar.addEventListener("keydown", function (event)
 		{
@@ -2097,6 +2667,59 @@
 			}
 			event.preventDefault();
 		});
+		window.addEventListener("resize", function ()
+		{
+			if (cubeShown())
+			{
+				schedule();
+			}
+		});
+	}
+
+	// The spots under the maps: a button with its start view each, arrow
+	// keys from one to the next; then reset view and the controls' help.
+	function buildSpots()
+	{
+		dom.spotButtons = [];
+		SPOTS.forEach(function (spot, i)
+		{
+			var b = el("button", "ft-spot");
+			b.type = "button";
+			b.setAttribute("data-spot", spot.id);
+			b.setAttribute("aria-pressed", spot.id === view.spot ? "true" : "false");
+			var c = el("canvas", "ft-spot-thumb");
+			c.width = SPOT_W;
+			c.height = SPOT_H;
+			c.setAttribute("aria-hidden", "true");
+			b.ctx = c.getContext("2d");
+			b.ctx.imageSmoothingQuality = "high";
+			b.appendChild(c);
+			b.appendChild(el("span", "ft-spot-name", spot.name));
+			b.title = spot.where.charAt(0).toUpperCase() + spot.where.slice(1) + ": a 360° view";
+			b.addEventListener("click", function () { selectSpot(spot.id); });
+			b.addEventListener("keydown", function (event)
+			{
+				var step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+				if (step === 0)
+				{
+					return;
+				}
+				event.preventDefault();
+				var next = dom.spotButtons[(i + step + SPOTS.length) % SPOTS.length];
+				next.focus();
+				next.click();
+			});
+			dom.spots.appendChild(b);
+			dom.spotButtons.push(b);
+		});
+		var tools = el("div", "ft-spot-tools");
+		var reset = el("button", "btn btn-sm", "Reset view");
+		reset.type = "button";
+		reset.addEventListener("click", resetCam);
+		tools.appendChild(reset);
+		dom.spotHint = el("span", "ft-spot-hint");
+		tools.appendChild(dom.spotHint);
+		dom.spots.appendChild(tools);
 	}
 
 	function makeViewSwitch(button, key)
@@ -2201,7 +2824,8 @@
 		makeViewSwitch(document.getElementById("ft-promod"), "promod");
 		makeViewSwitch(document.getElementById("ft-showgamma"), "gamma");
 		makeViewSwitch(document.getElementById("ft-clip"), "clip");
-		wireSplit();
+		buildSpots();
+		wireStage();
 	}
 
 	/* ---------- wiring ---------- */
@@ -2263,7 +2887,7 @@
 			return;
 		}
 		dom.panel = panel;
-		["controls", "presets", "maps", "stage", "canvas", "grid", "status", "note", "output", "warn",
+		["controls", "presets", "maps", "spots", "stage", "canvas", "grid", "status", "note", "output", "warn",
 			"split", "labels", "import", "allmaps-toggle", "allmaps-state", "allmaps-key", "permap-keys", "permap-output",
 			"permap-warn"]
 			.forEach(function (name)

@@ -70,7 +70,7 @@
 
 	// Ready-made colour sets. Each one writes the dvars listed in PRESET_PARTS.
 	var PRESETS = [
-		{ name: "My Original Color",
+		{ name: "TiPSY's",
 			allies: "0.847 0.992 0.576 1", alliesTitle: "0.847 0.992 0.576 1",
 			axis: "0.561 0.655 0.843 1", axisTitle: "0.561 0.655 0.843 1",
 			mine: "0.3 0.3 0.3 1" },

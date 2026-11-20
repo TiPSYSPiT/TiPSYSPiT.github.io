@@ -131,28 +131,45 @@ Size the minimap and its icons and see the result on a real map.
 ### filmtweaks
 
 Set the film colours (`r_filmTweak*`, `r_filmUseTweaks`, `r_gamma`) and see them
-on Backlot, District, Crash, Crossfire and Strike.
+on Backlot, Citystreets, Crash, Crossfire and Strike.
 
 - The preview runs the game's own colour pass: the `postfx_color` pixel shader
   from `code_post_gfx_mp.ff` with the constants `R_SetFilmInfo` and
   `R_UpdateColorManipulation` build, then the render target's clamp and the
   `r_gamma` ramp. In WebGL, or per pixel on a canvas without it.
+- Five spots per map (attacker spawn, A, B, mid, defender spawn), each a 360°
+  view: drag to look around, pinch or Ctrl + wheel to zoom, arrow keys and
+  + / − on the focused picture, Reset view. The view is drawn first and the
+  film pass then runs over the finished picture, as in the game, with the
+  same shader as the flat preview; without WebGL each spot shows its start
+  view.
 - Before / after shows your settings against the map's own film (its vision
-  file, what `r_filmUseTweaks 0` shows); All maps shows the five side by side,
-  with the shadows and the share cut at white of each underneath.
+  file, what `r_filmUseTweaks 0` shows), split on the same view; All maps
+  shows the chosen spot on all five maps side by side, with the shadows and
+  the share cut at white of each underneath.
   Promod server applies Promod's `r_desaturation 0` and `r_filmTweakInvert 0`;
   Mark lost detail shows where colours are cut at white or near black.
 - Cheat protected and Promod tags on the dvars, a warning when Promod would
-  block a setting, presets (three examples that set every dvar, and six
-  suggestions, each with a thumbnail on the shown map), randomize and
+  block a setting, presets (six suggestions, then TiPSY's and four examples
+  that set every dvar, `r_gamma` too; each with a thumbnail on the shown map; a
+  preset sets all five maps at once), randomize and
   fine-tune, importing pasted lines and a link that holds the settings.
-- Under Console commands, the per-map setup: one `bind` per map with its
-  brightness, contrast, tints, desaturation and `r_gamma`, ending in
-  `echo ^8[^9BACKLOT^8]^7` (the map's name in upper case); a key per map
-  (F1 to F5), with a warning when two maps share one. With All maps on, one
-  bind (`^8[^9ALL_MAPS^8]^7`) holds the same values for every map.
-- The map images in `assets/cod4/filmtweaks/` are renders from the CoD4 demo
-  viewer at each map's S&D attacker spawn, before any film pass.
+- After Console commands, the per-map setup. All maps is on when the tab
+  opens: one `bind` (F1) with brightness, contrast, tints, desaturation and
+  `r_gamma`, ending in `echo ^8[^9ALL_MAPS^8]^7`. Off: one bind per map,
+  ending in `echo ^8[^9BACKLOT^8]^7` (the map's name in upper case); a key per
+  map (F1 to F5), with a warning when two maps share one. Each bind's name can
+  be changed (letters, numbers, spaces, `_ - .` and colour codes `^0`–`^9`;
+  empty is the default, ↺ resets it).
+- Under the preview, a note that the result looks different from monitor to
+  monitor; fine-tune in game.
+- The pictures in `assets/cod4/filmtweaks/` are renders by the CoD4 demo
+  viewer's 3D maps (lightmaps, light grid, sun shadows, fog, sky), before any
+  film pass: `<map>_<spot>.js` the start view (1280×688), `360/<map>_<spot>.js`
+  the six 2048×2048 faces of the 360° view, loaded only when the spot is shown
+  (1024 on a phone).
+  The spawns are the S&D spawn point nearest the spawns' middle; A, B and mid
+  are where the players of a recorded match stood most often there.
 
 ### demos
 

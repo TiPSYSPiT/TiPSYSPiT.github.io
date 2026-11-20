@@ -29,14 +29,18 @@
 	--red-line: rgba(196, 50, 44, 0.11);
 	--orange-line: rgba(168, 106, 6, 0.13);
 
-	/* the page width, shared by the content and the footer rule above it */
-	--page-width: 1180px;
+	/* The page width, shared by the content and the footer rule above it: up
+	   to 1800px, so a wide screen is used; the tab column, when the tabs stand
+	   in one, is part of it. */
+	--page-width: 1800px;
 
-	/* With the tabs in a column the page grows by that column, so the panels
-	   keep the width they have under a row of tabs. */
 	--sidebar-width: 200px;
 	--sidebar-gap: 36px;
-	--layout-width: calc(var(--page-width) + var(--sidebar-width) + var(--sidebar-gap));
+	--layout-width: var(--page-width);
+
+	/* the space between the content and the window's edge: 16px on a phone,
+	   up to 32px on a wide screen */
+	--gutter: clamp(16px, 2.5vw, 32px);
 
 	--radius: 10px;
 	--radius-sm: 6px;
@@ -146,7 +150,7 @@ a:hover
 	width: 100%;
 	max-width: var(--layout-width);
 	margin: 0 auto;
-	padding: 56px 20px 40px;
+	padding: 20px var(--gutter) 40px;
 }
 
 .header
@@ -229,6 +233,7 @@ a:hover
 
 .lede
 {
+	max-width: 130ch;
 	margin: 0 0 20px;
 	color: var(--muted);
 	font-size: 14px;
@@ -1024,9 +1029,9 @@ a:hover
 
 /* ---------- filmtweaks ---------- */
 
-/* Phones and narrow windows: the preview on top, the settings below it. Wide
-   windows: the settings on the left, the preview beside them, kept in view
-   while the settings scroll. */
+/* One column, top to bottom: presets, import, the configurator, the preview
+   at the full width, the console lines, the per-map setup. The same order
+   on a phone. */
 .ft-layout
 {
 	display: grid;
@@ -1035,75 +1040,90 @@ a:hover
 	align-items: start;
 }
 
-.ft-view,
-.ft-side
+/* The configurator's heading, as tall as the headings with a copy button. */
+.ft-config-head
+{
+	min-height: 42px;
+}
+
+.ft-layout > *,
+.ft-view > .kf-out:first-child
 {
 	min-width: 0;
-}
-
-.ft-view > .kf-out:first-child,
-.ft-side > :first-child
-{
 	margin-top: 0;
+	margin-bottom: 0;
 }
 
-@media (min-width: 1100px)
+.ft-layout > .hint:empty
 {
+	display: none;
+}
+
+/* Running text keeps a readable line length at the full width; the notes'
+   rule above them still runs across the whole box. */
+.ft-layout .mm-note
+{
+	padding-right: max(16px, calc(100% - 130ch - 16px));
+}
+
+.ft-layout .ft-import-label
+{
+	max-width: 130ch;
+}
+
+/* Wide screens: the settings on the left (about 40 %), the preview on the
+   right (about 60 %), held in view while the settings scroll; its picture
+   gets smaller when the whole preview would not fit the window's height. */
+@media (min-width: 1200px)
+{
+	/* (margins, not row gaps: a hidden box leaves no gap behind) */
 	.ft-layout
 	{
-		grid-template-columns: minmax(380px, 440px) minmax(0, 1fr);
-		grid-template-areas: "side view";
-		gap: 16px;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+		gap: 0 16px;
 	}
 
-	.ft-view
+	.ft-layout > *
 	{
-		grid-area: view;
+		grid-column: 1;
+		margin-bottom: 12px;
 	}
 
-	.ft-side
-	{
-		grid-area: side;
-	}
-}
-
-@media (min-width: 1100px) and (min-height: 700px)
-{
-	.ft-view
+	.ft-layout > .ft-view
 	{
 		position: sticky;
 		top: 12px;
+		grid-column: 2;
+		grid-row: 1 / span 7;
+		align-self: start;
+		margin-bottom: 0;
+	}
+
+	.ft-view .ft-stage
+	{
+		width: min(100%, calc((100vh - 490px) * 1280 / 688));
+		width: min(100%, calc((100svh - 490px) * 1280 / 688));
 	}
 }
 
-/* On a phone only the picture itself stays at the top while the settings
-   scroll under it; with all five maps it would fill the screen, so not then. */
-@media (max-width: 1099px) and (min-height: 600px)
+/* The presets side by side where there is room for them. */
+.ft-presets .sb-preset-list
 {
-	.ft-view
-	{
-		display: contents;
-	}
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+}
 
-	.ft-preview
-	{
-		position: sticky;
-		top: 0;
-		z-index: 5;
-		margin-top: 0;
-		box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.35);
-	}
+/* The dvar rows in columns on a wide screen, each about as wide as before:
+   at most three, so the nine rows come out even. */
+#ft-controls
+{
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, max(420px, 30%)), 1fr));
+}
 
-	.ft-is-grid .ft-preview
-	{
-		position: static;
-		box-shadow: none;
-	}
-
-	.ft-scene
-	{
-		margin-top: 0;
-	}
+#ft-controls > .ft-opt
+{
+	box-shadow: 1px 0 0 var(--border);
 }
 
 .ft-preview-head
@@ -1170,12 +1190,167 @@ a:hover
 	display: none;
 }
 
+/* The spots of the map: a start view each, then reset view and the help. */
+.ft-spots
+{
+	display: flex;
+	align-items: stretch;
+	gap: 6px;
+	padding: 6px 8px;
+	border-bottom: 1px solid var(--border);
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.ft-spot
+{
+	display: flex;
+	flex: 0 0 auto;
+	flex-direction: column;
+	gap: 3px;
+	padding: 3px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-sm);
+	background: none;
+	color: var(--muted);
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.4;
+	text-align: left;
+	cursor: pointer;
+	touch-action: manipulation;
+}
+
+.ft-spot:hover
+{
+	color: var(--text);
+}
+
+.ft-spot[aria-pressed="true"]
+{
+	border-color: var(--border-strong);
+	background-color: var(--field);
+	color: var(--text);
+}
+
+.ft-spot:focus-visible
+{
+	outline: 2px solid var(--focus);
+	outline-offset: 1px;
+}
+
+.ft-spot-thumb
+{
+	display: block;
+	width: 112px;
+	height: auto;
+	aspect-ratio: 1280 / 688;
+	border-radius: 4px;
+	background-color: #222222;
+}
+
+.ft-spot-name
+{
+	padding: 0 2px;
+	white-space: nowrap;
+}
+
+.ft-spot-tools
+{
+	display: flex;
+	flex: 1 0 170px;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 6px;
+	padding-left: 8px;
+}
+
+.ft-spot-hint
+{
+	color: var(--muted);
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+@media (max-width: 600px)
+{
+	.ft-spot-thumb
+	{
+		width: 84px;
+	}
+}
+
+/* A narrower preview (the right column of a smaller screen): the five spots
+   on one line, reset view and the help under them. */
+@container (min-width: 480px) and (max-width: 800px)
+{
+	.ft-spots
+	{
+		flex-wrap: wrap;
+	}
+
+	.ft-spot-thumb
+	{
+		width: 84px;
+	}
+
+	.ft-spot-tools
+	{
+		flex-direction: row;
+		align-items: center;
+		flex-basis: 100%;
+		padding-left: 3px;
+	}
+}
+
+/* A 360 degree view turns with the pointer: no page scroll or zoom by
+   touch on it. */
+.ft-stage.is-pano
+{
+	cursor: grab;
+	touch-action: none;
+}
+
+.ft-stage.is-pano.is-looking
+{
+	cursor: grabbing;
+}
+
+.ft-stage.is-pano .ft-split
+{
+	cursor: ew-resize;
+}
+
+.ft-stage.is-pano .ft-split::after
+{
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -13px;
+	width: 28px;
+}
+
+.ft-stage:focus-visible
+{
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+}
+
 /* The picture is the game's, so its surroundings stay dark in both themes. */
+/* As wide as the content, but never so tall that the picture and the map
+   and spot pickers above it do not fit on the screen together (aspect
+   1280 / 688). */
 .ft-stage
 {
 	position: relative;
 	background-color: #161616;
 	touch-action: pan-y;
+	width: min(100%, calc((100vh - 200px) * 1280 / 688));
+	width: min(100%, calc((100svh - 200px) * 1280 / 688));
+	margin-inline: auto;
 }
 
 .ft-stage[hidden]
@@ -1938,11 +2113,20 @@ a:hover
 	font-size: 13px;
 }
 
+/* A row per bind: its key, then its name with a reset button. */
 .ft-keys
 {
 	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.ft-keyrow
+{
+	display: flex;
 	flex-wrap: wrap;
-	gap: 8px 14px;
+	align-items: center;
+	gap: 6px 14px;
 }
 
 .ft-keys[hidden]
@@ -1963,12 +2147,7 @@ a:hover
 	width: 64px;
 }
 
-/* The per-map binds: a block of their own inside Console commands. */
-.ft-permap
-{
-	border-top: 1px solid var(--border);
-}
-
+/* The per-map binds: a box of their own after Console commands. */
 .ft-sub-head
 {
 	border-top: 0;
@@ -1990,6 +2169,43 @@ a:hover
 .ft-key .ft-key-name
 {
 	min-width: 72px;
+}
+
+.ft-name-wrap
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.ft-key.ft-name .ft-key-name
+{
+	min-width: 0;
+	color: var(--muted);
+}
+
+.ft-key .ft-name-input
+{
+	width: 150px;
+}
+
+.ft-name-reset
+{
+	padding-inline: 8px;
+}
+
+/* The monitor note under the preview: an info line, like the others. */
+.ft-monitor
+{
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+}
+
+.ft-monitor .mm-tip-icon
+{
+	flex: 0 0 auto;
+	margin-top: 1px;
 }
 
 .ft-permap-row
@@ -5539,7 +5755,7 @@ pre
 .footer
 {
 	margin-top: auto;
-	padding: 0 20px 28px;
+	padding: 0 var(--gutter) 28px;
 	max-width: var(--layout-width);
 	width: 100%;
 	margin-left: auto;
@@ -5549,7 +5765,7 @@ pre
 }
 
 /* The rule sits on a child, not on .footer itself: a border on .footer would
-   span its padding as well and come out 40px longer than the one under the
+   span its padding as well and come out longer than the one under the
    tabs, which is drawn on a box that already sits inside .wrap's padding. */
 .footer::before
 {
@@ -5593,7 +5809,7 @@ pre
 {
 	.wrap
 	{
-		padding-top: 32px;
+		padding-top: 16px;
 	}
 
 	.actions

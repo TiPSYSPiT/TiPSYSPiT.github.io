@@ -26,6 +26,7 @@
 	<script src="js/cod4/minimap/icons.js" defer></script>
 	<script src="js/cod4/minimap/maps.js" defer></script>
 	<script src="js/cod4/minimap.js" defer></script>
+	<script src="js/cod4/filmtweaks-360.js" defer></script>
 	<script src="js/cod4/filmtweaks.js" defer></script>
 	<script src="js/cod4/faq.js" defer></script>
 	<script src="js/cod2/game.js"></script>
@@ -409,6 +410,42 @@
 				taken before any colour grading.</p>
 
 			<div class="ft-layout">
+				<details class="sb-presets ft-presets">
+					<summary class="sb-presets-head">Presets</summary>
+					<div class="sb-preset-list" id="ft-presets"></div>
+				</details>
+
+				<details class="kf-out ft-more">
+					<summary class="ft-more-head">Import lines</summary>
+					<div class="ft-more-body">
+						<label class="ft-import-label" for="ft-import">Paste lines from a config, a forum post or
+							a bind; seta, set and quotes are optional.</label>
+						<textarea class="ft-import" id="ft-import" rows="6" spellcheck="false" autocomplete="off"
+							placeholder='r_filmTweakContrast "1.8"'></textarea>
+						<div class="tools">
+							<button class="btn" type="button" id="ft-import-go">Import</button>
+						</div>
+					</div>
+				</details>
+
+				<div class="card mm-card ft-config" role="group" aria-labelledby="ft-config-title">
+					<div class="kf-out-head ft-config-head">
+						<span class="kf-out-title" id="ft-config-title">Configurator</span>
+					</div>
+					<div id="ft-controls"></div>
+					<div class="actions ft-actions">
+						<div class="tools">
+							<button class="btn" type="button" id="ft-reset">Reset</button>
+							<button class="btn" type="button" id="ft-random">Randomize</button>
+							<button class="btn" type="button" id="ft-finetune">Fine-tune</button>
+							<button class="btn" type="button" id="ft-link">Copy link</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="ft-warn" id="ft-warn" role="status" hidden></div>
+				<p class="hint" id="ft-hint" role="status"></p>
+
 				<div class="ft-view">
 					<div class="kf-out ft-preview">
 						<div class="kf-out-head ft-preview-head">
@@ -420,6 +457,7 @@
 							</div>
 						</div>
 						<div class="ft-maps" id="ft-maps" role="group" aria-label="Map"></div>
+						<div class="ft-spots" id="ft-spots" role="group" aria-label="Place on the map"></div>
 						<div class="ft-stage" id="ft-stage">
 							<canvas class="ft-canvas" id="ft-canvas" role="img"
 								aria-label="The map with your film settings"></canvas>
@@ -454,82 +492,50 @@
 								recordings leave it out.</span>
 							<span id="ft-clip-desc">Lost detail: pink where colours are cut at white, blue where the
 								picture is near black.</span></p>
+						<p class="mm-note ft-monitor"><span class="mm-tip-icon" aria-hidden="true">i</span><span>The result
+								can look different depending on your monitor (IPS, TN, VA, OLED), its calibration and
+								settings (brightness, contrast, gamma, colour profile). Always fine-tune in game.</span></p>
 						<p class="mm-note" id="ft-note" aria-live="polite"></p>
 					</div>
 				</div>
 
-				<div class="ft-side">
-					<details class="sb-presets ft-presets">
-						<summary class="sb-presets-head">Presets</summary>
-						<div class="sb-preset-list" id="ft-presets"></div>
-					</details>
-
-					<div class="card mm-card">
-						<div id="ft-controls"></div>
-						<div class="actions ft-actions">
-							<div class="tools">
-								<button class="btn" type="button" id="ft-reset">Reset</button>
-								<button class="btn" type="button" id="ft-random">Randomize</button>
-								<button class="btn" type="button" id="ft-finetune">Fine-tune</button>
-								<button class="btn" type="button" id="ft-link">Copy link</button>
-							</div>
-						</div>
+				<div class="kf-out ft-console">
+					<div class="kf-out-head">
+						<span class="kf-out-title">Console commands</span>
+						<button class="btn btn-sm" type="button" id="ft-copy">Copy</button>
 					</div>
+					<pre class="kf-output" id="ft-output"></pre>
+					<p class="mm-note">The r_filmTweak* dvars and r_gamma are saved to your config and work on
+						every server. r_filmUseTweaks is cheat protected: on a normal server its line does
+						nothing and every map keeps its own colours. On Promod the server switches it, and you
+						turn it on and off in the Promod quick menu: 2. Film Tweaks.</p>
+				</div>
 
-					<div class="ft-warn" id="ft-warn" role="status" hidden></div>
-					<p class="hint" id="ft-hint" role="status"></p>
-
-					<div class="kf-out ft-console">
-						<div class="kf-out-head">
-							<span class="kf-out-title">Console commands</span>
-							<button class="btn btn-sm" type="button" id="ft-copy">Copy</button>
-						</div>
-						<pre class="kf-output" id="ft-output"></pre>
-						<p class="mm-note">The r_filmTweak* dvars and r_gamma are saved to your config and work on
-							every server. r_filmUseTweaks is cheat protected: on a normal server its line does
-							nothing and every map keeps its own colours. On Promod the server switches it, and you
-							turn it on and off in the Promod quick menu: 2. Film Tweaks.</p>
-
-						<div class="ft-permap" role="group" aria-labelledby="ft-permap-title">
-							<div class="kf-out-head ft-sub-head">
-								<span class="kf-out-title" id="ft-permap-title">Per-map setup</span>
-								<button class="btn btn-sm" type="button" id="ft-copy-permap">Copy</button>
-							</div>
-							<div class="ft-permap-body">
-								<p class="ft-import-label">One bind per map with its brightness, contrast, tints,
-									desaturation and r_gamma: pick a map above, then set its values or load a
-									preset. Press the map's key once on that map (the game does not switch them by
-									itself when the map changes); the console then shows the map's name. With All
-									maps on, one bind holds the same values for every map. The switches above (Use
-									tweaks, Film on, Invert) are the same for all maps and stay in the lines
-									above.</p>
-								<div class="ft-permap-row">
-									<button class="ft-switch" type="button" role="switch" id="ft-allmaps-toggle"
-										aria-checked="false" aria-describedby="ft-allmaps-state"><span
-											class="ft-switch-track"></span><span class="ft-switch-text">All maps</span></button>
-									<span class="ft-permap-state" id="ft-allmaps-state">Off: one bind per map, each with its
-										own values.</span>
-								</div>
-								<div class="ft-keys" id="ft-permap-keys"></div>
-								<div class="ft-keys" id="ft-allmaps-key" hidden></div>
-								<p class="ft-warn-line is-block" id="ft-permap-warn" role="status" hidden></p>
-							</div>
-							<pre class="kf-output" id="ft-permap-output"></pre>
-						</div>
+				<div class="kf-out ft-permap" role="group" aria-labelledby="ft-permap-title">
+					<div class="kf-out-head ft-sub-head">
+						<span class="kf-out-title" id="ft-permap-title">Per-map setup</span>
+						<button class="btn btn-sm" type="button" id="ft-copy-permap">Copy</button>
 					</div>
-
-					<details class="kf-out ft-more">
-						<summary class="ft-more-head">Import lines</summary>
-						<div class="ft-more-body">
-							<label class="ft-import-label" for="ft-import">Paste lines from a config, a forum post or
-								a bind; seta, set and quotes are optional.</label>
-							<textarea class="ft-import" id="ft-import" rows="6" spellcheck="false" autocomplete="off"
-								placeholder='r_filmTweakContrast "1.8"'></textarea>
-							<div class="tools">
-								<button class="btn" type="button" id="ft-import-go">Import</button>
-							</div>
+					<div class="ft-permap-body">
+						<p class="ft-import-label">One bind per map with its brightness, contrast, tints,
+							desaturation and r_gamma: pick a map in the preview, then set its values; a preset
+							sets all five maps at once. Press the map's key once on that map (the game does not switch them by
+							itself when the map changes); the console then shows the bind's name, which you can
+							change. With All maps on, one bind holds the same values for every map. The switches above (Use
+							tweaks, Film on, Invert) are the same for all maps and stay in the lines
+							above.</p>
+						<div class="ft-permap-row">
+							<button class="ft-switch" type="button" role="switch" id="ft-allmaps-toggle"
+								aria-checked="true" aria-describedby="ft-allmaps-state"><span
+									class="ft-switch-track"></span><span class="ft-switch-text">All maps</span></button>
+							<span class="ft-permap-state" id="ft-allmaps-state">On: one bind, the same values on every
+								map.</span>
 						</div>
-					</details>
+						<div class="ft-keys" id="ft-permap-keys" hidden></div>
+						<div class="ft-keys" id="ft-allmaps-key"></div>
+						<p class="ft-warn-line is-block" id="ft-permap-warn" role="status" hidden></p>
+					</div>
+					<pre class="kf-output" id="ft-permap-output"></pre>
 				</div>
 			</div>
 		</section>
